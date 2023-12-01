@@ -16,10 +16,11 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ], 
-    'console': ['off', { allow: ['warn', 'error'] }],
     'semi': ['error', 'never'],
     'quotes': ['error', 'single'],
     'comma-dangle': ['error', 'always-multiline'],
     'indent': ['error', 2],
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    "no-console": ['error', { allow: ['warn', 'error'] }],
   },
 }
