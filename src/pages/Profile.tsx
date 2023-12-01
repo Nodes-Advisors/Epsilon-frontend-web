@@ -15,6 +15,14 @@ export default function Profile() {
 
 
   return (
-    <div>user profile</div>
+    <section>
+      <div>
+        <h1>Profile</h1>
+        <div>
+          <div>Username: </div>
+          <div>Email: </div>
+        </div>
+      </div>
+    </section>
   )
 }
