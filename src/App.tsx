@@ -19,7 +19,7 @@ function App() {
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <button onClick={handleClick}>{theme}</button>
+      {/* <button onClick={handleClick}>{theme}</button> */}
       <RouterProvider router={router}></RouterProvider>
     </Suspense>
   )
