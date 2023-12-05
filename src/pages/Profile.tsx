@@ -7,7 +7,9 @@ import NodesIcon from '../assets/svgs/nodes.svg?react'
 import StatusIcon from '../assets/svgs/status.svg?react'
 import EpsilonLogo from '../assets/svgs/epsilon_logo.svg?react'
 import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
-import YCLogo from '../assets/svgs/yc_logo.svg?react'
+import YCLogo from '../assets/images/yc_logo.png'
+import VectorLogo from '../assets/svgs/vector.svg?react'
+import HeadImg from '../assets/images/headimg-example.png'
 
 export default function Profile(): JSX.Element {
 
@@ -22,21 +24,39 @@ export default function Profile(): JSX.Element {
       <div style={{ marginTop: '10rem', display: 'flex' }}>
         <div className={styles['left-panel']}>
           <img loading='eager' src={venture_logo} alt="" className={styles['venture-logo']} />
-          <ActionButton 
-            onClick={() => alert('startup match')} 
-            buttonClass={styles['action-button']} 
-            textClass={styles['action-button-text']} 
-            text='STARTUP MATCH' />
-          <ActionButton
-            onClick={() => alert('share')}
-            buttonClass={styles['action-button']} 
-            textClass={styles['action-button-text']} 
-            text='SHARE' />
-          <ActionButton
-            onClick={() => alert('add to list')}
-            buttonClass={styles['action-button']} 
-            textClass={styles['action-button-text']} 
-            text='ADD TO LIST' />
+          <div className={styles['action-buttons']}>
+            <ActionButton 
+              onClick={() => alert('startup match')} 
+              buttonClass={styles['action-button']} 
+              textClass={styles['action-button-text']} 
+              text='STARTUP MATCH' />
+            <ActionButton
+              onClick={() => alert('share')}
+              buttonClass={styles['action-button']} 
+              textClass={styles['action-button-text']} 
+              text='SHARE' />
+            <ActionButton
+              onClick={() => alert('add to list')}
+              buttonClass={styles['action-button']} 
+              textClass={styles['action-button-text']} 
+              text='ADD TO LIST' />
+          </div>
+          <div>
+            <div className={styles['horizontal-flex-layout']} >
+              <VectorLogo className={styles['vector-logo']} />
+              <h2 className={styles['relationship-text']}>Relationships</h2>
+              <VectorLogo className={styles['vector-logo']} />
+            </div>
+            <div className={styles['horizontal-flex-layout']}>
+              <img src={HeadImg} alt="" className={styles['headimg']} />
+              <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
+                <span className={styles['relationship-inner-text']}>BEN HOrowitz</span>
+                <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span>
+              </div>
+              <img src={HeadImg} alt="" className={styles['headimg']} />
+            </div>
+            
+          </div>
         </div>
         <div className={styles['middle-panel']}>
           <div className={styles['name-layout']}>
@@ -104,7 +124,7 @@ export default function Profile(): JSX.Element {
             <span className={styles['investor-title-text']}>TOP CO-INVESTORS</span>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
@@ -112,7 +132,7 @@ export default function Profile(): JSX.Element {
             </div>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
@@ -120,7 +140,7 @@ export default function Profile(): JSX.Element {
             </div>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
@@ -133,7 +153,7 @@ export default function Profile(): JSX.Element {
             <span className={styles['investor-title-text']}>Recent Investment</span>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
@@ -141,7 +161,7 @@ export default function Profile(): JSX.Element {
             </div>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
@@ -149,7 +169,7 @@ export default function Profile(): JSX.Element {
             </div>
           </div>
           <div className={styles['investor-layout']}>
-            <YCLogo className={styles['investor-logo']} />
+            <img src={YCLogo} alt='' className={styles['investor-logo']} />
             <div className={styles['investor-text']}>
               <span className={styles['investor-name']}>Y-COMBINATOR</span>
               <br />
