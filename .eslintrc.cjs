@@ -17,7 +17,7 @@ module.exports = {
       { allowConstantExport: true },
     ], 
     'semi': ['error', 'never'],
-    'quotes': ['error', 'single'],
+    'quotes': [2, 'single', { 'avoidEscape': true, 'allowTemplateLiterals': true }],
     'comma-dangle': ['error', 'always-multiline'],
     'indent': ['error', 2],
     'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
