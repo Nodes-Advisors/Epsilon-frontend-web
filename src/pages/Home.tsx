@@ -1,7 +1,9 @@
 import styles from '../styles/home.module.less'
-import HeadImg from '../assets/images/headimg-example.png'
-import StatusIcon from '../assets/svgs/status-icon.svg?react'
 import EpsilonMiniLogo from '../assets/svgs/epsilon-mini-logo.svg?react'
+import HeadImgWrapper from '../components/headimg-wrapper'
+import HeadImg from '../assets/images/headimg-example.png'
+import Divider from '../components/divider'
+
 export default function Home() {
   return (
     <section className={styles['relative-layout']}>
@@ -9,21 +11,13 @@ export default function Home() {
         <div className={styles['epsilon-blur-circle']}>
           <EpsilonMiniLogo className={styles['epsilon-mini-logo']}/>
         </div>
-        <div className={styles['headimg-wrapper']}>
-          <img src={HeadImg} alt="" className={styles['headimg']}  />
-          <StatusIcon className={`${styles['status-icon']} ${styles['status-leave']}`} />
-        </div>
-        <div className={styles['headimg-wrapper']}>
-          <img src={HeadImg} alt="" className={styles['headimg']}  />
-          <StatusIcon className={`${styles['status-icon']} ${styles['status-busy']}`} />
-        </div>
-        <div className={styles['headimg-wrapper']}>
-          <img src={HeadImg} alt="" className={styles['headimg']}  />
-          <StatusIcon className={`${styles['status-icon']} ${styles['status-free']}`} />
-        </div>
-        <div>
-
-        </div>
+        <HeadImgWrapper headImg={HeadImg} status='online' />
+        <HeadImgWrapper headImg={HeadImg} status='busy' />
+        <HeadImgWrapper headImg={HeadImg} status='offline' />
+        <Divider height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
+        <nav>
+          
+        </nav>
       </aside>
     </section>
   )
