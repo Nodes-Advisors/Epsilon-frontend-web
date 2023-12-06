@@ -31,9 +31,17 @@ export default {
 
 ## Useful libraries
 - validation: zod
-- storage: localstorage / zustand /localforage
+- storage: localstorage / zustand / localforage
 - db: prisma
 - query: react-query
-- notification: websocket/rabbitmq/sms
-- headless ui: headless ui
-- auth: react-auth 
+- notification: websocket / rabbitmq / sms
+- headless ui: headless ui / native ui
+- auth: react-auth
+
+## Optimization
+- pass function / object -> usecallback
+- pass primitive -> usememo
+- child comonent -> memo
+- reduce the use of useEffect
+- useState -> useInner
+- useState -> useRef
