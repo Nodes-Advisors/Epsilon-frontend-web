@@ -14,7 +14,7 @@ import HeadImg from '../assets/images/headimg-example.png'
 export default function Profile(): JSX.Element {
 
   return (
-    <section style={{ position: 'relative'}}>
+    <section>
       <div className={styles['epsilon-logo-layout']}>
         <EpsilonLogo className={styles['epsilon-logo']} />
         

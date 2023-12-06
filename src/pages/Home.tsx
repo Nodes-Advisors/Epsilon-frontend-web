@@ -8,8 +8,12 @@ import KPIDashIcon from '../assets/svgs/kpi-dashboard.svg?react'
 import FundCardIcon from '../assets/svgs/fund-card.svg?react'
 import IntelligenceIcon from '../assets/svgs/intelligence.svg?react'
 import GroupButtonIcon from '../assets/svgs/group-button.svg?react'
+import SearchBar from '../components/searchbar'
+
 
 export default function Home() {
+  const name = 'Eliott  Harfouche'
+
   return (
     <section>
       <aside>
@@ -27,6 +31,18 @@ export default function Home() {
         </nav>
         <GroupButtonIcon id={styles['group-button']} />
       </aside>
+      <div className={styles['middle-panel']}>
+        <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{name}</span>!</p>
+        <SearchBar />
+        <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+        <div className={styles['news-grid']}>
+          <div className={styles['news-grid-item']}>ACCOUNT MANAGER</div>
+          <div>Eliott Harfouche, Tyler Aroner</div>
+          <div className={styles['news-grid-item']}>SWEET SPOT</div>
+          <div>$140M  |  (1592 Total Deals)</div>
+        </div>
+        <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
+      </div>
     </section>
   )
 }

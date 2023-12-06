@@ -5,8 +5,8 @@ section {
 aside:first-of-type {
     border-radius: 0.625rem;
     background-color: rgba(128, 124, 197, 0.62);
-    box-shadow: 0px 0px 0.5rem 0.5rem rgba(128, 124, 197, 0.62);
-    filter: drop-shadow(0rem 0rem 2rem rgba(128, 124, 197, 0.62));
+    box-shadow: 0px 0px 0.2rem 0.2rem rgba(128, 124, 197, 0.62);
+    filter: drop-shadow(0rem 0rem 0.5rem rgba(128, 124, 197, 0.62));
     width: 8.875rem;
     height: 69.8125rem;
     position: absolute;
@@ -21,8 +21,9 @@ aside > div:first-child{
     width: 4.0625rem;
     height: 4.0625rem;
     border-radius: 50%;
-    background-color: #D9D9D9;
-    box-shadow: 0px 0px 0.2rem 0.2rem #D9D9D9;
+    background-color: rgba(183,186,216, 0.6);
+    border-radius: 1.25rem;
+    box-shadow: 1px 1px 4px 4px #A283E4;
     margin-top: 0.5rem;
     display: grid;
     place-items: center;
@@ -78,6 +79,12 @@ aside > div:first-child{
     gap: 1.0rem;
 }
 
+.nav-widget-img {
+    &:hover {
+        cursor: pointer;
+    }
+}
+
 .nav-widget-text {
     color: #CCC;
     font-family: Fira Code;
@@ -96,4 +103,91 @@ aside > div:first-child{
     height: 3.375rem;
     position: absolute;
     bottom: 1rem;
+}
+
+#welcome {
+    color: #FFF;
+    font-family: Inter;
+    font-size: 1.25rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 1.25rem */
+}
+
+#name {
+    color: #807CC5;
+    font-family: Inter;
+    font-size: 1.25rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%;
+}
+
+.search-bar {
+    position: relative;
+}
+
+#search-bar-input {
+    &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+        font-family: Inter;
+        font-size: 1.5625rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 140%; /* 2.1875rem */
+        text-transform: capitalize;
+
+    }
+    &[type="text"] {
+        
+        padding-left: 4rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: Inter;
+        font-size: 1.5625rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 140%; /* 2.1875rem */
+        text-transform: capitalize;
+    }
+    border: none;
+    width: 36.5rem;
+    height: 2.44rem;
+    padding: 0.5rem;
+    border-radius: 1.5rem;
+    background: #9594C9;
+    box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.90);
+}
+
+.middle-panel {
+    margin-left: 8.25rem;
+}
+
+#search-bar-icon {
+    width: 2.4375rem;
+    height: 2.4375rem;
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.news-title {
+    color: #FFF;
+    font-family: Fira Code;
+    font-size: 1.8125rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 1.8125rem */
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    justify-content: start;
+}
+
+.news-grid-item {
+    justify-self: start;
 }
