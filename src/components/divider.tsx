@@ -7,7 +7,7 @@ type TDividerProps = {
 
 export default function Divider({color, height, width}: TDividerProps) {
   return (
-    <div style={{ background: color, height: height, width: width }}>
+    <div style={{ background: color, height, width }}>
     </div>
   )
 }
