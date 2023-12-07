@@ -36,10 +36,10 @@ export default function Home() {
         <SearchBar />
         <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
         <div className={styles['news-grid']}>
-          <div className={styles['news-grid-item']}>ACCOUNT MANAGER</div>
+          {/* <div className={styles['news-grid-item']}>ACCOUNT MANAGER</div>
           <div>Eliott Harfouche, Tyler Aroner</div>
           <div className={styles['news-grid-item']}>SWEET SPOT</div>
-          <div>$140M  |  (1592 Total Deals)</div>
+          <div>$140M  |  (1592 Total Deals)</div> */}
         </div>
         <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
       </div>

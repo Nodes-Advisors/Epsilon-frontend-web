@@ -5,6 +5,7 @@ const Home = lazy(() => import('../pages/Home'))
 const About = lazy(() => import('../pages/About'))
 const NotFound = lazy(() => import('../pages/NotFound'))
 const Profile = lazy(() => import('../pages/Profile'))
+const DetailMessage = lazy(() => import('../pages/DetailMessage'))
 
 const router =  createBrowserRouter([
   { index: true, element: <Navigate to='/home' /> },
@@ -13,6 +14,7 @@ const router =  createBrowserRouter([
   { path: 'about', element: <About /> },
   { path: 'profile', element: <Profile /> },
   { path: '*', element: <NotFound /> },
+  { path: 'detailmessage', element: <DetailMessage /> },
 ])
 
 export default router
