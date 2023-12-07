@@ -29,6 +29,18 @@ export default {
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
 
+## How to start it?
+
+1. install the deps
+```
+yarn
+```
+
+2. start in dev mode
+```
+yarn dev
+```
+
 ## Useful libraries
 - validation: zod
 - storage: localstorage / zustand / localforage
