@@ -10,11 +10,21 @@ import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
 import HeadImg from '../assets/images/headimg-example.png'
-
+// import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
-
+  // const { user, isLoading } = useAuth0()
   return (
     <section>
+      
+      {/* {
+        isLoading ? 
+          <div>Loading...</div>
+          : <>
+            <div>{user?.email}</div>
+            <div>{user?.name}</div></>
+        
+      } */}
+      
       <div className={styles['epsilon-logo-layout']}>
         <EpsilonLogo className={styles['epsilon-logo']} />
         

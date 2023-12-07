@@ -9,10 +9,30 @@ import FundCardIcon from '../assets/svgs/fund-card.svg?react'
 import IntelligenceIcon from '../assets/svgs/intelligence.svg?react'
 import GroupButtonIcon from '../assets/svgs/group-button.svg?react'
 import SearchBar from '../components/searchbar'
-
+import { useAuth0 } from '@auth0/auth0-react'
+import { useEffect } from 'react'
 
 export default function Home() {
-  const name = 'Eliott  Harfouche'
+  
+  const { logout, isAuthenticated, user, isLoading } = useAuth0()
+  const lastSlashIndex = window.location.href.lastIndexOf('/')
+  const returnString = window.location.origin.substring(0, lastSlashIndex) + '/login'
+  useEffect(() => {
+    console.log(user)
+  }, [user])
+
+  const LogoutButton = () => {
+    
+    return (
+      <button onClick={() => logout({ logoutParams: { returnTo: returnString } })}>
+        Log Out
+      </button>
+    )
+  }
+
+  
+
+  if (isLoading) return <div>hello...</div>
 
   return (
     <section>
@@ -32,7 +52,7 @@ export default function Home() {
         <GroupButtonIcon id={styles['group-button']} />
       </aside>
       <div className={styles['middle-panel']}>
-        <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{name}</span>!</p>
+        <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{isAuthenticated ? user?.name || user?.nickname || user?.given_name || 'Guest': 'Guest'}</span>!</p>
         <SearchBar />
         <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
         <div className={styles['news-grid']}>
@@ -43,6 +63,9 @@ export default function Home() {
         </div>
         <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
       </div>
+      <LogoutButton /> 
+      
+
     </section>
   )
 }
