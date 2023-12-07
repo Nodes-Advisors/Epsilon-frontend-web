@@ -25,7 +25,10 @@ const DropdownUl = ({data, searchItem}: {data: IEmailDetail[], searchItem: strin
     }
     // return `${sender} - ${subject} - ${toRecipients}`
   }
-
+  
+  useEffect(() => {
+    console.log(searchItem)
+  }, [searchItem])
 
   return (
     <ul className={styles['dropdown-ul']}>

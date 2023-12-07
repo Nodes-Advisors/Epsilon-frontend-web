@@ -3,12 +3,11 @@ import SearchBarIcon from '../assets/svgs/search-bar-icon.svg?react'
 import { useEffect, useMemo, useState } from 'react'
 import DropdownUl from './dropdown-ul'
 import { useQuery } from 'react-query'
-import { throttle } from 'lodash'
+import { throttle, debounce } from 'lodash'
 
 export default function SearchBar() {
 
   const [inputValue, setInputValue] = useState<string>('')
-  const [oldInputValue, setOldInputValue] = useState<string>('')
   const fetchSearch = async () => {
     if (inputValue === '') {
       return
@@ -23,9 +22,15 @@ export default function SearchBar() {
     return res.json()
   }
 
-  const setSearchValue = useMemo(() => throttle((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
-  }, 500,{ leading: false, trailing: true }), [])
+  const setSearchValue = useMemo(() => {
+    const debouncedSetInputValue = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value)
+    }, 500)
+  
+    return throttle((e: React.ChangeEvent<HTMLInputElement>) => {
+      debouncedSetInputValue(e)
+    }, 500, { leading: false, trailing: true })
+  }, [])
   
   const { isFetching, error, data, refetch } = useQuery('search', 
     () => fetchSearch(),
@@ -34,16 +39,9 @@ export default function SearchBar() {
   const empty = inputValue === '' ? '' : '-non'
 
   useEffect(() => {
-    console.log(inputValue)
     refetch()
-    // console.log(inputValue)
-  }, [inputValue])
 
-  useEffect(() => {
-    if (!isFetching) {
-      setOldInputValue(inputValue)
-    }
-  }, [isFetching])
+  }, [inputValue])
 
   const memoData = useMemo(() => data, [data])
 
@@ -55,9 +53,10 @@ export default function SearchBar() {
       {
         error ? 
           <div>Error: {(error as {message: string}).message as string}</div>
-          :  !isFetching
-            ? inputValue !== '' && <DropdownUl data={memoData} searchItem={inputValue} />
-            : <DropdownUl data={[]} searchItem={inputValue} />
+          : 
+          !isFetching
+            ? inputValue !== '' && <DropdownUl data={data} searchItem={inputValue} />
+            : null
       }
     </div>
   )
