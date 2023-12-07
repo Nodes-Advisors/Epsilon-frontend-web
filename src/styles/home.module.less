@@ -185,7 +185,7 @@ aside > div:first-child{
     &:focus {
         outline: #ccc solid 0.1rem;
         border-radius: 1.5rem 1.5rem 0 0;
-        transition: 100ms;
+        transition: 50ms;
     }
     border: none;
     width: 36.5rem;
@@ -252,6 +252,9 @@ aside > div:first-child{
     &:nth-child(2) {
         background-color: #807CC5;
     }
+    &:last-child p {
+        border-radius: 0 0 1.5rem 1.5rem;
+    }
 }
 
 .dropdown-li {
@@ -267,7 +270,7 @@ aside > div:first-child{
     font-style: normal;
     font-weight: 400;
     // line-height: 140%; /* 2.1875rem */
-    text-transform: capitalize;
+    // text-transform: capitalize;
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -277,9 +280,6 @@ aside > div:first-child{
     }
     &:hover {
         background-color: #807CC5;
-        &:last-child {
-            border-radius: 0 0 1.5rem 1.5rem;
-        }
     }
 }
 

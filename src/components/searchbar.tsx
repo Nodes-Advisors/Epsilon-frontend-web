@@ -8,7 +8,7 @@ import { throttle } from 'lodash'
 export default function SearchBar() {
 
   const [inputValue, setInputValue] = useState<string>('')
-
+  const [oldInputValue, setOldInputValue] = useState<string>('')
   const fetchSearch = async () => {
     if (inputValue === '') {
       return
@@ -27,16 +27,25 @@ export default function SearchBar() {
     setInputValue(e.target.value)
   }, 500,{ leading: false, trailing: true }), [])
   
-  const { isLoading, error, data, refetch } = useQuery('search', 
+  const { isFetching, error, data, refetch } = useQuery('search', 
     () => fetchSearch(),
     { enabled: inputValue !== '' })
   
-  const empty = inputValue === '' || !data || data.length === 0 ? '' : '-non'
+  const empty = inputValue === '' ? '' : '-non'
 
   useEffect(() => {
+    console.log(inputValue)
     refetch()
+    // console.log(inputValue)
   }, [inputValue])
 
+  useEffect(() => {
+    if (!isFetching) {
+      setOldInputValue(inputValue)
+    }
+  }, [isFetching])
+
+  const memoData = useMemo(() => data, [data])
 
   return (
     <div className={styles['search-bar']}>
@@ -44,13 +53,11 @@ export default function SearchBar() {
       <input id={styles['search-bar-input' + `${empty}-empty`]} maxLength={100} type="text" placeholder="Search"
         onChange={e => setSearchValue(e)} />
       {
-        isLoading ? (
-          <div>Loading...</div>
-        ) : error ? (
+        error ? 
           <div>Error: {(error as {message: string}).message as string}</div>
-        ) : inputValue !== '' && data ? (
-          <DropdownUl data={data} searchItem={inputValue} />
-        ) : null
+          :  !isFetching
+            ? inputValue !== '' && <DropdownUl data={memoData} searchItem={inputValue} />
+            : <DropdownUl data={[]} searchItem={inputValue} />
       }
     </div>
   )
