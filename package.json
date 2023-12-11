@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.3",
+    "@headlessui/react": "^1.7.17",
     "@types/lodash": "^4.14.202",
     "clsx": "^2.0.0",
     "eslint-plugin-react": "^7.33.2",
@@ -22,7 +23,8 @@
     "react-query": "^3.39.3",
     "react-router-dom": "^6.20.0",
     "vite-plugin-svgr": "^4.2.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
