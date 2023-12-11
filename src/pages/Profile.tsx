@@ -74,25 +74,25 @@ export default function Profile(): JSX.Element {
               <span className={styles['partial-name']}>Andreessen</span>
               <span className={styles['partial-name']}>Horowitz</span>
             </div>
-            <StatusIcon />
+            <StatusIcon className={styles['status-icon']} />
           </div>
           <div className={styles['description-layout']}>
             <span className={styles.description}>
-            Venture Capital
+              Venture Capital
             </span>
-            <span className={styles['description-layout']}>|</span>
+            <span >|</span>
             <span className={styles.description}>
-          2009
+              2009
             </span>
-            <span className={styles['description-layout']}>|</span>
-            <span className={styles['official-website']}>
-          www.a16z.com
-            </span>
+            <span >|</span>
+            <a className={styles['official-website']} href='https://www.a16z.com' target='_blank' rel="noreferrer">
+              www.a16z.com
+            </a>
           </div>
           <div className={styles['location-layout']}>
             <LocationIcon className={styles['location-icon']} />
             <span className={styles['description']}>
-            Menlo Park, CA, United States
+              Menlo Park, CA, United States
             </span>
           </div>
           <div className={styles['detail-layout']}>

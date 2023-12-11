@@ -16,8 +16,8 @@ export default function NavWidget({Svg, width, height, to, text}: INavWidgetProp
 
   return (
     <div className={styles['nav-widget-item']}>
-      <Svg onClick={() => navigate(`/profile`)} className={styles['nav-widget-img']} style={{ width, height }} />
-      <a href='/profile' className={styles['nav-widget-text']}>{text}</a>
+      <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} />
+      <a href={to} className={styles['nav-widget-text']}>{text}</a>
     </div>
   )
 }
