@@ -15,16 +15,7 @@ export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   return (
     <section>
-      
-      {/* {
-        isLoading ? 
-          <div>Loading...</div>
-          : <>
-            <div>{user?.email}</div>
-            <div>{user?.name}</div></>
-        
-      } */}
-      
+            
       <div className={styles['epsilon-logo-layout']}>
         <EpsilonLogo className={styles['epsilon-logo']} />
         
