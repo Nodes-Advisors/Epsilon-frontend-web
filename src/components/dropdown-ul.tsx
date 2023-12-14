@@ -4,7 +4,7 @@ import { Fragment, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DetailMessage from '../pages/DetailMessage'
 import { memo } from 'react'
-type IEmailDetail = {
+type TEmailDetail = {
   sender: string,
   subject: string,
   toRecipients: string,
@@ -12,7 +12,7 @@ type IEmailDetail = {
   [key: string]: string | boolean
 }
 // may change backend to decide which keyword is matched
-const DropdownUl = ({data, searchItem}: {data: IEmailDetail[], searchItem: string}) => {
+const DropdownUl = ({data, searchItem, focused}: {data: TEmailDetail[], searchItem: string, focused: boolean}) => {
 
   const navigate = useNavigate()
   const displayData = (email: IEmailDetail) => {
@@ -33,7 +33,7 @@ const DropdownUl = ({data, searchItem}: {data: IEmailDetail[], searchItem: strin
   return (
     <ul className={styles['dropdown-ul']}>
       {
-        Array.from({length: data ? data.length + 2 : 2}, (_, i) => i).map((_, i) => (
+        Array.from({length: data ? (focused ? data.length + 2 : 1) : 2}, (_, i) => i).map((_, i) => (
           i === 0 ? (
             <Fragment key={i}>
               <li className={styles['dropdown-li']}></li>

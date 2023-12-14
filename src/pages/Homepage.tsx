@@ -1,7 +1,7 @@
 import styles from '../styles/home.module.less'
 import EpsilonMiniLogo from '../assets/svgs/epsilon-mini-logo.svg?react'
 import HeadImgWrapper from '../components/headimg-wrapper'
-import HeadImg from '../assets/images/headimg-example.png'
+import UserAvatar from '../assets/images/user-avatar.png'
 import Divider from '../components/divider'
 import NavWidget from '../components/nav-widget'
 import KPIDashIcon from '../assets/svgs/kpi-dashboard.svg?react'
@@ -33,7 +33,6 @@ export default function Home() {
       const user = {...auth0User, status: 'online' as const } 
       setUser(user)
     } 
-    else console.log('executed not authenticated')
   }, [isAuthenticated])
 
   const logoutauth0 = async() => {
@@ -51,12 +50,12 @@ export default function Home() {
         <div>
           <EpsilonMiniLogo className={styles['epsilon-mini-logo']}/>
         </div>
-        <HeadImgWrapper headImg={user?.picture ? user.picture : HeadImg} status={user && user?.status ? user.status : 'offline'} />
+        <HeadImgWrapper headImg={user?.picture ? user.picture : UserAvatar} status={user && user?.status ? user.status : 'not-login'} />
 
         <Divider height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
         <nav>
           <NavWidget Svg={KPIDashIcon} width='3.125rem' height='2.44794rem' to='/kpidash' text= 'KPI Dash'/>
-          <NavWidget Svg={FundCardIcon} width='3rem' height='3.22225rem' to='/fund-card' text='Fund Card' />
+          <NavWidget Svg={FundCardIcon} width='3rem' height='3.22225rem' to='/fund-cards' text='Fund Card' />
           <NavWidget Svg={IntelligenceIcon} width='' height='3.125rem' to='/intelligence' text='Intelligence' />
         </nav>
         <GroupButtonIcon id={styles['group-button']} />

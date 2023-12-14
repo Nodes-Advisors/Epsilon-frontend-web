@@ -10,21 +10,37 @@ import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
 import HeadImg from '../assets/images/headimg-example.png'
+import { useState, useEffect } from 'react'
+import { AsyncImage } from 'loadable-image'
+import Skeleton from 'react-loading-skeleton'
+
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
+  const [isLoading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 3000)
+  }, [])
+
   return (
     <section>
             
       <div className={styles['epsilon-logo-layout']}>
         <EpsilonLogo className={styles['epsilon-logo']} />
-        
+        {/* <Skeleton className={styles['epsilon-logo']} /> */}
         <div className={styles['epsilon-logo-divider']}></div>
       </div>
       
       <div style={{ marginTop: '10rem', display: 'flex' }}>
         <div className={styles['left-panel']}>
-          <img loading='eager' src={venture_logo} alt="" className={styles['venture-logo']} />
+          {
+            isLoading 
+              ? 
+              <Skeleton className={styles['venture-logo']}  />
+              : 
+              <img loading='eager' src={venture_logo} alt="" className={styles['venture-logo']} />
+          }
           <div className={styles['action-buttons']}>
             <ActionButton 
               onClick={() => alert('startup match')} 
@@ -49,12 +65,27 @@ export default function Profile(): JSX.Element {
               <VectorLogo className={styles['vector-logo']} />
             </div>
             <div className={styles['horizontal-flex-layout']}>
-              <img src={HeadImg} alt="" className={styles['headimg']} />
-              <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
-                <span className={styles['relationship-inner-text']}>BEN HOrowitz</span>
-                <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span>
-              </div>
-              <img src={HeadImg} alt="" className={styles['headimg']} />
+              {
+                isLoading 
+                  ?
+                  <>
+                    <Skeleton className={styles['headImg']} />
+                    <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
+                      <Skeleton className={styles['relationship-inner-text']} />
+                      <Skeleton className={styles['relationship-inner-text-action']} />
+                    </div>
+                    <Skeleton className={styles['headImg']}/>
+                  </>  
+                  :
+                  <>
+                    <img src={HeadImg} alt="" className={styles['headImg']} />
+                    <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
+                      <span className={styles['relationship-inner-text']}>BEN HOrowitz</span>
+                      <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span>
+                    </div>
+                    <img src={HeadImg} alt="" className={styles['headImg']} />
+                  </>
+              }     
             </div>
             
           </div>
@@ -90,27 +121,57 @@ export default function Profile(): JSX.Element {
             <div className={styles['detail-divider-top']}></div>
             <p className={styles['detail-category']}>
               <span className={styles['detail-category-text']}>INDUSTRY CODE</span>
-              <span className={styles['detail-category-text-2']}>Biotech, Healthcare, Consumer, Crypto, Enterprise & Fintech</span>
+              {
+                isLoading 
+                  ?
+                  <Skeleton className={styles['detail-category-text-2']} width={'30rem'} />
+                  :
+                  <span className={styles['detail-category-text-2']}>Biotech, Healthcare, Consumer, Crypto, Enterprise & Fintech</span>
+              }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
               <span className={styles['detail-category-text']}>CURRENT FUND SIZE</span>
-              <span className={styles['detail-category-text-2']}>$35 Billion</span>
+              {
+                isLoading 
+                  ?
+                  <Skeleton className={styles['detail-category-text-2']} width={'10rem'} />
+                  :
+                  <span className={styles['detail-category-text-2']}>$35 Billion</span>
+              }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
               <span className={styles['detail-category-text']}>DEAL TYPE</span>
-              <span className={styles['detail-category-text-2']}>Early Stage, Later Stage</span>
+              {
+                isLoading
+                  ?
+                  <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
+                  :
+                  <span className={styles['detail-category-text-2']}>Seed, Early Stage Venture, Late Stage Venture</span>
+              }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
               <span className={styles['detail-category-text']}>ACCOUNT MANAGER</span>
-              <span className={styles['detail-category-text-2']}>Eliott Harfouche, Tyler Aroner</span>
+              {
+                isLoading
+                  ?
+                  <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
+                  :
+                  <span className={styles['detail-category-text-2']}>Eliott Harfouche, Tyler Aroner</span>
+              }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
               <span className={styles['detail-category-text']}>SWEET SPOT</span>
-              <span className={styles['detail-category-text-2']}>$140M  |  (1592 Total Deals)</span>
+              {
+                isLoading
+                  ?
+                  <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
+                  :
+                  <span className={styles['detail-category-text-2']}>$140M  |  (1592 Total Deals)</span>
+              }
             </p>
           </div>
           <div className={styles['model-layout']}>
@@ -125,28 +186,73 @@ export default function Profile(): JSX.Element {
             <span className={styles['investor-title-text']}>TOP CO-INVESTORS</span>
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info']}>SEED STAGE</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info']}>SEED STAGE</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info']}>SEED STAGE</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
 
           <div className={styles['investor-title-layout']}>
@@ -154,29 +260,73 @@ export default function Profile(): JSX.Element {
             <span className={styles['investor-title-text']}>Recent Investment</span>
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info-2']}>SEED STAGE</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info-2']}>SEED STAGE</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
           <div className={styles['investor-layout']}>
-            <img src={YCLogo} alt='' className={styles['investor-logo']} />
-            <div className={styles['investor-text']}>
-              <span className={styles['investor-name']}>Y-COMBINATOR</span>
-              <br />
-              <span className={styles['stage-info-2']}>SEED STAGE</span>
-              <span className={styles['stage-info-2']}>$ 60M</span>
-            </div>
+            {
+              isLoading
+                ?
+                <>
+                  <Skeleton className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                  </div>
+                </>
+                :
+                <>
+                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                  <div className={styles['investor-text']}>
+                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
+                    <br />
+                    <span className={styles['stage-info']}>SEED STAGE</span>
+                  </div>
+                </>
+            }
           </div>
 
         </div>
