@@ -12,13 +12,15 @@ import SearchBar from '../components/searchbar'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect } from 'react'
 import { useUserStore } from '../store/store'
+import TodayNews from '../components/today-news'
+import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
+import LiveUpdate from '../components/live-update'
 
 export default function Home() {
   
-  const { isAuthenticated, isLoading, user: auth0User, 
+  const { isAuthenticated, user: auth0User, 
     logout, loginWithRedirect } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
-  const getUser = useUserStore(state => state.getUser)
   const user = useUserStore(state => state.user)
 
   useEffect(() => {
@@ -43,9 +45,6 @@ export default function Home() {
   }
 
 
-
-  // if (isLoading) return <div>hello...</div>
-
   return (
     <section>
       <aside>
@@ -68,6 +67,7 @@ export default function Home() {
         <SearchBar />
 
         <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+        <TodayNews />
         <div className={styles['news-grid']}>
           {/* <div className={styles['news-grid-item']}>ACCOUNT MANAGER</div>
           <div>Eliott Harfouche, Tyler Aroner</div>
@@ -75,6 +75,12 @@ export default function Home() {
           <div>$140M  |  (1592 Total Deals)</div> */}
         </div>
         <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
+        <TodayNews />
+        <div className={styles['live-update-layout']}>
+          <h2 className={styles['news-title']}>Live update</h2>
+          <LiveUpdateIcon className={styles['live-update-icon']} />
+        </div>
+        <LiveUpdate />
         <div style={{ position: 'absolute', right: 0, top: 0 }}>
           {
             user 

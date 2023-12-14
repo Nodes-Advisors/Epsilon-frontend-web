@@ -308,3 +308,109 @@ aside > div:first-child{
     left: 0.5rem;
     top: 0.5rem;
 }
+
+.news-ul {
+    max-width: 75rem;
+    width: -moz-fit-content;
+    width: fit-content;
+    border: none;
+    // box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.90);
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-size: 0.9375rem;
+    font-family: Inter;
+}
+
+.news-ul > li {
+    text-wrap: wrap;
+    margin-top: 0.5rem;
+    text-wrap: wrap;
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+.news-ul > li > span {
+    text-wrap: wrap;
+    color: #754DCA;
+}
+
+.new-ul-skeleton {
+    width: 50%;
+    border: none;
+    list-style-type: none;
+    // text-align: left;
+    margin: 0;
+    padding: 0;
+}
+
+.new-ul-skeleton > li {
+    margin-top: 0.35rem;
+    &:first-child {
+        margin-top: 0;
+    }
+}
+
+.live-update-layout {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.live-update-icon {
+    fill: #D23548;
+    width: 1.9375rem;
+    height: 1.4375rem;
+
+}
+
+.live-update-button-layout {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.live-update-option-button-highlighted {
+    &:focus {
+        font-weight: 700;
+        outline: none;
+        background-color: transparent;
+    }
+    &:focus-visible {
+        font-weight: 700;
+        outline: none;
+        background-color: transparent;
+    }
+    outline: none;
+    background-color: transparent;
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+.live-update-option-button {
+    &:hover {
+        cursor: pointer;
+        font-weight: 700;
+        background-color: transparent;
+    }
+    &:focus {
+        font-weight: 700;
+        outline: none;
+        background-color: transparent;
+    }
+    &:focus-visible {
+        font-weight: 700;
+        outline: none;
+        background-color: transparent;
+    }
+    padding: 0;
+    background-color: transparent;
+    margin: 0;
+    border: none;
+    outline: none;
+}
