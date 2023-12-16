@@ -13,6 +13,7 @@
     "@auth0/auth0-react": "^2.2.3",
     "@headlessui/react": "^1.7.17",
     "@types/lodash": "^4.14.202",
+    "airtable": "^0.12.2",
     "clsx": "^2.0.0",
     "eslint-plugin-react": "^7.33.2",
     "loadable-image": "^3.0.6",
