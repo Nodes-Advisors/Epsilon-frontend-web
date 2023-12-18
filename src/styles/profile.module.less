@@ -64,7 +64,9 @@ section {
 }
 
 .description-layout {
-    margin-left: 1.5rem;
+    // margin-left: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin-bottom: 0.5rem;
     display: flex;
     flex-direction: row;
@@ -92,7 +94,7 @@ section {
 }
 
 .location-layout{
-    margin-left: 2rem;
+    // margin-left: 2rem;
     margin-bottom: 1rem;
     display: flex;
     flex-direction: row;
@@ -130,6 +132,10 @@ section {
 }
 
 .detail-category-text-2 {
+    width: 40rem;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     position: absolute;
     left: 15rem;
@@ -255,6 +261,10 @@ section {
     text-transform: uppercase;
     display: inline-block;
     margin-bottom: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    max-width: 11rem;
 }
 
 .stage-info {

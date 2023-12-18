@@ -10,18 +10,37 @@ import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
 import HeadImg from '../assets/images/headimg-example.png'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
+import { useLocation } from 'react-router-dom'
+import { useFundsStore } from '../store/store'
 
+import { FieldSet, Record } from 'airtable'
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
-
+  const recordRef = useRef<Record<FieldSet> | null>(null)
+  const [location, setLocation] = useState<string | null>(null)
   useEffect(() => {
-    setTimeout(() => setLoading(false), 3000)
+    // console.log(funds)
+    const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
+    console.log(record)
+    setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
+      acc += record.fields[cur] ? curIndex !== array.length - 1 ? record.fields[cur] + ', ' : record.fields[cur] : '', ''))
+    recordRef.current = record
+    setTimeout(() => setLoading(false), 1000)
   }, [])
+
+  const funds = useFundsStore(state => state.funds)
+  const id = localStorage.getItem('fund-id')
+  if (!id) {
+    throw new Error('fund id not found')
+  }
+  
+
+
 
   return (
     <section>
@@ -39,7 +58,10 @@ export default function Profile(): JSX.Element {
               ? 
               <Skeleton className={styles['venture-logo']}  />
               : 
-              <img loading='eager' src={venture_logo} alt="" className={styles['venture-logo']} />
+              <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999' }}
+
+                draggable='false' onContextMenu={e => e.preventDefault()} />
           }
           <div className={styles['action-buttons']}>
             <ActionButton 
@@ -93,28 +115,65 @@ export default function Profile(): JSX.Element {
         <div className={styles['middle-panel']}>
           <div className={styles['name-layout']}>
             <div className={styles.name}>
-              <span className={styles['partial-name']}>Andreessen</span>
-              <span className={styles['partial-name']}>Horowitz</span>
+              <span className={styles['partial-name']}>
+                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}
+              </span>
             </div>
-            <StatusIcon className={styles['status-icon']} />
+            {
+              isLoading 
+                ?
+                <Skeleton className={styles['status-icon']} />
+                : 
+                <StatusIcon className={styles['status-icon']} />
+            }
           </div>
           <div className={styles['description-layout']}>
-            <span className={styles.description}>
-              Venture Capital
-            </span>
+            {
+              isLoading ?
+                <span className={styles.description}>
+              loading...
+                </span>
+                : 
+                recordRef.current ? 
+                  (recordRef.current.fields['Deal Class'] as string[]).length === 0
+                    ?
+                    'no description'
+                    :
+                    (recordRef.current.fields['Deal Class'] as string[]).length > 1 
+                      ?
+                      <span className={styles.description}>
+                        {(recordRef.current.fields['Deal Class'] as string[]).map((dealClass: string, index: number) => 
+                          index !== (recordRef.current!.fields['Deal Class'] as string[]).length - 1 ? dealClass + ', ' : dealClass )}
+                      </span>
+                      :
+                      <span className={styles.description}>
+                        {recordRef.current.fields['Deal Class'] as string}
+                      </span>
+                  : 'no description'
+            }
+            
             <span >|</span>
-            <span className={styles.description}>
+            {/* <span className={styles.description}>
               2009
-            </span>
-            <span >|</span>
-            <a className={styles['official-website']} href='https://www.a16z.com' target='_blank' rel="noreferrer">
-              www.a16z.com
+            </span> */}
+            {/* <span >|</span> */}
+            <a className={styles['official-website']} href={recordRef.current ? recordRef.current.fields['Website Link'] as string : 'www.google.com'} target='_blank' rel="noreferrer">
+              {isLoading ? 'loading...' : recordRef.current ? recordRef.current.fields['Website Link'] as string : 'no official website, please google it'}
             </a>
           </div>
           <div className={styles['location-layout']}>
             <LocationIcon className={styles['location-icon']} />
             <span className={styles['description']}>
-              Menlo Park, CA, United States
+              {
+                isLoading
+                  ? 
+                  <Skeleton className={styles['description']} width={'10rem'} />
+                  : 
+                  recordRef.current 
+                    ? 
+                    location as string
+                    : 'no location'
+              }
             </span>
           </div>
           <div className={styles['detail-layout']}>
@@ -126,7 +185,13 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'30rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>Biotech, Healthcare, Consumer, Crypto, Enterprise & Fintech</span>
+                  <span className={styles['detail-category-text-2']}>
+                    {
+                      recordRef.current ? (recordRef.current.fields['Company Industry Code'] as string[]).map((industryCode: string, index: number) => 
+                        index !== (recordRef.current!.fields['Company Industry Code'] as string[]).length - 1 ? industryCode + ', ' : industryCode )
+                        : 'no industry code'
+                    }
+                  </span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -137,7 +202,7 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'10rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>$35 Billion</span>
+                  <span className={styles['detail-category-text-2']}>currently unavialable</span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -147,8 +212,17 @@ export default function Profile(): JSX.Element {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
-                  :
-                  <span className={styles['detail-category-text-2']}>Seed, Early Stage Venture, Late Stage Venture</span>
+                  : recordRef.current ? (recordRef.current.fields['Deal Type 1'] as string[]).length > 1
+                    ?
+                    <span className={styles['detail-category-text-2']}>
+                      {(recordRef.current.fields['Deal Type 1'] as string[]).map((dealType: string, index: number) => 
+                        index !== (recordRef.current!.fields['Deal Type 1'] as string[]).length - 1 ? dealType + ', ' : dealType )}
+                    </span>
+                    :
+                    <span className={styles['detail-category-text-2']}>
+                      {recordRef.current.fields['Deal Type 1'] as string}
+                    </span>
+                    : 'no deal type'
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -159,7 +233,17 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>Eliott Harfouche, Tyler Aroner</span>
+                  recordRef.current ? (recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).length > 1
+                    ?
+                    <span className={styles['detail-category-text-2']}>
+                      {(recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).map((accountManager: string, index: number) => 
+                        index !== (recordRef.current!.fields['Lead Partner at Investment Firm'] as string[]).length - 1 ? accountManager + ', ' : accountManager )}
+                    </span>
+                    :
+                    <span className={styles['detail-category-text-2']}>
+                      {recordRef.current.fields['Lead Partner at Investment Firm'] as string}
+                    </span>
+                    : 'no account manager recorded'
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -170,7 +254,7 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>$140M  |  (1592 Total Deals)</span>
+                  <span className={styles['detail-category-text-2']}>currently unavialable</span>
               }
             </p>
           </div>
@@ -185,77 +269,50 @@ export default function Profile(): JSX.Element {
             <DotCircleIcon className={styles['dot-circle-investor-icon']} />
             <span className={styles['investor-title-text']}>TOP CO-INVESTORS</span>
           </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+          {
+            isLoading 
+              ? 
+              (
+                Array(5).fill(0).map((_, i) => (
+                  <div key={i} className={styles['investor-layout']}>
+      
+              
+                    <Skeleton className={styles['investor-logo']} />
+                    <div className={styles['investor-text']}>
+                      <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                      <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                    </div>
                   </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+                ))
+              )
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+            
+              :
+              
+              !recordRef.current!.fields['Co-investors'] || (recordRef.current!.fields['Co-investors'] as string[]).length === 0
+                ? 'no co-investors'
+                : (
+                recordRef.current!.fields['Co-investors'] as string[]).map((investor: string) => (
+                  <div key={investor} className={styles['investor-layout']}>
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
+                    <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                    <div className={styles['investor-text']}>
+                      <span className={styles['investor-name']}>{investor}</span>
+                      <br />
+                      <span className={styles['stage-info']}>May not know</span>
+                    </div>
 
-          <div className={styles['investor-title-layout']}>
+                  </div>
+                ),
+                )
+          }
+          
+
+
+          
+
+          {/* <div className={styles['investor-title-layout']}>
             <DotCircleIcon className={styles['dot-circle-recent-investment-icon']} />
             <span className={styles['investor-title-text']}>Recent Investment</span>
           </div>
@@ -304,8 +361,8 @@ export default function Profile(): JSX.Element {
                   </div>
                 </>
             }
-          </div>
-          <div className={styles['investor-layout']}>
+          </div> */}
+          {/* <div className={styles['investor-layout']}>
             {
               isLoading
                 ?
@@ -327,7 +384,7 @@ export default function Profile(): JSX.Element {
                   </div>
                 </>
             }
-          </div>
+          </div> */}
 
         </div>
       </div>
