@@ -10,6 +10,7 @@ const DetailMessage = lazy(() => import('../pages/DetailMessage'))
 const KPIDash = lazy(() => import('../pages/KPIDash'))
 const FundCards = lazy(() => import('../pages/FundCards'))
 const GPTdata = lazy(() => import('../pages/GPTdata'))
+const KPIExcel = lazy(() => import('../pages/KPIExcel'))
 
 const router =  createBrowserRouter([
   { index: true, element: <Navigate to='/home' /> },
@@ -23,6 +24,7 @@ const router =  createBrowserRouter([
   // { path: 'login', element: <Login /> },
   { path: 'kpidash', element: <KPIDash /> },
   { path: 'gptdata', element: <GPTdata /> },
+  { path: 'kpiexcel', element: <KPIExcel /> },
 ])
 
 export default router
