@@ -9,6 +9,7 @@ const DetailMessage = lazy(() => import('../pages/DetailMessage'))
 // const Login = lazy(() => import('../pages/Login'))
 const KPIDash = lazy(() => import('../pages/KPIDash'))
 const FundCards = lazy(() => import('../pages/FundCards'))
+const GPTdata = lazy(() => import('../pages/GPTdata'))
 
 const router =  createBrowserRouter([
   { index: true, element: <Navigate to='/home' /> },
@@ -21,6 +22,7 @@ const router =  createBrowserRouter([
   { path: 'detailmessage', element: <DetailMessage /> },
   // { path: 'login', element: <Login /> },
   { path: 'kpidash', element: <KPIDash /> },
+  { path: 'gptdata', element: <GPTdata /> },
 ])
 
 export default router
