@@ -15,14 +15,21 @@ import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useLocation } from 'react-router-dom'
 import { useFundsStore } from '../store/store'
-
+import { Popover } from '@headlessui/react'
 import { FieldSet, Record } from 'airtable'
+import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
+
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
   const recordRef = useRef<Record<FieldSet> | null>(null)
   const [location, setLocation] = useState<string | null>(null)
+  const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [requestName, setRequestName] = useState<string | null>(null)
+  const [approvers, setApprovers] = useState<string | null>(null)
+  const [details, setDetails] = useState<string | null>(null)
   useEffect(() => {
     // console.log(funds)
     const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
@@ -39,19 +46,16 @@ export default function Profile(): JSX.Element {
     throw new Error('fund id not found')
   }
   
-
+  const addRequest = () => {
+    setPopoverOpen(true)
+  }
 
 
   return (
-    <section>
+    <section style={{ display: 'flex', justifyContent: 'center', alignItems: 'start' }}>
             
-      <div className={styles['epsilon-logo-layout']}>
-        <EpsilonLogo className={styles['epsilon-logo']} />
-        {/* <Skeleton className={styles['epsilon-logo']} /> */}
-        <div className={styles['epsilon-logo-divider']}></div>
-      </div>
       
-      <div style={{ marginTop: '10rem', display: 'flex' }}>
+      <div style={{ display: 'flex', marginTop: '10vh' }}>
         <div className={styles['left-panel']}>
           {
             isLoading 
@@ -70,10 +74,10 @@ export default function Profile(): JSX.Element {
               textClass={styles['action-button-text']} 
               text='STARTUP MATCH' />
             <ActionButton
-              onClick={() => alert('share')}
+              onClick={addRequest}
               buttonClass={styles['action-button']} 
               textClass={styles['action-button-text']} 
-              text='SHARE' />
+              text='ADD A REQUEST' />
             <ActionButton
               onClick={() => alert('add to list')}
               buttonClass={styles['action-button']} 
@@ -202,7 +206,7 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'10rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>currently unavialable</span>
+                  <span className={styles['detail-category-text-2']} style={{ color: '#fff4' }}>currently unavailable</span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -227,7 +231,7 @@ export default function Profile(): JSX.Element {
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
-              <span className={styles['detail-category-text']}>ACCOUNT MANAGER</span>
+              <span className={styles['detail-category-text']}>Lead Partner</span>
               {
                 isLoading
                   ?
@@ -254,13 +258,15 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>currently unavialable</span>
+                  <span className={styles['detail-category-text-2']}  style={{ color: '#fff4' }}>currently unavailable</span>
               }
             </p>
           </div>
           <div className={styles['model-layout']}>
-            <NodesIcon className={styles['nodes-icon']}/>
-            <span className={styles['model-text']}>INTELLIGENCE</span>
+            <h2>Historical Log</h2>
+            
+            {/* <NodesIcon className={styles['nodes-icon']}/> */}
+            {/* <span className={styles['model-text']}>INTELLIGENCE</span> */}
           </div>
         </div>
         <div className={styles['right-panel']}>
@@ -309,86 +315,62 @@ export default function Profile(): JSX.Element {
           }
           
 
+        </div>
 
-          
 
-          {/* <div className={styles['investor-title-layout']}>
-            <DotCircleIcon className={styles['dot-circle-recent-investment-icon']} />
-            <span className={styles['investor-title-text']}>Recent Investment</span>
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+      </div>
+      <div  className={styles['popover-background']} style={{ visibility: isPopoverOpen ? 'visible' : 'hidden' }}>
+        <div className={styles['popover-form']}>
+          <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
+            <div className={styles['popover-form-title']}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: '3px solid #5392d4' }}
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+                  draggable='false' onContextMenu={e => e.preventDefault()} />
+                <div>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}</span></span>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
+                </div>
+              </div>
+              <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setPopoverOpen(false)} />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Name of request</span>
+              <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%', 
+                borderBottom: requestName && requestName !== '' ? 'blue 1px solid' : 'red 1px solid' }} 
+              ref={inputRef} 
+              onChange={(e) => setRequestName(e.target.value)}
+              placeholder='Use a name that&apos;s easy to understand' />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers</span>
+              <input style={{ marginTop: '1rem', marginBottom: '0.2rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', 
+                borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'none' }} 
+              onChange={(e) => setApprovers(e.target.value)}
+              placeholder='Enter names here' />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
+                <option  value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Additional details</span>
+              <textarea style={{ marginTop: '1rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', minWidth: '100%', minHeight: '5rem', maxHeight: '10rem',
+                borderBottom: details && details !== '' ? 'blue 1px solid' : 'none' }}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder='If needed, add some extra info that will help recipients learn more about the request' />
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div> */}
-          {/* <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
-
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div> */}
-
+            </div>
+            <button onClick={() => setPopoverOpen(false)}>send</button>
+          </form>
         </div>
       </div>
-
     </section>
   )
 }

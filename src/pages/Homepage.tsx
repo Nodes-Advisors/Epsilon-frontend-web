@@ -45,7 +45,7 @@ export default function Home() {
 
 
   return (
-    <section>
+    <section style={{ zIndex: 10, width: '70%' }} >
       <aside>
         <div>
           <EpsilonMiniLogo className={styles['epsilon-mini-logo']}/>
@@ -54,33 +54,29 @@ export default function Home() {
 
         <Divider height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
         <nav>
-          <NavWidget Svg={KPIDashIcon} width='3.125rem' height='2.44794rem' to='/kpidash' text= 'KPI Dash'/>
+          <NavWidget Svg={KPIDashIcon} width='3.125rem' height='2.44794rem' to='/kpi-dash' text= 'KPI Dash'/>
           <NavWidget Svg={FundCardIcon} width='3rem' height='3.22225rem' to='/fund-cards' text='Fund Card' />
           <NavWidget Svg={IntelligenceIcon} width='' height='3.125rem' to='/intelligence' text='Intelligence' />
         </nav>
-        <GroupButtonIcon id={styles['group-button']} />
+        {/* <GroupButtonIcon id={styles['group-button']} /> */}
       </aside>
-      <div className={styles['middle-panel']}>
+      <div style={{ zIndex: 10 }} className={styles['middle-panel']}>
         <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{user ? user?.name || user?.nickname || user?.given_name || 'Guest': 'Guest'}</span>!</p>
 
-        <SearchBar />
+        {/* <SearchBar /> */}
 
         <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
         <TodayNews />
-        <div className={styles['news-grid']}>
-          {/* <div className={styles['news-grid-item']}>ACCOUNT MANAGER</div>
-          <div>Eliott Harfouche, Tyler Aroner</div>
-          <div className={styles['news-grid-item']}>SWEET SPOT</div>
-          <div>$140M  |  (1592 Total Deals)</div> */}
-        </div>
+
         <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
         <TodayNews />
+        
         <div className={styles['live-update-layout']}>
           <h2 className={styles['news-title']}>Live update</h2>
           <LiveUpdateIcon className={styles['live-update-icon']} />
         </div>
         <LiveUpdate />
-        <div style={{ position: 'absolute', right: 0, top: 0 }}>
+        {/* <div style={{ position: 'absolute', right: 0, top: 0 }}>
           {
             user 
               ?
@@ -92,7 +88,7 @@ export default function Home() {
                 <button onClick={() => loginWithRedirect()}>Login</button>
               </div>
           }
-        </div>
+        </div> */}
       </div>
       
       

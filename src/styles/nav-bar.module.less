@@ -1,0 +1,172 @@
+.nav-search-bar {
+    width: 40rem;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: #646cff3d;
+    color: #fff;
+    outline: none;
+    border: none;
+    &:focus {
+        outline: orange 0.1rem solid;
+    }
+    font-size: 1.2rem;
+    &::placeholder {
+        // padding-left: 1rem;
+        color: #fffa;
+    }
+    &[type="text"] {
+        padding-left: 3rem;
+    }
+}
+
+.nav-saved-fund {
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+
+.login {
+    position: absolute;
+    right: 4rem;
+    font-weight: 600;
+    color: #fff9;
+    // &:hover {
+    //     cursor: pointer;
+    //     // text-decoration: underline;
+    //     color: #fff;
+    // }
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.toggle {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    color: #333;
+    background-color: #fff;
+    padding-top: 0.5rem;
+    &:hover {
+        color: #333;
+        background-color: #eee;
+        // text-decoration: underline;
+    }
+    &:last-child {
+        padding-bottom: 0.5rem;
+    }
+}
+
+.nav-profile-pic {
+    &:hover {
+        cursor: pointer;
+        color: #fff;
+    }
+}
+
+.nav-profile-login {
+    &:hover {
+        cursor: pointer;
+        color: #fff;
+    }
+}
+
+.notification-icon {
+    fill: #ddd;
+    width: 1.5rem;
+    height: 1.5rem;
+    &:hover {
+        cursor: pointer;
+        fill: #fff;
+    }
+}
+
+.notification-layout {
+    text-align: start;
+    position: absolute;
+    right: 5rem;
+    top: 5rem;
+    z-index: 1000;
+    border-radius: 0.25rem;
+    width: 25rem;
+    height: 15rem;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    color: #000;
+}
+
+.cancel-button {
+    width: 1.4rem;
+    height: 1.4rem;
+    &:hover {
+        cursor: pointer;
+        transform: scale(1.1);
+    }
+}
+
+.notification-message {
+    padding: 0.5rem 0;
+   
+    margin: 0 1rem;
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+        background-color: #eee;
+    }
+}
+
+// add a css class for scroll bar
+
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #333 #fff;
+
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 0.5rem;
+    position: absolute;
+    right: 0;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: #fff;
+    
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 0.25rem;
+    border: 0.1rem solid #fff;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:active {
+    background-color: #777;
+}
+
+// .scrollbar::-webkit-scrollbar-thumb:window-inactive {
+//     background-color: #999;
+// }
+
+// .scrollbar::-webkit-scrollbar-corner {
+//     background-color: #fff;
+// }
+
+// .scrollbar::-webkit-scrollbar-corner:vertical {
+//     height: 0.5rem;
+// }
+
+// .scrollbar::-webkit-scrollbar-corner:horizontal {
+//     width: 0.5rem;
+// }
+
+// .scrollbar::-webkit-scrollbar-corner:vertical:horizontal {
+//     height: 0.5rem;
+//     width: 0.5rem;
+// }

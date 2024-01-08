@@ -2,7 +2,7 @@ section {
     display: flex;
     flex-direction: row;
     align-items: center;
-    
+    min-height: 90vh;
 }
 
 .left-panel {
@@ -389,4 +389,56 @@ section {
 
 section {
     position: relative;
+}
+
+.popover-background {
+    position: absolute;
+    background-color: #3336;
+    height: 100%;
+    width: 100%;    
+    
+}
+
+.popover-form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40rem;
+    height: 60rem;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow-y: auto;
+
+    color: #000;
+    text-align: start;
+}
+
+.popover-form-title {
+    display: flex;
+    align-items: start;
+    // margin: 2.5rem 2.5rem 0 2.5rem;
+    justify-content: space-between;
+    font-size: 1.2rem;
+}
+
+.cancelbutton {
+    width: 2rem;
+    height: 2rem;
+    &:hover {
+        transform: scale(1.1);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+}
+
+option {
+    background-color: #fff;
+    &:hover {
+        box-shadow: 0 0 10px 100px #000 inset;
+    }
+}
+
+textarea {
+    font-family: Arial, Helvetica, sans-serif;
 }

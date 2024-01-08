@@ -9,6 +9,11 @@ const DetailMessage = lazy(() => import('../pages/DetailMessage'))
 // const Login = lazy(() => import('../pages/Login'))
 const KPIDash = lazy(() => import('../pages/KPIDash'))
 const FundCards = lazy(() => import('../pages/FundCards'))
+const SavedList = lazy(() => import('../pages/SavedList'))
+const UserProfile = lazy(() => import('../pages/UserProfile'))
+const NavBar = lazy(() => import('../components/nav-bar'))
+
+const navWrapper = (children: React.ReactNode) => <NavBar>{children}</NavBar>
 
 const router =  createBrowserRouter([
   { index: true, element: <Navigate to='/home' /> },
@@ -20,7 +25,11 @@ const router =  createBrowserRouter([
   { path: '*', element: <NotFound /> },
   { path: 'detailmessage', element: <DetailMessage /> },
   // { path: 'login', element: <Login /> },
-  { path: 'kpidash', element: <KPIDash /> },
-])
+  { path: 'kpi-dash', element: <KPIDash /> },
+  { path: 'my-saved-list', element: <SavedList /> },
+  { path: 'user-profile', element: <UserProfile /> },
+
+].map(item => ({ ...item, element: navWrapper(item.element) })),
+)
 
 export default router
