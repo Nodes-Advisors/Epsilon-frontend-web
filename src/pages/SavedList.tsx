@@ -105,7 +105,7 @@ export default function SavedList() {
                             </div>
                             <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', backgroundColor: index % 3 === 0 ? (index%3 === 1 ? '#00ff00' : '#00ff00') : '#ff0000'}}></div>
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '20rem', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '15rem', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '20rem', textAlign: 'left', maxHeight: '5rem' }}>{record.fields['Company Industry Code'] as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.fields['Deal Class'] as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.fields['Lead Partner at Investment Firm'] as string || 'n/a'}</span>
@@ -130,45 +130,45 @@ export default function SavedList() {
         <div className={styles['popover-form']}>
           <div style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
-              </div>
+             
+              <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
+              <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setOpenRequestPanel(false)} />
             </div>
-            <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setOpenRequestPanel(false)} />
-          </div>
-          <div>
-            <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Name of request</span>
-            <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%', 
-              borderBottom: requestName && requestName !== '' ? 'blue 1px solid' : 'red 1px solid' }} 
-            ref={inputRef} 
-            onChange={(e) => setRequestName(e.target.value)}
-            placeholder='Use a name that&apos;s easy to understand' />
-          </div>
-          <div>
-            <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers</span>
-            <input style={{ marginTop: '1rem', marginBottom: '0.2rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', 
-              borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'none' }} 
-            onChange={(e) => setApprovers(e.target.value)}
-            placeholder='Enter names here' />
-          </div>
-          <div>
-            <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
-            <select
-              style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
-              <option  value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
-          </div>
-          <div>
-            <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Additional details</span>
-            <textarea style={{ marginTop: '1rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', minWidth: '100%', minHeight: '5rem', maxHeight: '10rem',
-              borderBottom: details && details !== '' ? 'blue 1px solid' : 'none' }}
-            onChange={(e) => setDetails(e.target.value)}
-            placeholder='If needed, add some extra info that will help recipients learn more about the request' />
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Name of request</span>
+              <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%', background: '#eee',
+                borderBottom: requestName && requestName !== '' ? 'blue 1px solid' : 'red 1px solid' }} 
+              ref={inputRef} 
+              onChange={(e) => setRequestName(e.target.value)}
+              placeholder='Use a name that&apos;s easy to understand' />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers</span>
+              <input style={{ marginTop: '1rem', marginBottom: '0.2rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', 
+                borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'none' }} 
+              onChange={(e) => setApprovers(e.target.value)}
+              placeholder='Enter names here' />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
+                <option  value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Additional details</span>
+              <textarea style={{ marginTop: '1rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', minWidth: '100%', minHeight: '5rem', maxHeight: '10rem',
+                borderBottom: details && details !== '' ? 'blue 1px solid' : 'none' }}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder='If needed, add some extra info that will help recipients learn more about the request' />
 
+            </div>
+            <button onClick={() => setOpenRequestPanel(false)}>send</button>
           </div>
-          <button onClick={() => setOpenRequestPanel(false)}>send</button>
+         
         </div>
       </div>
     </div>

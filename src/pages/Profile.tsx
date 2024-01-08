@@ -319,7 +319,7 @@ export default function Profile(): JSX.Element {
 
 
       </div>
-      <div  className={styles['popover-background']} style={{ visibility: isPopoverOpen ? 'visible' : 'hidden' }}>
+      <div className={styles['popover-background']} style={{ visibility: isPopoverOpen ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
           <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
@@ -337,7 +337,7 @@ export default function Profile(): JSX.Element {
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Name of request</span>
-              <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%', 
+              <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%',  background: '#eee', padding: '0.5rem 0 0.5rem 0.5rem',
                 borderBottom: requestName && requestName !== '' ? 'blue 1px solid' : 'red 1px solid' }} 
               ref={inputRef} 
               onChange={(e) => setRequestName(e.target.value)}
@@ -353,8 +353,8 @@ export default function Profile(): JSX.Element {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
-                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
-                <option  value="High">High</option>
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
+                <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
               </select>
