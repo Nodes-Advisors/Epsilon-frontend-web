@@ -14,7 +14,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useLocation } from 'react-router-dom'
-import { useFundsStore } from '../store/store'
+import { useFundsStore, useSavedFundsStore } from '../store/store'
 import { Popover } from '@headlessui/react'
 import { FieldSet, Record } from 'airtable'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
@@ -30,10 +30,16 @@ export default function Profile(): JSX.Element {
   const [requestName, setRequestName] = useState<string | null>(null)
   const [approvers, setApprovers] = useState<string | null>(null)
   const [details, setDetails] = useState<string | null>(null)
+
+  const savedFunds = useSavedFundsStore(state => state.savedFunds)
+  const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
+  const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
+
   useEffect(() => {
     // console.log(funds)
     const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
-    console.log(record)
+    console.log(record.id)
+    console.log(savedFunds)
     setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
       acc += record.fields[cur] ? curIndex !== array.length - 1 ? record.fields[cur] + ', ' : record.fields[cur] : '', ''))
     recordRef.current = record
@@ -52,9 +58,8 @@ export default function Profile(): JSX.Element {
 
 
   return (
-    <section style={{ display: 'flex', justifyContent: 'center', alignItems: 'start' }}>
-            
-      
+    <div 
+      style={{ display: 'flex', justifyContent: 'center', alignItems: 'start', minHeight: '80vh' }}>
       <div style={{ display: 'flex', marginTop: '10vh' }}>
         <div className={styles['left-panel']}>
           {
@@ -79,10 +84,10 @@ export default function Profile(): JSX.Element {
               textClass={styles['action-button-text']} 
               text='ADD A REQUEST' />
             <ActionButton
-              onClick={() => alert('add to list')}
+              onClick={() => recordRef && recordRef.current && savedFunds.find((fund) => fund.id === recordRef.current?.id) ? deleteSavedFund(recordRef.current) : addSavedFund(recordRef.current)}
               buttonClass={styles['action-button']} 
               textClass={styles['action-button-text']} 
-              text='ADD TO LIST' />
+              text= {savedFunds.find((fund) => fund.id === recordRef.current?.id) ? 'REMOVE FROM LIST' : 'ADD TO LIST'} />
           </div>
           <div>
             <div className={styles['horizontal-flex-layout']} >
@@ -157,10 +162,6 @@ export default function Profile(): JSX.Element {
             }
             
             <span >|</span>
-            {/* <span className={styles.description}>
-              2009
-            </span> */}
-            {/* <span >|</span> */}
             <a className={styles['official-website']} href={recordRef.current ? recordRef.current.fields['Website Link'] as string : 'www.google.com'} target='_blank' rel="noreferrer">
               {isLoading ? 'loading...' : recordRef.current ? recordRef.current.fields['Website Link'] as string : 'no official website, please google it'}
             </a>
@@ -265,8 +266,6 @@ export default function Profile(): JSX.Element {
           <div className={styles['model-layout']}>
             <h2>Historical Log</h2>
             
-            {/* <NodesIcon className={styles['nodes-icon']}/> */}
-            {/* <span className={styles['model-text']}>INTELLIGENCE</span> */}
           </div>
         </div>
         <div className={styles['right-panel']}>
@@ -336,24 +335,42 @@ export default function Profile(): JSX.Element {
               <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setPopoverOpen(false)} />
             </div>
             <div>
-              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Name of request</span>
-              <input style={{ marginTop: '1rem', fontSize: '1.75rem', border: 'none', outline: 'none', width: '100%',  background: '#eee', padding: '0.5rem 0 0.5rem 0.5rem',
-                borderBottom: requestName && requestName !== '' ? 'blue 1px solid' : 'red 1px solid' }} 
-              ref={inputRef} 
-              onChange={(e) => setRequestName(e.target.value)}
-              placeholder='Use a name that&apos;s easy to understand' />
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
+                <option value="Letme">Let me review the fund</option>
+                <option value="Assign">Assign the fund request to</option>
+              </select>
             </div>
             <div>
-              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers or Assignees</span>
               <input style={{ marginTop: '1rem', marginBottom: '0.2rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', 
-                borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'none' }} 
+                borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'transparent 1px solid', color: '#000' }} 
               onChange={(e) => setApprovers(e.target.value)}
               placeholder='Enter names here' />
             </div>
             <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
+                <option value="Deal I">Deal I</option>
+                <option value="Deal II">Deal II</option>
+                <option value="Deal III">Deal III</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
+                <option value="Person A">Person A</option>
+                <option value="Person B">Person B</option>
+                <option value="Person C">Person C</option>
+              </select>
+            </div>
+            <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
-                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem 0.2rem', marginTop: '1rem' }} name="Priority" id="">
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
@@ -361,8 +378,8 @@ export default function Profile(): JSX.Element {
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Additional details</span>
-              <textarea style={{ marginTop: '1rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', minWidth: '100%', minHeight: '5rem', maxHeight: '10rem',
-                borderBottom: details && details !== '' ? 'blue 1px solid' : 'none' }}
+              <textarea style={{ marginTop: '1rem', color: '#000', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', minWidth: '100%', maxWidth: '100%', height: '5rem',
+                borderBottom: details && details !== '' ? 'blue 1px solid' : 'transparent 1px solid' }}
               onChange={(e) => setDetails(e.target.value)}
               placeholder='If needed, add some extra info that will help recipients learn more about the request' />
 
@@ -371,6 +388,6 @@ export default function Profile(): JSX.Element {
           </form>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

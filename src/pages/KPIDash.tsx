@@ -24,14 +24,19 @@ export default function KPIDash () {
   const handleDrop = (stage) => {
     return (e) => {
       const task = e.dataTransfer.getData('task')
+      const originalStage = Object.keys(tasks).find(key => tasks[key].includes(task))
+  
+      if (originalStage === stage) {
+        return
+      }
+  
       setTasks(prev => ({
         ...prev,
         [stage]: [...prev[stage], task],
-        [Object.keys(prev).find(key => prev[key].includes(task))]: prev[Object.keys(prev).find(key => prev[key].includes(task))].filter(t => t !== task),
+        [originalStage]: prev[originalStage].filter(t => t !== task),
       }))
     }
   }
-
   useEffect(() => {
     setTimeout(() => setLoading(false), 3000)
   }, [isLoading])

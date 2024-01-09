@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import venture_logo from '../assets/images/venture-logo-example.png'
 import styles from '../styles/profile.module.less'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
+import { convertedOutput } from '../lib/utils'
 
 export default function SavedList() {
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
@@ -24,6 +25,7 @@ export default function SavedList() {
     }, 3000)
   }
   , [])
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
@@ -62,7 +64,7 @@ export default function SavedList() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{savedFunds.length} Funds</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: '3.5fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', gap: '1rem', width: '100%', textAlign: 'left'  }}>
                     <span style={{ fontSize: '1.15rem' }}>Funds</span>
                     <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
                     <span style={{ fontSize: '1.15rem' }}>Sector</span>
@@ -76,7 +78,7 @@ export default function SavedList() {
                   {
                     savedFunds.map((record, index) => (
                       <>
-                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gridTemplateColumns: '3.5fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
@@ -105,12 +107,12 @@ export default function SavedList() {
                             </div>
                             <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', backgroundColor: index % 3 === 0 ? (index%3 === 1 ? '#00ff00' : '#00ff00') : '#ff0000'}}></div>
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '15rem', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '20rem', textAlign: 'left', maxHeight: '5rem' }}>{record.fields['Company Industry Code'] as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.fields['Deal Class'] as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.fields['Lead Partner at Investment Firm'] as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.fields['Company Industry Code'] as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Deal Class'] as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Lead Partner at Investment Firm'] as string[] | string) || 'n/a'}</span>
                           <span></span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '15rem', textAlign: 'left' }}>{record.fields['Co-investors'] as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Co-investors'] as string[] | string) || 'n/a'}</span>
                         </div>
                         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                       </>

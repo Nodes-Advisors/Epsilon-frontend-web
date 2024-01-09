@@ -15,6 +15,7 @@ import { useUserStore } from '../store/store'
 import TodayNews from '../components/today-news'
 import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
 import LiveUpdate from '../components/live-update'
+import IntelligenceAlterIcon from '../assets/images/intelligence.png'
 
 export default function Home() {
   
@@ -52,7 +53,7 @@ export default function Home() {
         </div>
         <HeadImgWrapper headImg={user?.picture ? user.picture : UserAvatar} status={user && user?.status ? user.status : 'not-login'} />
 
-        <Divider height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
+        <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
         <nav>
           <NavWidget Svg={KPIDashIcon} width='3.125rem' height='2.44794rem' to='/kpi-dash' text= 'KPI Dash'/>
           <NavWidget Svg={FundCardIcon} width='3rem' height='3.22225rem' to='/fund-cards' text='Fund Card' />
@@ -66,9 +67,6 @@ export default function Home() {
         {/* <SearchBar /> */}
 
         <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
-        <TodayNews />
-
-        <h2 className={styles['news-title']}>Today&apos;s Feed</h2>
         <TodayNews />
         
         <div className={styles['live-update-layout']}>

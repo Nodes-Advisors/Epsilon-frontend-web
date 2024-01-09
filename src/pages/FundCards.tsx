@@ -9,6 +9,7 @@ import { useFundsStore } from '../store/store'
 import { useSavedFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
+import { convertedOutput } from '../lib/utils'
 
 export default function FundCards() {
   const [isLoading, setLoading] = useState(true)
@@ -19,12 +20,12 @@ export default function FundCards() {
   const [approvers, setApprovers] = useState<string>('')
   const [details, setDetails] = useState<string>('')
   const inputRef = useRef<HTMLInputElement>(null)
-  
+
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
-  
   const inSavedFunds = (record: any) => savedFunds.find((fund) => fund.id === record.id)
+  
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
@@ -83,7 +84,7 @@ export default function FundCards() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{data.length} Funds</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: '3.5fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
                     <span style={{ fontSize: '1.15rem' }}>Funds</span>
                     <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
                     <span style={{ fontSize: '1.15rem' }}>Sector</span>
@@ -97,7 +98,7 @@ export default function FundCards() {
                   {
                     data.map((record, index) => (
                       <>
-                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gridTemplateColumns: '3.5fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
@@ -128,12 +129,12 @@ export default function FundCards() {
                             </div>
                             <div style={{ width: '0.5rem', height: '0.5rem', borderRadius: '50%', backgroundColor: index % 3 === 0 ? (index%3 === 1 ? '#00ff00' : '#00ff00') : '#ff0000'}}></div>
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '15rem', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '20rem', textAlign: 'left', maxHeight: '5rem' }}>{record.get('Company Industry Code') as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.get('Deal Class') as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.get('Lead Partner at Investment Firm') as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.get('Company Industry Code') as string | string[]) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Deal Class') as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Lead Partner at Investment Firm') as string[] | string) as string || 'n/a'}</span>
                           <span></span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', width: '10rem', textAlign: 'left' }}>{record.get('Co-investors') as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Co-investors') as string[] | string) as string || 'n/a'}</span>
                         
                         </div>
                         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
