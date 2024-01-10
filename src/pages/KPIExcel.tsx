@@ -1,7 +1,228 @@
+// import React, { useState, useEffect } from 'react'
+// import axios from 'axios'
+// import ReactDOM from 'react-dom'
+// import { Bar } from 'react-chartjs-2'
+// import 'chart.js/auto'
+
+// // Define the structure of the data for deals and account holders
+// interface DealData {
+//   dealName: string;
+//   totalOutreach: number;
+//   newFund: number;
+//   respondOrNot: number;
+// }
+
+// interface AccountHolderData {
+//   accountHolder: string;
+//   totalOutreach: number;
+//   newFund: number;
+//   respondOrNot: number;
+//   newRespond: number;
+// }
+
+// const App: React.FC = () => {
+//   const [dealData, setDealData] = useState<DealData[]>([])
+//   const [accountHolderData, setAccountHolderData] = useState<AccountHolderData[]>([])
+//   const [chartData, setChartData] = useState({})
+//   const [loading, setLoading] = useState<boolean>(true)
+
+//   const tableStyle = {
+//     width: '45%',
+//     margin: '0 2.5%',
+//   }
+
+//   const tableContainerStyle = {
+//     display: 'flex',
+//     justifyContent: 'space-around',
+//     padding: '20px',
+//   }
+
+//   useEffect(() => {
+//     // Fetch the data for deals
+//     const fetchDealData = async () => {
+//       try {
+//         const response = await axios.get<DealData[]>('http://localhost:5002/deals')
+//         setDealData(response.data)
+//       } catch (error) {
+//         console.error('Error fetching deal data:', error)
+//       }
+//     }
+
+//     // Fetch the data for account holders
+//     const fetchAccountHolderData = async () => {
+//       try {
+//         const response = await axios.get<AccountHolderData[]>('http://localhost:5002/account-holders')
+//         setAccountHolderData(response.data)
+//       } catch (error) {
+//         console.error('Error fetching account holder data:', error)
+//       }
+//     }
+
+//     // Fetch both datasets
+//     Promise.all([fetchDealData(), fetchAccountHolderData()]).then(() => {
+//       setLoading(false)
+//       // You can also set up chart data here if it depends on the fetched data
+//     })
+//   }, [])
+
+//   useEffect(() => {
+//     // Assuming the dealData is already populated
+//     const chartLabels = dealData.map((item) => item.dealName)
+//     const totalOutreachData = dealData.map((item) => item.totalOutreach)
+//     const newFundData = dealData.map((item) => item.newFund)
+//     const respondOrNotData = dealData.map((item) => item.respondOrNot)
+
+//     setChartData({
+//       labels: chartLabels,
+//       datasets: [
+//         {
+//           label: 'Total Outreach',
+//           data: totalOutreachData,
+//           backgroundColor: 'rgba(255, 99, 132, 1)', // Brighter color
+//           barThickness: 'flex', // Adjust bar thickness
+//         },
+//         {
+//           label: 'New Fund',
+//           data: newFundData,
+//           backgroundColor: 'rgba(54, 162, 235, 1)', // Brighter color
+//           barThickness: 'flex', // Adjust bar thickness
+//         },
+//         {
+//           label: 'Respond or Not',
+//           data: respondOrNotData,
+//           backgroundColor: 'rgba(255, 206, 86, 1)', // Brighter color
+//           barThickness: 'flex', // Adjust bar thickness
+//         },
+//       ],
+//     })
+//   }, [dealData]) // This effect runs when dealData is set
+
+//   // Chart options
+//   const chartOptions = {
+//     indexAxis: 'y', // For horizontal bar chart
+//     elements: {
+//       bar: {
+//         borderWidth: 1.5,
+//         // Set minimum bar thickness
+//         minBarLength: 2,
+//       },
+//     },
+//     responsive: true,
+//     maintainAspectRatio: false, // Add this to maintain aspect ratio
+//     plugins: {
+//       legend: {
+//         position: 'right',
+//         labels: {
+//           color: 'white', // Adjust to white color for visibility on black background
+//         },
+//       },
+//     },
+//     scales: {
+//       x: {
+//         ticks: {
+//           color: 'white', // Adjust to white color for visibility on black background
+//         },
+//       },
+//       y: {
+//         ticks: {
+//           color: 'white', // Adjust to white color for visibility on black background
+//           autoSkip: false, // Ensure all labels are shown
+//           maxRotation: 0, // Prevent rotation of labels
+//           minRotation: 0,
+//         },
+//       },
+//     },
+//   }
+
+//   return (
+//     <div>
+//       {loading ? (
+//         <p>Loading data...</p >
+//       ) : (
+//         <div>
+//           <div style={tableContainerStyle}>
+
+//             {/* Deal Data Table */}
+//             <table style={tableStyle}>
+//               <thead>
+//                 <tr>
+//                   <th>Deal Name</th>
+//                   <th>Total Outreach</th>
+//                   <th>New Fund</th>
+//                   <th>Respond or Not</th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {dealData.map((item, index) => (
+//                   <tr key={index}>
+//                     <td>{item.dealName}</td>
+//                     <td>{item.totalOutreach}</td>
+//                     <td>{item.newFund}</td>
+//                     <td>{item.respondOrNot}</td>
+//                   </tr>
+//                 ))}
+//                 <tr>
+//                   <td>Grand Total</td>
+//                   <td>{dealData.reduce((acc, item) => acc + item.totalOutreach, 0)}</td>
+//                   <td>{dealData.reduce((acc, item) => acc + item.newFund, 0)}</td>
+//                   <td>{dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}</td>
+//                 </tr>
+//               </tbody>
+//             </table>
+
+//             {/* Account Holder Data Table */}
+//             <table style={tableStyle}>
+//               <thead>
+//                 <tr>
+//                   <th>Account Holder</th>
+//                   <th>Total Outreach</th>
+//                   <th>New Fund</th>
+//                   <th>Respond or Not</th>
+//                   <th>New Respond</th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {accountHolderData.map((item, index) => (
+//                   <tr key={index}>
+//                     <td>{item.accountHolder}</td>
+//                     <td>{item.totalOutreach}</td>
+//                     <td>{item.newFund}</td>
+//                     <td>{item.respondOrNot}</td>
+//                     <td>{item.newRespond}</td>
+//                   </tr>
+//                 ))}
+//                 <tr>
+//                   <td>Grand Total</td>
+//                   <td>{accountHolderData.reduce((acc, item) => acc + item.totalOutreach, 0)}</td>
+//                   <td>{accountHolderData.reduce((acc, item) => acc + item.newFund, 0)}</td>
+//                   <td>{accountHolderData.reduce((acc, item) => acc + item.respondOrNot, 0)}</td>
+//                   <td>{accountHolderData.reduce((acc, item) => acc + item.newRespond, 0)}</td>
+//                 </tr>
+//               </tbody>
+//             </table>
+//           </div>
+
+//           {/* Deal Data Bar Chart */}
+//           <div style={{ height: '400px' }}>
+//             <Bar data={chartData} options={chartOptions} />
+//           </div>
+
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
+// const rootElement = document.getElementById('root')
+// if (rootElement) {
+//   ReactDOM.render(<App />, rootElement)
+// }
+
+
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import ReactDOM from 'react-dom'
-import { Bar } from 'react-chartjs-2'
+import { Bar, Line, Doughnut } from 'react-chartjs-2'
 import 'chart.js/auto'
 
 // Define the structure of the data for deals and account holders
@@ -22,13 +243,19 @@ interface AccountHolderData {
 
 const App: React.FC = () => {
   const [dealData, setDealData] = useState<DealData[]>([])
-  const [accountHolderData, setAccountHolderData] = useState<AccountHolderData[]>([])
-  const [chartData, setChartData] = useState({})
+  const [accountHolderData, setAccountHolderData] = useState<
+    AccountHolderData[]
+  >([])
+  const [dealChartData, setDealChartData] = useState({})
   const [loading, setLoading] = useState<boolean>(true)
+  const [monthlyTotals, setMonthlyTotals] = useState([])
+  const [monthlyLineData, setMonthlyLineData] = useState({})
+  const [accountHoldersLineData, setAccountHoldersLineData] = useState({})
+  const [accountHoldersPieData, setAccountHoldersPieData] = useState({})
 
   const tableStyle = {
-    width: '45%',
-    margin: '0 2.5%',
+    width: '40%',
+    margin: '0 1%',
   }
 
   const tableContainerStyle = {
@@ -38,10 +265,12 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    // Fetch the data for deals
+    // Fetch the Data for Deals
     const fetchDealData = async () => {
       try {
-        const response = await axios.get<DealData[]>('http://localhost:5002/deals')
+        const response = await axios.get<DealData[]>(
+          'http://localhost:5002/deals',
+        )
         setDealData(response.data)
       } catch (error) {
         console.error('Error fetching deal data:', error)
@@ -51,7 +280,9 @@ const App: React.FC = () => {
     // Fetch the data for account holders
     const fetchAccountHolderData = async () => {
       try {
-        const response = await axios.get<AccountHolderData[]>('http://localhost:5002/account-holders')
+        const response = await axios.get<AccountHolderData[]>(
+          'http://localhost:5002/account-holders',
+        )
         setAccountHolderData(response.data)
       } catch (error) {
         console.error('Error fetching account holder data:', error)
@@ -66,13 +297,13 @@ const App: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    // Assuming the dealData is already populated
+    // For Deal KPI Chart
     const chartLabels = dealData.map((item) => item.dealName)
     const totalOutreachData = dealData.map((item) => item.totalOutreach)
     const newFundData = dealData.map((item) => item.newFund)
     const respondOrNotData = dealData.map((item) => item.respondOrNot)
 
-    setChartData({
+    setDealChartData({
       labels: chartLabels,
       datasets: [
         {
@@ -97,7 +328,7 @@ const App: React.FC = () => {
     })
   }, [dealData]) // This effect runs when dealData is set
 
-  // Chart options
+  // Deal Chart Options
   const chartOptions = {
     indexAxis: 'y', // For horizontal bar chart
     elements: {
@@ -134,12 +365,197 @@ const App: React.FC = () => {
     },
   }
 
+  useEffect(() => {
+    // Fetch the monthly totals data
+    const fetchMonthlyTotals = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5002/monthly-totals',
+        )
+        setMonthlyTotals(response.data)
+      } catch (error) {
+        console.error('Error fetching monthly totals:', error)
+      }
+    }
+
+    fetchMonthlyTotals()
+  }, []) // Run once on component mount
+
+  useEffect(() => {
+    // For Monthly KPI Chart
+    const chartLabels = monthlyTotals.map(
+      (data) => `${data.month}/${data.year}`,
+    )
+    const totalOutreachData = monthlyTotals.map((data) => data.totalOutreach)
+    const totalNewFundData = monthlyTotals.map((data) => data.totalNewFund)
+    const totalResponseData = monthlyTotals.map((data) => data.totalResponse)
+
+    setMonthlyLineData({
+      labels: chartLabels,
+      datasets: [
+        {
+          label: 'Total Outreach',
+          data: totalOutreachData,
+          borderColor: 'rgb(0, 123, 255)', // Blue
+          backgroundColor: 'rgba(0, 123, 255, 0.5)', // Light blue
+          fill: false,
+          tension: 0.1,
+        },
+        {
+          label: 'Total New Fund',
+          data: totalNewFundData,
+          borderColor: 'rgb(255, 193, 7)', // Orange
+          backgroundColor: 'rgba(255, 193, 7, 0.5)', // Light orange
+          fill: false,
+          tension: 0.1,
+        },
+        {
+          label: 'Total Response',
+          data: totalResponseData,
+          borderColor: 'rgb(108, 117, 125)', // Gray
+          backgroundColor: 'rgba(108, 117, 125, 0.5)', // Light gray
+          fill: false,
+          tension: 0.1,
+        },
+      ],
+    })
+  }, [monthlyTotals]) // This effect runs when monthlyTotals is set
+
+  // Monthly Chart Options
+  const lineChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Month',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Count',
+        },
+      },
+    },
+  }
+
+  // Helper function to transform the data into Chart.js format
+  const transformDataForChart = (rawData) => {
+    // Group data by account holders
+    const dataByAccountHolder = rawData.reduce(
+      (acc, { accountHolder, month, year, totalOutreach }) => {
+        const monthYear = `${month}-${year}`
+        if (!acc[accountHolder]) {
+          acc[accountHolder] = {
+            label: accountHolder,
+            data: [],
+            borderColor: getRandomColor(),
+            fill: false,
+            tension: 0.1,
+          }
+        }
+        acc[accountHolder].data.push({ monthYear, totalOutreach })
+        return acc
+      },
+      {},
+    )
+
+    // Sort data by month-year for each account holder
+    for (const holder of Object.keys(dataByAccountHolder)) {
+      dataByAccountHolder[holder].data.sort(
+        (a, b) => new Date(a.monthYear) - new Date(b.monthYear),
+      )
+    }
+
+    // Create the labels (month-year) and datasets for the chart
+    const labels = [
+      ...new Set(rawData.map(({ month, year }) => `${month}-${year}`)),
+    ].sort((a, b) => new Date(a) - new Date(b))
+    const datasets = Object.values(dataByAccountHolder).map(
+      (accountHolder) => ({
+        label: accountHolder.label,
+        data: labels.map((label) => {
+          const entry = accountHolder.data.find(
+            (entry) => entry.monthYear === label,
+          )
+          return entry ? entry.totalOutreach : null
+        }),
+        borderColor: accountHolder.borderColor,
+        fill: accountHolder.fill,
+        tension: accountHolder.tension,
+      }),
+    )
+
+    return { labels, datasets }
+  }
+
+  // Random color generator for the datasets
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF'
+    let color = '#'
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)]
+    }
+    return color
+  }
+
+  // useEffect hook to fetch data and transform it for the chart
+  useEffect(() => {
+    const fetchAccountHolderKPIs = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:5002/account-holder-kpis',
+        )
+        const transformedData = transformDataForChart(response.data)
+        setAccountHoldersLineData(transformedData)
+      } catch (error) {
+        console.error('Error fetching account holder KPIs:', error)
+      }
+    }
+
+    fetchAccountHolderKPIs()
+  }, [])
+
+  useEffect(() => {
+    const fetchTotalOutreachPerAccountHolder = async () => {
+      try {
+        const response = await axios.get('http://localhost:5002/total-outreach-per-account-holder')
+        const dataForPieChart = transformDataForPieChart(response.data)
+        setAccountHoldersPieData(dataForPieChart)
+      } catch (error) {
+        console.error('Error fetching total outreach per account holder:', error)
+      }
+    }
+
+    fetchTotalOutreachPerAccountHolder()
+  }, [])
+
+  // Helper function to transform the data into Chart.js format for the doughnut chart
+  const transformDataForPieChart = (data) => {
+    return {
+      labels: data.map(item => item.accountHolder),
+      datasets: [{
+        data: data.map(item => item.totalOutreach),
+        backgroundColor: data.map(() => getRandomColor()),
+        borderWidth: 1,
+      }],
+    }
+  }
+
   return (
     <div>
       {loading ? (
-        <p>Loading data...</p >
+        <p>Loading data...</p>
       ) : (
         <div>
+          <h2>Statistics for Each Deal</h2>
           <div style={tableContainerStyle}>
             {/* Deal Data Table */}
             <table style={tableStyle}>
@@ -162,13 +578,31 @@ const App: React.FC = () => {
                 ))}
                 <tr>
                   <td>Grand Total</td>
-                  <td>{dealData.reduce((acc, item) => acc + item.totalOutreach, 0)}</td>
-                  <td>{dealData.reduce((acc, item) => acc + item.newFund, 0)}</td>
-                  <td>{dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}</td>
+                  <td>
+                    {dealData.reduce(
+                      (acc, item) => acc + item.totalOutreach,
+                      0,
+                    )}
+                  </td>
+                  <td>
+                    {dealData.reduce((acc, item) => acc + item.newFund, 0)}
+                  </td>
+                  <td>
+                    {dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}
+                  </td>
                 </tr>
               </tbody>
             </table>
 
+            {/* Horizontal Bar Plot for Each Deal's KPI */}
+            <div style={{ height: '800px', width: '950px' }}>
+              <Bar data={dealChartData} options={chartOptions} />
+            </div>
+          </div>
+
+          <h2>Account Holders' KPI</h2>
+
+          <div style={tableContainerStyle}>
             {/* Account Holder Data Table */}
             <table style={tableStyle}>
               <thead>
@@ -192,16 +626,75 @@ const App: React.FC = () => {
                 ))}
                 <tr>
                   <td>Grand Total</td>
-                  <td>{accountHolderData.reduce((acc, item) => acc + item.totalOutreach, 0)}</td>
-                  <td>{accountHolderData.reduce((acc, item) => acc + item.newFund, 0)}</td>
-                  <td>{accountHolderData.reduce((acc, item) => acc + item.respondOrNot, 0)}</td>
-                  <td>{accountHolderData.reduce((acc, item) => acc + item.newRespond, 0)}</td>
+                  <td>
+                    {accountHolderData.reduce(
+                      (acc, item) => acc + item.totalOutreach,
+                      0,
+                    )}
+                  </td>
+                  <td>
+                    {accountHolderData.reduce(
+                      (acc, item) => acc + item.newFund,
+                      0,
+                    )}
+                  </td>
+                  <td>
+                    {accountHolderData.reduce(
+                      (acc, item) => acc + item.respondOrNot,
+                      0,
+                    )}
+                  </td>
+                  <td>
+                    {accountHolderData.reduce(
+                      (acc, item) => acc + item.newRespond,
+                      0,
+                    )}
+                  </td>
                 </tr>
               </tbody>
             </table>
+
+            {/* Line Plot for Each Account Holder */}
+            <div style={{ height: '500px', width: '950px' }}>
+              <Line data={accountHoldersLineData} options={lineChartOptions} />
+            </div>
           </div>
-          <div style={{ height: '400px' }}>
-            <Bar data={chartData} options={chartOptions} />
+
+          {/* Doughnut Plot for Each Account Users' Total Outreach */}
+          <div style={tableContainerStyle}>
+            <div > 
+              <Doughnut data={accountHoldersPieData} />
+            </div>
+          </div>
+
+          <h2>Statistics for Each Month</h2>
+
+          <div style={tableContainerStyle}>
+            {/* Table for KPI in Each Month */}
+            <div style={tableContainerStyle}>
+              <div style={tableStyle}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Total Outreach</th>
+                      <th>Total New Fund</th>
+                      <th>Total Response</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {monthlyTotals.map((data, index) => (
+                      <tr key={index}>
+                        <td>{`${data.month}/${data.year}`}</td>
+                        <td>{data.totalOutreach}</td>
+                        <td>{data.totalNewFund}</td>
+                        <td>{data.totalResponse}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       )}
