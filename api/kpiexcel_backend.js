@@ -40,8 +40,8 @@ app.get("/deals", async (req, res) => {
           $group: {
             _id: "$deal_name",
             totalOutreach: { $sum: 1 },
-            newFund: { $sum: "$new_fund" }, 
-            respondOrNot: { $sum: "$repond_or_not" }, 
+            newFund: { $sum: "$new_fund" },
+            respondOrNot: { $sum: "$repond_or_not" },
           },
         },
         {
@@ -103,63 +103,6 @@ app.get("/account-holders", async (req, res) => {
   }
 });
 
-// app.get("/monthly-totals", async (req, res) => {
-//   try {
-//     const database = client.db(dbName);
-//     const collection = database.collection(InboundCollectionName);
-
-//     // The `$project` stage here converts the date field to month and year strings
-//     // and groups by them in the `$group` stage.
-//     const monthlyTotals = await collection
-//       .aggregate([
-//         {
-//           $project: {
-//             month: { $month: "$date" }, 
-//             year: { $year: "$date" }, 
-//             totalOutreach: 1,
-//             newFund: "$new_fund", 
-//             totalResponse: "$repond_or_not" 
-//           }
-//         },
-//         {
-//           $group: {
-//             _id: { month: "$month", year: "$year" },
-//             totalOutreach: { $sum: 1 },
-//             totalNewFund: { $sum: "$newFund" },
-//             totalResponse: { $sum: "$totalResponse" },
-//           },
-//         },
-//         {
-//           $project: {
-//             _id: 0,
-//             month: { 
-//               $arrayElemAt: [ 
-//                 ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-//                 { $subtract: ["$_id.month", 1] }
-//               ] 
-//             },
-//             year: "$_id.year",
-//             totalOutreach: 1,
-//             totalNewFund: 1,
-//             totalResponse: 1,
-//           },
-//         },
-//         { $sort: { year: 1, month: 1 } }, // This will sort first by year then by month
-//       ])
-//       .toArray();
-
-//     res.json(monthlyTotals.map(item => ({ // Map to the format the frontend expects
-//       month: `${item.month}/${item.year}`,
-//       totalOutreach: item.totalOutreach,
-//       totalNewFund: item.totalNewFund,
-//       totalResponse: item.totalResponse
-//     })));
-//   } catch (error) {
-//     console.error("Error fetching monthly totals:", error);
-//     res.status(500).send("Error fetching data");
-//   }
-// });
-
 app.get("/monthly-totals", async (req, res) => {
   try {
     const database = client.db(dbName);
@@ -170,22 +113,36 @@ app.get("/monthly-totals", async (req, res) => {
         {
           $group: {
             _id: {
-              month: { $month: "$date" }, // Ensure this is the correct field in your documents
-              year: { $year: "$date" }   // Ensure this is the correct field in your documents
+              month: { $month: "$date" },
+              year: { $year: "$date" },
             },
-            totalOutreach: { $sum: 1 }, // Make sure this field exists in your documents
-            totalNewFund: { $sum: "$new_fund" },         // Make sure this field exists in your documents
-            totalResponse: { $sum: "$repond_or_not" },  // Make sure this field exists in your documents
+            totalOutreach: { $sum: 1 },
+            totalNewFund: { $sum: "$new_fund" },
+            totalResponse: { $sum: "$repond_or_not" },
+            averageResponse: { $avg: "$repond_or_not" },
           },
         },
         {
           $project: {
             _id: 0,
-            month: { 
-              $arrayElemAt: [ 
-                ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                { $subtract: ["$_id.month", 1] }
-              ] 
+            month: {
+              $arrayElemAt: [
+                [
+                  "Jan",
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                ],
+                { $subtract: ["$_id.month", 1] },
+              ],
             },
             year: "$_id.year",
             totalOutreach: 1,
@@ -193,23 +150,25 @@ app.get("/monthly-totals", async (req, res) => {
             totalResponse: 1,
           },
         },
-        { $sort: { "year": 1, "month": 1 } }, // Sort by year then month
+        { $sort: { year: 1, month: 1 } }, // Sort by year then month
       ])
       .toArray();
 
-    res.json(monthlyTotals.map(item => ({
-      month: item.month,
-      year: item.year,
-      totalOutreach: item.totalOutreach,
-      totalNewFund: item.totalNewFund,
-      totalResponse: item.totalResponse
-    })));
+    res.json(
+      monthlyTotals.map((item) => ({
+        month: item.month,
+        year: item.year,
+        totalOutreach: item.totalOutreach,
+        totalNewFund: item.totalNewFund,
+        totalResponse: item.totalResponse,
+        averageResponse: item.averageResponse,
+      }))
+    );
   } catch (error) {
     console.error("Error fetching monthly totals:", error);
     res.status(500).send("Error fetching data");
   }
 });
-
 
 app.get("/total-outreach-per-account-holder", async (req, res) => {
   try {
@@ -251,15 +210,15 @@ app.get("/account-holder-kpis", async (req, res) => {
       .aggregate([
         {
           $group: {
-            _id: { 
-              accountHolder: "$account_holder", 
-              month: { $month: "$date" }, 
-              year: { $year: "$date" }   
+            _id: {
+              accountHolder: "$account_holder",
+              month: { $month: "$date" },
+              year: { $year: "$date" },
             },
             totalOutreach: { $sum: 1 },
             newFund: { $sum: "$new_fund" },
-            respondOrNot: { $sum: "$repond_or_not" }, 
-            newRespond: { $sum: "$new_respond" }, 
+            respondOrNot: { $sum: "$repond_or_not" },
+            newRespond: { $sum: "$new_respond" },
           },
         },
         {
