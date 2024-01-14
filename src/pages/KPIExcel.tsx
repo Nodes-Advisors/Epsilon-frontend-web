@@ -607,7 +607,7 @@ const App: React.FC = () => {
               {" "}
               {/* Adjust minWidth according to your need */}
               <div style={{ height: "500px", width: "100%" }}>
-                <Line data={combinedChartData} options={combinedChartOptions} />
+                {/* <Line data={combinedChartData} options={combinedChartOptions} /> */}
               </div>
             </div>
           </div>
