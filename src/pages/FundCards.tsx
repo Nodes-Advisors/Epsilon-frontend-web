@@ -11,6 +11,7 @@ import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
 import { STATUS_COLOR_LIST } from '../lib/constants'
+import type { FILTER_NAME } from '../lib/constants'
 
 export default function FundCards() {
   const [isLoading, setLoading] = useState(true)
@@ -21,7 +22,10 @@ export default function FundCards() {
   const [approvers, setApprovers] = useState<string>('')
   const [details, setDetails] = useState<string>('')
   const inputRef = useRef<HTMLInputElement>(null)
-
+  
+  const [filterName, setFilterName] = useState<FILTER_NAME>('')
+  const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
+  
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
@@ -49,12 +53,23 @@ export default function FundCards() {
       })
   }, [])
 
-
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).nodeName === 'BUTTON') {
+      const button = e.target as HTMLButtonElement
+      const rect = button.getBoundingClientRect()
+      setFilterName(button.textContent as FILTER_NAME)
+      setFilterWindowPosition({ left: rect.left - button.clientHeight, top: rect.top - button.clientHeight })
+      console.log(rect.left, button.clientWidth)
+      console.log(`${button.textContent} button - Left: ${rect.left - button.clientHeight}, Top: ${rect.top}`)
+    }
+  }
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <div 
+          onClick={handleClick}
+          style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <span>
         Filters:
           </span>
@@ -63,9 +78,16 @@ export default function FundCards() {
           <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Stage</button>
           <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Lead</button>
           <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Advanced Search</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>CLEAR FILTERS</button>
+          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Clear Filters</button>
         </div>
-        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
+        {
+          filterName !== '' &&
+          <div style={{ position: 'absolute', left: filterWindowPosition.left, top: filterWindowPosition.top,
+            backgroundColor: '#ff0000', width: '10rem', height: '7rem' }}>
+
+          </div>
+        }
+        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem', margin: '1rem' }}></div>
         {
           isLoading 
             ? 
@@ -83,76 +105,75 @@ export default function FundCards() {
               }
             </div>
             :
-            (
-              data.length > 0
-                ?
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                  <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{data.length} Funds</span>
-                  <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
-                    <span style={{ fontSize: '1.15rem' }}>Funds</span>
-                    <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
-                    <span style={{ fontSize: '1.15rem' }}>Sector</span>
-                    <span style={{ fontSize: '1.15rem' }}>Type</span>
-                    <span style={{ fontSize: '1.15rem' }}>People at the Fund</span>
-                    <span style={{ fontSize: '1.15rem' }}>Deals</span>
-                    <span style={{ fontSize: '1.15rem' }}>Co-investors</span>
-                    <span style={{ fontSize: '1.15rem' }}>Suitability Score</span>
-                  </div>
-                  <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
-                  {
-                    data.map((record, index) => (
-                      <>
-                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
-                              <button
-                                onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
-                                style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
-                              <button 
-                                onClick={() => { 
-                                  if (savedFunds.find((fund) => fund.id === record.id)) {
-                                    deleteSavedFund(record)
-                                  } else {
-                                    addSavedFund(record)
-                                  }
-                                }}
-                                style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{inSavedFunds(record) ? 'SAVED' : 'SAVE'}</button>
-                              <button 
-                                onClick={() => setOpenRequestPanel(true)}
-                                style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>
-                                {'REQUEST'}
-                              </button>
-                            </div>
-                            <div style={{ position: 'relative' }}>
-                              <AsyncImage
-                                onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                                onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
-                                src={record.get('Logo') ? (record.get('Logo') as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid ${randomColor()}`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                              <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record.get('Investor Name') as string}</span>
-                              <span style={{  }}>{record.get('Investor HQ Country') as string}</span>
-                            </div>
-                            
+
+            <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{data.length} Funds</span>
+              <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
+                <span style={{ fontSize: '1.15rem' }}>Funds</span>
+                <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
+                <span style={{ fontSize: '1.15rem' }}>Sector</span>
+                <span style={{ fontSize: '1.15rem' }}>Type</span>
+                <span style={{ fontSize: '1.15rem' }}>People at the Fund</span>
+                <span style={{ fontSize: '1.15rem' }}>Deals</span>
+                <span style={{ fontSize: '1.15rem' }}>Co-investors</span>
+                <span style={{ fontSize: '1.15rem' }}>Suitability Score</span>
+              </div>
+              <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
+                              
+              
+              {
+                data.length > 0
+                  ?
+                  data.map((record, index) => (
+                    <>
+                      <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
+                            <button
+                              onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
+                              style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
+                            <button 
+                              onClick={() => { 
+                                if (savedFunds.find((fund) => fund.id === record.id)) {
+                                  deleteSavedFund(record)
+                                } else {
+                                  addSavedFund(record)
+                                }
+                              }}
+                              style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{inSavedFunds(record) ? 'SAVED' : 'SAVE'}</button>
+                            <button 
+                              onClick={() => setOpenRequestPanel(true)}
+                              style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>
+                              {'REQUEST'}
+                            </button>
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.get('Company Industry Code') as string | string[]) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Deal Class') as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Lead Partner at Investment Firm') as string[] | string) as string || 'n/a'}</span>
-                          <span></span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Co-investors') as string[] | string) as string || 'n/a'}</span>
-                        
+                          <div style={{ position: 'relative' }}>
+                            <AsyncImage
+                              onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
+                              onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
+                              src={record.get('Logo') ? (record.get('Logo') as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid ${randomColor()}`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
+                            <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record.get('Investor Name') as string}</span>
+                            <span style={{  }}>{record.get('Investor HQ Country') as string}</span>
+                          </div>
+                            
                         </div>
-                        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
-                      </>
-                    ))
-                  }
-                </div>
-                :
-                (
-                  <p>No data</p>
-                )
-            )
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.get('Company Industry Code') as string | string[]) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Deal Class') as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Lead Partner at Investment Firm') as string[] | string) as string || 'n/a'}</span>
+                        <span></span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Co-investors') as string[] | string) as string || 'n/a'}</span>
+                        
+                      </div>
+                      <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
+                    </>
+                  )) : <p>No data</p>
+              }
+            </div>
+           
+            
         }
       </div>
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>

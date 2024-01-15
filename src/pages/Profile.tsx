@@ -71,10 +71,15 @@ export default function Profile(): JSX.Element {
               ? 
               <Skeleton className={styles['venture-logo']}  />
               : 
-              <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
-                style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', border: '0.5rem solid #00aa00' }}
+              <div style={{ position: 'relative' }}>
+                <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                  style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
+                    border: '0.5rem solid #00aa00', 
+                  }}
 
-                draggable='false' onContextMenu={e => e.preventDefault()} />
+                  draggable='false' onContextMenu={e => e.preventDefault()} />
+                {/* <div style={{ position: 'absolute', width: '2rem', height: '2rem', right: 0, bottom: 0, borderRadius: '50%', backgroundColor: '#ff0000' }}></div> */}
+              </div>
           }
           <div className={styles['action-buttons']}>
             <ActionButton 

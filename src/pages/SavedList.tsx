@@ -44,7 +44,7 @@ export default function SavedList() {
           <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Advanced Search</button>
           <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>CLEAR FILTERS</button>
         </div>
-        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
+        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem', margin: '1rem 0' }}></div>
         {
           isLoading 
             ? 
@@ -119,7 +119,7 @@ export default function SavedList() {
                           <span></span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Co-investors'] as string[] | string) || 'n/a'}</span>
                         </div>
-                        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
+                        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem'}}></div>
                       </>
                     ))
                   }
