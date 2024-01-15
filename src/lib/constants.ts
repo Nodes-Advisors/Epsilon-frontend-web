@@ -1,0 +1,1 @@
+export const STATUS_COLOR_LIST = ['#009900', '#ffa500', '#990000']

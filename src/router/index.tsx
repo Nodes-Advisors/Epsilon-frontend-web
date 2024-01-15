@@ -13,7 +13,10 @@ const SavedList = lazy(() => import('../pages/SavedList'))
 const UserProfile = lazy(() => import('../pages/UserProfile'))
 const NavBar = lazy(() => import('../components/nav-bar'))
 
-const navWrapper = (children: React.ReactNode) => <NavBar>{children}</NavBar>
+const navWrapper = (children: React.ReactNode) => 
+  <NavBar><div style={{marginTop: '10vh', width: '100%'}}>
+    {children}
+  </div></NavBar>
 
 const router =  createBrowserRouter([
   { index: true, element: <Navigate to='/home' /> },

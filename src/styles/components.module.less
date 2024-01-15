@@ -1,0 +1,39 @@
+.switch-button {
+   background-color: #fff; 
+   border: 0.25px solid black;
+
+}
+
+.switch-button-active {
+   background-color: #080E7C88;
+   border: 0.25px solid black;
+}
+
+.switch-button-after {
+   background-color: grey; 
+   &.move-right {
+    animation: move-right 0.2s forwards;
+   }
+    &.move-left {
+     animation: move-left 0.2s forwards;
+    }
+}
+
+@keyframes move-right {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        background-color: #080E7C;
+        transform: translateX(calc(var(--width) - var(--height)));
+    }
+}
+
+@keyframes move-left {
+    0% {
+        transform: translateX(calc(var(--width) - var(--height)));
+    }
+    100% {
+        transform: translateX(0);
+    }
+}    

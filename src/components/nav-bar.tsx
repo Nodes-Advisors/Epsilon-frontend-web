@@ -8,6 +8,9 @@ import { AsyncImage } from 'loadable-image'
 import { useEffect, useRef, useState } from 'react'
 import NotificationBellIcon from '../assets/svgs/notification-bell.svg?react'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
+import Switch from './switch-button'
+import MenuIcon from '../assets/images/menu.png'
+import LeftNavBar from './left-nav-bar'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
   const navigate = useNavigate()
@@ -19,7 +22,9 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [openNotification, setOpenNotification] = useState<boolean>(false)
   const notificationRef = useRef<HTMLDivElement>(null)
-
+  const [option, setOption] = useState<boolean>(false)
+  const [numNewMsg, setNumNewMsg] = useState<number>(8)
+  const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
   const logoutauth0 = async() => {
     const lastSlashIndex = window.location.href.lastIndexOf('/')
     const returnString = window.location.origin.substring(0, lastSlashIndex) + '/home'
@@ -44,7 +49,11 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     }
   }, [])
 
+  useEffect(() => {
+    setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards')))
 
+  }, [window.location.href])
+  
 
   return (
     <>
@@ -52,13 +61,24 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         style={{ 
           width: '100%',
           height: '10vh',
-          background: '#646cff1b',
+          background: '#121834',
           display: 'flex',
           alignItems: 'center',
-          position: 'sticky',
+          position: 'fixed',
+          top: 0,
+          zIndex: 9999,
         }}
       >
-        <img 
+        {
+          openLeftNavBar && <LeftNavBar show={true} />
+        }
+        <img src={MenuIcon}
+          style={{ width: '2rem', height: 'auto', marginLeft: '2rem', filter: 'invert(1)'  }}
+          onMouseOver={e => (e.target as HTMLImageElement).style.cursor = 'pointer'}
+          onClick={() => setOpenLeftNavBar(!openLeftNavBar) }
+          alt="" />
+        <img
+          onMouseOver={e => (e.target as HTMLImageElement).style.cursor = 'pointer'}
           onClick={() => navigate('/home')}
           src={EpsilonLogo} style={{ width: '10rem', height: 'auto', marginLeft: '2rem' }} alt="" />
         <div style={{ position: 'relative', marginLeft: '2rem' }}>
@@ -75,15 +95,27 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         </span>
 
         <div 
-          className={styles['login']}>
-          <NotificationBellIcon 
-            onClick={() => setOpenNotification(!openNotification)}
-            className={styles['notification-icon']} />
+          className={styles['login']} >
+          <div style={{ position: 'relative' }}>
+            <NotificationBellIcon 
+              onClick={() => { setOpenNotification(!openNotification); setNumNewMsg(0) }}
+              className={styles['notification-icon']} />
+            <div style={{ backgroundColor: 'red', color: 'white',
+              top: '-0.5rem', right: '-0.5rem', 
+              display: numNewMsg !== 0 ? '' : 'none',
+              position: 'absolute', borderRadius: '50%', width: '1rem', height: '1rem', fontSize: '0.9rem' }}>7</div>
+          </div>
+          
           {
             openNotification &&
             <div ref={notificationRef} className={`${styles['notification-layout']} ${styles['scrollbar']}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1rem 1rem 0.5rem 1rem', width: '22rem' }}>
-                <h2 style={{ zIndex: 1001, color: '#000', fontSize: '1.2rem', margin: 0 }}>Recent Notification</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1rem 1rem 0.5rem 1rem', width: '90%' }}>
+                <h2 style={{ color: '#000', fontSize: '1.2rem', margin: 0 }}>Recent Notification</h2>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span>Only Show Aprrovals?</span>
+                  <Switch width='2rem' height='1rem' option={option} setOption={setOption} />
+                  {/* <span>Approvals</span> */}
+                </div>
                 <CancelButtonIcon 
                   className={styles['cancel-button']}
                   onClick={() => setOpenNotification(false)}
@@ -92,7 +124,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
               {
                 [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
                   <div key={index} className={styles['notification-message']} >
-                    <span>message {item} from someone</span>
+                    <span>{option ? 'approval request' : 'message'} {item} from someone</span>
                   </div>
                 ))
               }

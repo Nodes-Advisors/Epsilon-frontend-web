@@ -15,7 +15,11 @@ import { useUserStore } from '../store/store'
 import TodayNews from '../components/today-news'
 import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
 import LiveUpdate from '../components/live-update'
-import IntelligenceAlterIcon from '../assets/images/intelligence.png'
+import EpsilonLogo from '../assets/images/epsilon.png'
+import KPIDashImg from  '../assets/images/kpi.png'
+import FundCardImg from '../assets/images/fund-card.png'
+import IntelligenceImg from '../assets/images/intelligence.png'
+import LeftNavBar from '../components/left-nav-bar'
 
 export default function Home() {
   
@@ -46,21 +50,7 @@ export default function Home() {
 
 
   return (
-    <section style={{ zIndex: 10, width: '70%' }} >
-      <aside>
-        <div>
-          <EpsilonMiniLogo className={styles['epsilon-mini-logo']}/>
-        </div>
-        <HeadImgWrapper headImg={user?.picture ? user.picture : UserAvatar} status={user && user?.status ? user.status : 'not-login'} />
-
-        <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
-        <nav>
-          <NavWidget Svg={KPIDashIcon} width='3.125rem' height='2.44794rem' to='/kpi-dash' text= 'KPI Dash'/>
-          <NavWidget Svg={FundCardIcon} width='3rem' height='3.22225rem' to='/fund-cards' text='Fund Card' />
-          <NavWidget Svg={IntelligenceIcon} width='' height='3.125rem' to='/intelligence' text='Intelligence' />
-        </nav>
-        {/* <GroupButtonIcon id={styles['group-button']} /> */}
-      </aside>
+    <section style={{ zIndex: 10, width: '100%', minHeight: '90vh' }} >
       <div style={{ zIndex: 10 }} className={styles['middle-panel']}>
         <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{user ? user?.name || user?.nickname || user?.given_name || 'Guest': 'Guest'}</span>!</p>
 

@@ -62,8 +62,11 @@
 }
 
 .kpi-ul {
+    margin-top: 1rem;
+    // margin-left: 2rem;
     text-align: left;
     font-size: 1.25rem;
+    // list-style: inside;
 }
 
 .kpi-ul > li {
@@ -74,6 +77,14 @@
 }
 
 .kpi-horizontal-layout {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    // align-items: center;
+    // gap: 5rem;
+}
+
+.kpi-miniboard-horizontal-layout {
     display: flex;
     justify-content: space-around;
     width: 100%;
@@ -96,6 +107,8 @@
 }
 
 .kpi-mini-dashboard {
+    // position: relative;
+    // z-index: -1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -171,13 +184,14 @@
 
 // create a triangle in ::after
 .stage-first-container {
+    font-weight: 700;
     font-size: 1.5rem;
     text-align: center;
     display: grid;
     place-items: center;
     position: relative;
-    width: 16rem;
-    height: 8rem;
+    width: 15rem;
+    height: 6rem;
     background-color: rgba(213, 212, 225, 0.26);
     &::after {
         content: "";
@@ -186,13 +200,14 @@
         left: 100%;
         width: 0rem;
         height: 0rem;
-        border-left: 4rem solid rgba(213, 212, 225, 0.26);
-        border-bottom: 4rem solid transparent;
-        border-top: 4rem solid transparent;
+        border-left: 3rem solid rgba(213, 212, 225, 0.26);
+        border-bottom: 3rem solid transparent;
+        border-top: 3rem solid transparent;
     }
 }
 
 .stage-container {
+    font-weight: 700;
     font-size: 1.5rem;
     text-wrap: nowrap;
     display: flex;
@@ -202,17 +217,17 @@
     left: -25%;
     width: 0rem;
     height: 0rem;
-    border-left: 4rem solid transparent;
-    border-bottom: 4rem solid rgba(213, 212, 225, 0.26);
-    border-top: 4rem solid rgba(213, 212, 225, 0.26);
+    border-left: 3rem solid transparent;
+    border-bottom: 3rem solid rgba(213, 212, 225, 0.26);
+    border-top: 3rem solid rgba(213, 212, 225, 0.26);
     
     &::before {
         content: "";
         position: absolute;
-        top: -4rem;
+        top: -3rem;
         left: 0;
-        width: 16rem;
-        height: 8rem;
+        width: 15rem;
+        height: 6rem;
         display: grid;
         place-items: center;
         font-size: 1.5rem;
@@ -221,13 +236,13 @@
     &::after {
         content: "";
         position: absolute;
-        top: -4rem;
-        left: 16rem;
+        top: -3rem;
+        left: 15rem;
         width: 0rem;
         height: 0rem;
-        border-left: 4rem solid rgba(213, 212, 225, 0.26);
-        border-bottom: 4rem solid transparent;
-        border-top: 4rem solid transparent;
+        border-left: 3rem solid rgba(213, 212, 225, 0.26);
+        border-bottom: 3rem solid transparent;
+        border-top: 3rem solid transparent;
     }
 }
 
@@ -247,7 +262,7 @@
 .task {
     font-size: 1.2rem;
     font-weight: 700;
-    width: 16rem;
+    width: 15rem;
     height: 6rem; 
     // padding: 0 2rem;
     background-color: rgba(213, 212, 225, 0.26);

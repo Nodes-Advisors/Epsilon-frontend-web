@@ -4,18 +4,23 @@ import TICKIcon from '../assets/svgs/tick.svg?react'
 import EpsilonLogo from '../assets/images/epsilon-logo.png'
 import { useEffect, useState } from 'react'
 import Skeleton from 'react-loading-skeleton'
-
+import { throttle } from 'lodash'
+import LeftNavBar from '../components/left-nav-bar'
 
 export default function KPIDash () {
   const [focused, setFocused] = useState<'all' | 'you'>('all')
   const [isLoading, setLoading] = useState(true)
   const [category, setCategory] = useState<'dashboard' | 'deal-funnel'>('dashboard')
   const [tasks, setTasks] = useState({
-    I: ['Deal One', 'Deal Two', 'Deal Three'],
-    II: ['Deal Four', 'Deal Five', 'Deal Six'],
-    III: ['Deal Seven', 'Deal Eight', 'Deal Nine'],
-    IV: ['Deal 10', 'Deal 11', 'Deal 12'],
+    I: ['Fund Card I', 'Fund Card II', 'Fund Card III'],
+    II: ['Fund Card IV', 'Fund Card V', 'Fund Card VI'],
+    III: ['Fund Card VII', 'Fund Card VIII', 'Fund Card IX'],
+    IV: ['Fund Card X', 'Fund Card XI', 'Fund Card XII'],
   })
+ 
+
+  
+
   
   const handleDragStart = (e, task) => {
     e.dataTransfer.setData('task', task)
@@ -42,9 +47,10 @@ export default function KPIDash () {
   }, [isLoading])
 
   return (
-    <div className={styles['kpi-main']} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '5rem', gap: '3rem' }} >
+    <div className={styles['kpi-main']} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'calc(10vh + 5rem)', gap: '3rem' }} >
+     
       <div>
-        <div className={styles['kpi-head']}>
+        <div className={styles['kpi-head']} style={{  }}>
           <img src={EpsilonLogo} id={styles['epsilon-logo']} alt="" />
           <span className={styles['kpi-dashboard-text']} >KPI Dashboard</span>
         </div>
@@ -82,9 +88,9 @@ export default function KPIDash () {
           </div>
           {
             category === 'dashboard' ? (
-              <div style={{  display: 'flex', flexDirection: 'column', gap: '3rem', position: 'relative' }} >
-                <div style={{ display: 'flex', gap: '1rem', 
-                  position: 'absolute', left: '2rem', top: '-3rem' }}>
+              <div style={{  display: 'flex', flexDirection: 'column', gap: '3rem', position: 'relative', zIndex: 1 }} >
+                <div style={{ display: 'flex', gap: '1rem',
+                  position: 'absolute', left: '2rem', top: '-3rem', zIndex: 255 }}>
                   <button className={focused === 'all' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('all'); setLoading(true)}} >All</button>
                   <button className={focused === 'you' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('you'); setLoading(true)}} >You</button>
 
@@ -95,7 +101,7 @@ export default function KPIDash () {
 
                     <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
 
-                    <div className={styles['kpi-horizontal-layout']}>
+                    <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
                           ?
@@ -114,7 +120,7 @@ export default function KPIDash () {
                   </KPIBlock>
                   <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
                     <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Deck requests</KPIText>
-                    <div className={styles['kpi-horizontal-layout']}>
+                    <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
                           ?
@@ -133,7 +139,7 @@ export default function KPIDash () {
                   </KPIBlock>
                   <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
                     <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Conversion to qualified</KPIText>
-                    <div className={styles['kpi-horizontal-layout']}>
+                    <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
                           ?
@@ -152,7 +158,7 @@ export default function KPIDash () {
                   </KPIBlock>
                   <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
                     <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
-                    <div className={styles['kpi-horizontal-layout']}>
+                    <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
                           ?

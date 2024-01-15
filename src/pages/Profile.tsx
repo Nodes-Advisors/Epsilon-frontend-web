@@ -18,6 +18,9 @@ import { useFundsStore, useSavedFundsStore } from '../store/store'
 import { Popover } from '@headlessui/react'
 import { FieldSet, Record } from 'airtable'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
+import LeftNavBar from '../components/left-nav-bar'
+import { throttle } from 'lodash'
+import { STATUS_COLOR_LIST } from '../lib/constants'
 
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
@@ -34,7 +37,7 @@ export default function Profile(): JSX.Element {
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
-
+  const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
   useEffect(() => {
     // console.log(funds)
     const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
@@ -59,7 +62,8 @@ export default function Profile(): JSX.Element {
 
   return (
     <div 
-      style={{ display: 'flex', justifyContent: 'center', alignItems: 'start', minHeight: '80vh' }}>
+      style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'start', minHeight: '80vh' }}>
+
       <div style={{ display: 'flex', marginTop: '10vh' }}>
         <div className={styles['left-panel']}>
           {
@@ -68,7 +72,7 @@ export default function Profile(): JSX.Element {
               <Skeleton className={styles['venture-logo']}  />
               : 
               <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
-                style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999' }}
+                style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', border: '0.5rem solid #00aa00' }}
 
                 draggable='false' onContextMenu={e => e.preventDefault()} />
           }
@@ -128,13 +132,13 @@ export default function Profile(): JSX.Element {
                 {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}
               </span>
             </div>
-            {
+            {/* {
               isLoading 
                 ?
                 <Skeleton className={styles['status-icon']} />
                 : 
                 <StatusIcon className={styles['status-icon']} />
-            }
+            } */}
           </div>
           <div className={styles['description-layout']}>
             {
@@ -324,7 +328,7 @@ export default function Profile(): JSX.Element {
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
-                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: '3px solid #5392d4' }}
+                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid ${randomColor()}` }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} />
                 <div>
@@ -338,16 +342,18 @@ export default function Profile(): JSX.Element {
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
               <select
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
-                <option value="Letme">Let me review the fund</option>
+                <option value="Letme">Bypass the approval</option>
                 <option value="Assign">Assign the fund request to</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers or Assignees</span>
-              <input style={{ marginTop: '1rem', marginBottom: '0.2rem', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', width: '100%', 
-                borderBottom: approvers && approvers !== '' ? 'red 1px solid' : 'transparent 1px solid', color: '#000' }} 
-              onChange={(e) => setApprovers(e.target.value)}
-              placeholder='Enter names here' />
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Approvers or Assignees" id="">
+                <option value="Tyler Aroner">Tyler Aroner</option>
+                <option value="Eliott Harfouche">Eliott Harfouche</option>
+                <option value="Iman Ghavami">Iman Ghavami</option>
+              </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
@@ -365,6 +371,7 @@ export default function Profile(): JSX.Element {
                 <option value="Person A">Person A</option>
                 <option value="Person B">Person B</option>
                 <option value="Person C">Person C</option>
+                <option value="Not Referring Anyone">Not Referring Anyone</option>
               </select>
             </div>
             <div>
