@@ -10,11 +10,19 @@ import { useSavedFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
-import { STATUS_COLOR_LIST } from '../lib/constants'
+import { STATUS_COLOR_LIST, 
+  LOCATION_LIST, 
+  FIRM_NAMES, 
+  TYPE_LIST, 
+  SECTOR_LIST, 
+  COINVESTORS_LIST,
+  STATUS_LIST,
+} from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
+import CancelButton from '../assets/images/cancel.png'
 
 export default function FundCards() {
-  const filterNames = ['Firm', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
   const getfcs = useCallback((apikey: string | undefined, baseId: string | undefined) => getFundCards(apikey, baseId)
@@ -28,7 +36,25 @@ export default function FundCards() {
   
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
-  const [filteredList, setFilteredList] = useState<string[]>([])
+  const [filteredList, setFilteredList] = useState<{
+    '': string[],
+    'Firm': string[],
+    'Location': string[],
+    'Status': string[],
+    'Stage': string[],
+    'Lead': string[],
+    'Advanced Search': string[],
+    'Clear Filters': string[],
+  }>({
+    '': [],
+    'Firm': [],
+    'Location': [],
+    'Status': [],
+    'Stage': [],
+    'Lead': [],
+    'Advanced Search': [],
+    'Clear Filters': [],
+  })
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
@@ -39,21 +65,16 @@ export default function FundCards() {
   const navigate = useNavigate()
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
 
-
-  useEffect(() => {
-
-    console.log(data.map((fund) => fund.get('Deal Class')))
-    
-  }, [])
-
   useEffect(() => {
     setLoading(true)
     getfcs(import.meta.env.VITE_AIRTABLE_API_KEY, import.meta.env.VITE_AIRTABLE_BASE_ID)
     
       .then((data) => {
         setData(data)
-        setFunds(data)
-        // console.log(data)
+        setFunds(data)        
+        // console.log(
+        //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
+        // )
       })
       .catch((error) => {
         console.error(error)
@@ -63,7 +84,24 @@ export default function FundCards() {
       })
   }, [])
 
-
+  const getFilteredList = (filterName: FILTER_NAME) => {
+    switch (filterName) {
+    case 'Firm':
+      return FIRM_NAMES
+    case 'Location':
+      return LOCATION_LIST
+    case 'Status':
+      return STATUS_LIST
+    case 'Stage':
+      return TYPE_LIST
+    case 'Lead':
+      return ['Tyler Aroner', 'Eliott Harfouche', 'Iman Ghavami']
+    case 'Advanced Search':
+      return ['Advanced Search']
+    default:
+      return []
+    }
+  }
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).nodeName === 'BUTTON') {
@@ -72,6 +110,17 @@ export default function FundCards() {
       // console.log(filterName)
       if (button.textContent === 'Clear Filters') {
         setFilterName('')
+        setShowFilteredList(false)
+        setFilteredList({
+          '': [],
+          'Firm': [],
+          'Location': [],
+          'Status': [],
+          'Stage': [],
+          'Lead': [],
+          'Advanced Search': [],
+          'Clear Filters': [],
+        })
         return
       }
       setFilterName(button.textContent as FILTER_NAME)
@@ -89,7 +138,7 @@ export default function FundCards() {
       if (target.nodeName === 'BUTTON') {
         const button = target as HTMLButtonElement
       
-        if (filterNames.includes(button.textContent as string)) {
+        if (filterNames.includes(button.textContent as FILTER_NAME)) {
           if (button.textContent === 'Clear Filters') {
             setFilterName('')
             setShowFilteredList(false)
@@ -102,7 +151,9 @@ export default function FundCards() {
       } else if (target.id.startsWith('v-')) {
         return
       } else if (target.parentElement?.id.startsWith('v-')) {
-
+        return
+      } else if (target.hasAttribute('data-label') && (target.getAttribute('data-label') as string).startsWith('v-')) {
+        return
       } else {
         setFilterName('')
 
@@ -125,19 +176,23 @@ export default function FundCards() {
           <span>
         Filters:
           </span>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Firm</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Status</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Stage</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Lead</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Advanced Search</button>
-          <button style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>Clear Filters</button>
+          {
+            filterNames.map((name: FILTER_NAME) => (
+              <button key={name} style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>
+                {
+                  name !== 'Clear Filters' && (filteredList[name] as string[]).length > 0
+                    ? <span>{`${name}\u0020\u00B7\u0020${filteredList[name].length}`}</span>
+                    : name
+                }
+              </button>))
+          }
         </div>
         {
           filterName !== '' &&
           <div id="v-layout" style={{ position: 'absolute', left: filterWindowPosition.left, top: filterWindowPosition.top,
             backgroundColor: '#080E1C', border: '2px solid #fffa', borderRadius: '2px', padding: '0.5rem',
             zIndex: 20, width: '26rem', minHeight: '8rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-            <span id="v-span" style={{ fontSize: '1.2rem', alignSelf: 'start', marginLeft: '10%' }}>{filterName}</span>
+            <span id="v-span" style={{ fontSize: '1.2rem', alignSelf: 'start', marginLeft: '2rem' }}>{filterName}</span>
             <div id='v-div' style={{ position: 'relative', width: '90%' }}>
               
               <div style={{ display: 'flex' }}>
@@ -145,18 +200,56 @@ export default function FundCards() {
                   className={styles['v-container']}
                   style={{ display: 'flex', flex: 9, flexWrap: 'wrap', gap: '0.3rem', padding: '0.2rem' }} placeholder='Search'>
                   {
-                    filteredList.map((filterItem ) => (
-                      <div key={filterItem} style={{ padding: '0.4rem', borderRadius: '0.3rem', backgroundColor: '#fff4', color: '#fff', fontSize: '1.2rem' }}>{filterItem}</div>
+                    filteredList[filterName].map((filterItem ) => (
+                      <div 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setFilteredList({
+                            ...filteredList,
+                            [filterName]: filteredList[filterName].filter((item) => item !== filterItem),
+                          })
+                      
+                        }}
+                        data-label='v-filterItemContainer' key={filterItem} className={styles['filterItem-container']}>
+                        <div data-label='v-filterItem' style={{  
+                          color: '#fff', fontSize: '1.2rem' }}>
+                          {filterItem}
+                        </div>
+                        <img 
+                          data-label='v-cancelbutton' src={CancelButton} className={styles['cancel-button']} />
+                      </div>
                     ))
                   }
-                  {/* <div>iofdsfew</div> */}
+
                   <input id="v-input" ref={inputRef}
+                    autoSave='false'
+                    autoComplete='false'
                     placeholder='Search'
-                    onMouseDown={(e) => { e.stopPropagation(); setShowFilteredList(true) }}
+                    onKeyDown={(e) => {
+                      e.stopPropagation()
+
+                      if (e.key === 'Backspace') {
+                        if (inputRef.current?.value !== '') return
+                        setFilteredList({
+                          ...filteredList,
+                          [filterName]: filteredList[filterName].slice(0, filteredList[filterName].length - 1),
+                        })
+                      
+                      }
+                    }}
                     onClick={() => setShowFilteredList(true)}
                     className={styles['filter-input']} name='firm' type='text' />
                 </div>
-                <div style={{ backgroundColor: '#fff', flex: 1 }}></div>
+                <div id='v-cancelpanel' style={{ backgroundColor: '#2A2F3E', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img 
+                    onClick={() => {
+                      setFilteredList({
+                        ...filteredList,
+                        [filterName]: [],
+                      })
+                    }}
+                    data-label='v-cancelbutton' src={CancelButton} className={styles['cancel-button']} />
+                </div>
               </div>
               
               {
@@ -164,13 +257,18 @@ export default function FundCards() {
                 <ul 
                   onClick={(e) => {
                     e.stopPropagation()
-                    setFilteredList(prev => [...prev, (e.target as HTMLElement).textContent as string])
+                    setFilteredList({
+                      ...filteredList,
+                      [filterName]: [...filteredList[filterName], (e.target as HTMLElement).textContent as string],
+
+                    })
                   }}
                   id="v-ul" className={styles['filter-select']} style={{ position: 'absolute', textAlign: 'left' }}>
-                  <li className={styles['filter-option']}>All</li>
-                  <li className={styles['filter-option']}>ep1</li>
-                  <li className={styles['filter-option']}>ep2</li>
-                  <li className={styles['filter-option']}>ep3</li>
+                  {
+                    getFilteredList(filterName).filter(filterItem => !filteredList[filterName].includes(filterItem)).map((filterItem) => (
+                      <li key={filterItem} className={styles['filter-option']}>{filterItem}</li>
+                    ))
+                  }
                 </ul>
               }
             </div>
