@@ -14,6 +14,7 @@ import { STATUS_COLOR_LIST } from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
 
 export default function FundCards() {
+  const filterNames = ['Firm', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
   const getfcs = useCallback((apikey: string | undefined, baseId: string | undefined) => getFundCards(apikey, baseId)
@@ -24,8 +25,10 @@ export default function FundCards() {
   const inputRef = useRef<HTMLInputElement>(null)
   
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   
+  const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
+  const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
+  const [filteredList, setFilteredList] = useState<string[]>([])
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
@@ -35,6 +38,13 @@ export default function FundCards() {
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
+
+
+  useEffect(() => {
+
+    console.log(data.map((fund) => fund.get('Deal Class')))
+    
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -53,16 +63,58 @@ export default function FundCards() {
       })
   }, [])
 
+
+
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).nodeName === 'BUTTON') {
       const button = e.target as HTMLButtonElement
       const rect = button.getBoundingClientRect()
+      // console.log(filterName)
+      if (button.textContent === 'Clear Filters') {
+        setFilterName('')
+        return
+      }
       setFilterName(button.textContent as FILTER_NAME)
-      setFilterWindowPosition({ left: rect.left - button.clientHeight, top: rect.top - button.clientHeight })
-      console.log(rect.left, button.clientWidth)
-      console.log(`${button.textContent} button - Left: ${rect.left - button.clientHeight}, Top: ${rect.top}`)
+      setFilterWindowPosition({ left: rect.left, top: rect.top - button.clientHeight })
+      // console.log(rect.left, button.clientWidth)
+      // console.log(`${button.textContent} button - Left: ${rect.left - button.clientHeight}, Top: ${rect.top}`)
     }
   }
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement
+      // console.log(target)
+      // console.log(filterName)
+      if (target.nodeName === 'BUTTON') {
+        const button = target as HTMLButtonElement
+      
+        if (filterNames.includes(button.textContent as string)) {
+          if (button.textContent === 'Clear Filters') {
+            setFilterName('')
+            setShowFilteredList(false)
+            return
+          }
+          setFilterName(button.textContent as FILTER_NAME)
+          setShowFilteredList(false)
+          return
+        }
+      } else if (target.id.startsWith('v-')) {
+        return
+      } else if (target.parentElement?.id.startsWith('v-')) {
+
+      } else {
+        setFilterName('')
+
+        setShowFilteredList(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
@@ -82,9 +134,47 @@ export default function FundCards() {
         </div>
         {
           filterName !== '' &&
-          <div style={{ position: 'absolute', left: filterWindowPosition.left, top: filterWindowPosition.top,
-            backgroundColor: '#ff0000', width: '10rem', height: '7rem' }}>
-
+          <div id="v-layout" style={{ position: 'absolute', left: filterWindowPosition.left, top: filterWindowPosition.top,
+            backgroundColor: '#080E1C', border: '2px solid #fffa', borderRadius: '2px', padding: '0.5rem',
+            zIndex: 20, width: '26rem', minHeight: '8rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+            <span id="v-span" style={{ fontSize: '1.2rem', alignSelf: 'start', marginLeft: '10%' }}>{filterName}</span>
+            <div id='v-div' style={{ position: 'relative', width: '90%' }}>
+              
+              <div style={{ display: 'flex' }}>
+                <div id='v-container'
+                  className={styles['v-container']}
+                  style={{ display: 'flex', flex: 9, flexWrap: 'wrap', gap: '0.3rem', padding: '0.2rem' }} placeholder='Search'>
+                  {
+                    filteredList.map((filterItem ) => (
+                      <div key={filterItem} style={{ padding: '0.4rem', borderRadius: '0.3rem', backgroundColor: '#fff4', color: '#fff', fontSize: '1.2rem' }}>{filterItem}</div>
+                    ))
+                  }
+                  {/* <div>iofdsfew</div> */}
+                  <input id="v-input" ref={inputRef}
+                    placeholder='Search'
+                    onMouseDown={(e) => { e.stopPropagation(); setShowFilteredList(true) }}
+                    onClick={() => setShowFilteredList(true)}
+                    className={styles['filter-input']} name='firm' type='text' />
+                </div>
+                <div style={{ backgroundColor: '#fff', flex: 1 }}></div>
+              </div>
+              
+              {
+                showFilteredList &&
+                <ul 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setFilteredList(prev => [...prev, (e.target as HTMLElement).textContent as string])
+                  }}
+                  id="v-ul" className={styles['filter-select']} style={{ position: 'absolute', textAlign: 'left' }}>
+                  <li className={styles['filter-option']}>All</li>
+                  <li className={styles['filter-option']}>ep1</li>
+                  <li className={styles['filter-option']}>ep2</li>
+                  <li className={styles['filter-option']}>ep3</li>
+                </ul>
+              }
+            </div>
+            
           </div>
         }
         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem', margin: '1rem' }}></div>

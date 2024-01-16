@@ -41,8 +41,8 @@ export default function Profile(): JSX.Element {
   useEffect(() => {
     // console.log(funds)
     const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
-    console.log(record.id)
-    console.log(savedFunds)
+    // console.log(record.id)
+    // console.log(savedFunds)
     setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
       acc += record.fields[cur] ? curIndex !== array.length - 1 ? record.fields[cur] + ', ' : record.fields[cur] : '', ''))
     recordRef.current = record
