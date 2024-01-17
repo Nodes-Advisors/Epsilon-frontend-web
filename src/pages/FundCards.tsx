@@ -25,6 +25,7 @@ export default function FundCards() {
   const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
+  const [filterdData, setFilteredData] = useState<Record<FieldSet>[]>([])
   const getfcs = useCallback((apikey: string | undefined, baseId: string | undefined) => getFundCards(apikey, baseId)
     , [])
   const [requestName, setRequestName] = useState<string>('')
@@ -55,6 +56,42 @@ export default function FundCards() {
     'Advanced Search': [],
     'Clear Filters': [],
   })
+  // according to filteredList, filter data
+
+  useEffect(() => {
+    if (filterName === '') {
+      setFilteredData(data)
+      return
+    }
+    
+    setFilteredData(data.filter((record) => {
+      return Object.keys(filteredList).every((filterName) => {
+        // If no filter is set for this filterName, return true
+        if (filteredList[filterName].length === 0) {
+          return true
+        }
+  
+        // Apply the filter based on the filterName
+        switch (filterName) {
+        case 'Firm':
+          return filteredList[filterName].includes(record.get('Investor Name') as string)
+        case 'Location':
+          return filteredList[filterName].includes(record.get('Investor HQ Country') as string)
+        case 'Status':
+          return filteredList[filterName].includes(record.get('Deal Class') as string)
+        case 'Stage':
+          return filteredList[filterName].includes(record.get('Lead Partner at Investment Firm') as string)
+        case 'Lead':
+          return filteredList[filterName].includes(record.get('Co-investors') as string)
+        case 'Advanced Search':
+          return filteredList[filterName].includes(record.get('Co-investors') as string)
+        default:
+          return true
+        }
+      })
+    }))
+  }, [filteredList])
+
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
@@ -71,7 +108,8 @@ export default function FundCards() {
     
       .then((data) => {
         setData(data)
-        setFunds(data)        
+        setFunds(data)  
+        setFilteredData(data)      
         // console.log(
         //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
         // )
@@ -180,9 +218,10 @@ export default function FundCards() {
             filterNames.map((name: FILTER_NAME) => (
               <button key={name} style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>
                 {
-                  name !== 'Clear Filters' && (filteredList[name] as string[]).length > 0
-                    ? <span>{`${name}\u0020\u00B7\u0020${filteredList[name].length}`}</span>
-                    : name
+                  name
+                  //  !== 'Clear Filters' && (filteredList[name] as string[]).length > 0
+                  //   ? <span>{`${name}\u0020\u00B7\u0020${filteredList[name].length}`}</span>
+                  //   : name
                 }
               </button>))
           }
@@ -295,7 +334,7 @@ export default function FundCards() {
             :
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{data.length} Funds</span>
+              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filterdData.length} Funds</span>
               <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
                 <span style={{ fontSize: '1.15rem' }}>Funds</span>
                 <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
@@ -310,9 +349,9 @@ export default function FundCards() {
                               
               
               {
-                data.length > 0
+                filterdData.length > 0
                   ?
-                  data.map((record, index) => (
+                  filterdData.map((record, index) => (
                     <>
                       <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

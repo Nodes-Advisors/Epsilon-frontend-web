@@ -15,7 +15,7 @@ import LeftNavBar from './left-nav-bar'
 export default function NavBar ({children}: {children: React.ReactNode}) {
   const navigate = useNavigate()
   const [openPanel, setOpenPanel] = useState(false)
-  const { isAuthenticated, user: auth0User, 
+  const { user: auth0User, 
     logout, loginWithRedirect } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)

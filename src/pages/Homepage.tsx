@@ -1,30 +1,14 @@
 import styles from '../styles/home.module.less'
-import EpsilonMiniLogo from '../assets/svgs/epsilon-mini-logo.svg?react'
-import HeadImgWrapper from '../components/headimg-wrapper'
-import UserAvatar from '../assets/images/user-avatar.png'
-import Divider from '../components/divider'
-import NavWidget from '../components/nav-widget'
-import KPIDashIcon from '../assets/svgs/kpi-dashboard.svg?react'
-import FundCardIcon from '../assets/svgs/fund-card.svg?react'
-import IntelligenceIcon from '../assets/svgs/intelligence.svg?react'
-import GroupButtonIcon from '../assets/svgs/group-button.svg?react'
-import SearchBar from '../components/searchbar'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect } from 'react'
 import { useUserStore } from '../store/store'
 import TodayNews from '../components/today-news'
 import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
 import LiveUpdate from '../components/live-update'
-import EpsilonLogo from '../assets/images/epsilon.png'
-import KPIDashImg from  '../assets/images/kpi.png'
-import FundCardImg from '../assets/images/fund-card.png'
-import IntelligenceImg from '../assets/images/intelligence.png'
-import LeftNavBar from '../components/left-nav-bar'
 
 export default function Home() {
   
-  const { isAuthenticated, user: auth0User, 
-    logout, loginWithRedirect } = useAuth0()
+  const { isAuthenticated, user: auth0User } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
 
@@ -40,13 +24,6 @@ export default function Home() {
     } 
   }, [isAuthenticated])
 
-  const logoutauth0 = async() => {
-    const lastSlashIndex = window.location.href.lastIndexOf('/')
-    const returnString = window.location.origin.substring(0, lastSlashIndex) + '/home'
-    localStorage.setItem('logout', 'true')
-    await logout({ logoutParams: { returnTo: returnString }})
-    
-  }
 
 
   return (

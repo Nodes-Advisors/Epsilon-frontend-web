@@ -136,7 +136,6 @@ export const LOCATION_LIST = [
   'South Korea',
   'Mexico',
   'Japan',
-  null,
   'Australia',
 ]
 
@@ -147,7 +146,6 @@ export const TYPE_LIST = [
   'Individual',
   'Corporate',
   'Debt',
-  null,
 ]
 
 export const SECTOR_LIST = [
@@ -399,7 +397,6 @@ export const COINVESTORS_LIST = [
   'WRF Capital',
   '7G Bioventures',
   'BioAdvance',
-  null,
   'Fulmer & Company',
   'BDC Capital',
   'Ontario Centre of Innovation',
