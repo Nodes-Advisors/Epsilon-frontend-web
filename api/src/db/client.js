@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
@@ -20,6 +21,10 @@ process.on('SIGINT', async () => {
   await client.close()
   console.log('MongoDB disconnected on app termination')
   process.exit(0)
+})
+
+afterAll(async () => {
+  await client.close()
 })
 
 export default client
