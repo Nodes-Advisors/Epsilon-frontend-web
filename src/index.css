@@ -45,10 +45,10 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
+  /* display: flex; */
   /* place-items: center; */
-  min-width: 320px;
-  min-height: 100vh;
+  /* min-width: 320px; */
+  min-height: 90vh;
 }
 
 h1 {
@@ -74,6 +74,11 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+img {
+  user-select: none;
+  /* pointer-events: none; */
 }
 
 /* @media (prefers-color-scheme: light) {

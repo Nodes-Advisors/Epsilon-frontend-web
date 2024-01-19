@@ -9,14 +9,22 @@ type INavWidgetProps = {
     width: string;
     height: string;
     text: string;
+    src?: string | undefined;
 }
 
-export default function NavWidget({Svg, width, height, to, text}: INavWidgetProps) {
+export default function NavWidget({Svg, width, height, to, text, src=undefined}: INavWidgetProps) {
   const navigate = useNavigate()
 
   return (
     <div className={styles['nav-widget-item']}>
-      <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} />
+      {
+        src 
+          ? 
+          <img src={src} alt='nav-widget-img' onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} /> 
+          : 
+          <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} />
+      }
+      
       <a href={to} className={styles['nav-widget-text']}>{text}</a>
     </div>
   )

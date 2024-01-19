@@ -15,7 +15,7 @@ type TEmailDetail = {
 const DropdownUl = ({data, searchItem, focused}: {data: TEmailDetail[], searchItem: string, focused: boolean}) => {
 
   const navigate = useNavigate()
-  const displayData = (email: IEmailDetail) => {
+  const displayData = (email: TEmailDetail) => {
     const { sender, subject, toRecipients } = email
     const emailDetail: { [key: string]: string } = { sender, subject, toRecipients }
     for (const key in emailDetail) {

@@ -7,10 +7,23 @@ const NotFound = lazy(() => import("../pages/NotFound"));
 const Profile = lazy(() => import("../pages/Profile"));
 const DetailMessage = lazy(() => import("../pages/DetailMessage"));
 // const Login = lazy(() => import('../pages/Login'))
-const KPIDash = lazy(() => import("../pages/KPIDash"));
-const FundCards = lazy(() => import("../pages/FundCards"));
+
+
 const GPTdata = lazy(() => import("../components/GPTdata"));
 const KPIExcel = lazy(() => import("../pages/KPIExcel"));
+
+const KPIDash = lazy(() => import('../pages/KPIDash'))
+const FundCards = lazy(() => import('../pages/FundCards'))
+const SavedList = lazy(() => import('../pages/SavedList'))
+const UserProfile = lazy(() => import('../pages/UserProfile'))
+const NavBar = lazy(() => import('../components/nav-bar'))
+const Database = lazy(() => import('../pages/Database'))
+
+const navWrapper = (children: React.ReactNode) => 
+  <NavBar><div style={{marginTop: '10vh', width: '100%'}}>
+    {children}
+  </div></NavBar>
+
 
 const router = createBrowserRouter([
   { index: true, element: <Navigate to="/home" /> },
@@ -22,9 +35,17 @@ const router = createBrowserRouter([
   { path: "*", element: <NotFound /> },
   { path: "detailmessage", element: <DetailMessage /> },
   // { path: 'login', element: <Login /> },
-  { path: "kpidash", element: <KPIDash /> },
+
   { path: "gptdata", element: <GPTdata /> },
   { path: "kpiexcel", element: <KPIExcel /> },
 ]);
+
+  { path: 'kpi-dash', element: <KPIDash /> },
+  { path: 'my-saved-list', element: <SavedList /> },
+  { path: 'user-profile', element: <UserProfile /> },
+  { path: 'database', element: <Database /> },
+].map(item => ({ ...item, element: navWrapper(item.element) })),
+)
+
 
 export default router;

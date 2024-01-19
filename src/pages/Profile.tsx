@@ -10,36 +10,76 @@ import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
 import HeadImg from '../assets/images/headimg-example.png'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
+import { useLocation } from 'react-router-dom'
+import { useFundsStore, useSavedFundsStore } from '../store/store'
+import { Popover } from '@headlessui/react'
+import { FieldSet, Record } from 'airtable'
+import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
+import LeftNavBar from '../components/left-nav-bar'
+import { throttle } from 'lodash'
+import { STATUS_COLOR_LIST } from '../lib/constants'
 
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
+  const recordRef = useRef<Record<FieldSet> | null>(null)
+  const [location, setLocation] = useState<string | null>(null)
+  const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [requestName, setRequestName] = useState<string | null>(null)
+  const [approvers, setApprovers] = useState<string | null>(null)
+  const [details, setDetails] = useState<string | null>(null)
 
+  const savedFunds = useSavedFundsStore(state => state.savedFunds)
+  const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
+  const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
+  const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
   useEffect(() => {
-    setTimeout(() => setLoading(false), 3000)
+    // console.log(funds)
+    const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
+    // console.log(record.id)
+    // console.log(savedFunds)
+    setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
+      acc += record.fields[cur] ? curIndex !== array.length - 1 ? record.fields[cur] + ', ' : record.fields[cur] : '', ''))
+    recordRef.current = record
+    setTimeout(() => setLoading(false), 1000)
   }, [])
 
+  const funds = useFundsStore(state => state.funds)
+  const id = localStorage.getItem('fund-id')
+  if (!id) {
+    throw new Error('fund id not found')
+  }
+  
+  const addRequest = () => {
+    setPopoverOpen(true)
+  }
+
+
   return (
-    <section>
-            
-      <div className={styles['epsilon-logo-layout']}>
-        <EpsilonLogo className={styles['epsilon-logo']} />
-        {/* <Skeleton className={styles['epsilon-logo']} /> */}
-        <div className={styles['epsilon-logo-divider']}></div>
-      </div>
-      
-      <div style={{ marginTop: '10rem', display: 'flex' }}>
+    <div 
+      style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'start', minHeight: '80vh' }}>
+
+      <div style={{ display: 'flex', marginTop: '10vh' }}>
         <div className={styles['left-panel']}>
           {
             isLoading 
               ? 
               <Skeleton className={styles['venture-logo']}  />
               : 
-              <img loading='eager' src={venture_logo} alt="" className={styles['venture-logo']} />
+              <div style={{ position: 'relative' }}>
+                <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                  style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
+                    border: '0.5rem solid #00aa00', 
+                  }}
+
+                  draggable='false' onContextMenu={e => e.preventDefault()} />
+                {/* <div style={{ position: 'absolute', width: '2rem', height: '2rem', right: 0, bottom: 0, borderRadius: '50%', backgroundColor: '#ff0000' }}></div> */}
+              </div>
           }
           <div className={styles['action-buttons']}>
             <ActionButton 
@@ -48,15 +88,15 @@ export default function Profile(): JSX.Element {
               textClass={styles['action-button-text']} 
               text='STARTUP MATCH' />
             <ActionButton
-              onClick={() => alert('share')}
+              onClick={addRequest}
               buttonClass={styles['action-button']} 
               textClass={styles['action-button-text']} 
-              text='SHARE' />
+              text='ADD A REQUEST' />
             <ActionButton
-              onClick={() => alert('add to list')}
+              onClick={() => recordRef && recordRef.current && savedFunds.find((fund) => fund.id === recordRef.current?.id) ? deleteSavedFund(recordRef.current) : addSavedFund(recordRef.current)}
               buttonClass={styles['action-button']} 
               textClass={styles['action-button-text']} 
-              text='ADD TO LIST' />
+              text= {savedFunds.find((fund) => fund.id === recordRef.current?.id) ? 'REMOVE FROM LIST' : 'ADD TO LIST'} />
           </div>
           <div>
             <div className={styles['horizontal-flex-layout']} >
@@ -93,28 +133,61 @@ export default function Profile(): JSX.Element {
         <div className={styles['middle-panel']}>
           <div className={styles['name-layout']}>
             <div className={styles.name}>
-              <span className={styles['partial-name']}>Andreessen</span>
-              <span className={styles['partial-name']}>Horowitz</span>
+              <span className={styles['partial-name']}>
+                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}
+              </span>
             </div>
-            <StatusIcon className={styles['status-icon']} />
+            {/* {
+              isLoading 
+                ?
+                <Skeleton className={styles['status-icon']} />
+                : 
+                <StatusIcon className={styles['status-icon']} />
+            } */}
           </div>
           <div className={styles['description-layout']}>
-            <span className={styles.description}>
-              Venture Capital
-            </span>
+            {
+              isLoading ?
+                <span className={styles.description}>
+              loading...
+                </span>
+                : 
+                recordRef.current ? 
+                  (recordRef.current.fields['Deal Class'] as string[]).length === 0
+                    ?
+                    'no description'
+                    :
+                    (recordRef.current.fields['Deal Class'] as string[]).length > 1 
+                      ?
+                      <span className={styles.description}>
+                        {(recordRef.current.fields['Deal Class'] as string[]).map((dealClass: string, index: number) => 
+                          index !== (recordRef.current!.fields['Deal Class'] as string[]).length - 1 ? dealClass + ', ' : dealClass )}
+                      </span>
+                      :
+                      <span className={styles.description}>
+                        {recordRef.current.fields['Deal Class'] as string}
+                      </span>
+                  : 'no description'
+            }
+            
             <span >|</span>
-            <span className={styles.description}>
-              2009
-            </span>
-            <span >|</span>
-            <a className={styles['official-website']} href='https://www.a16z.com' target='_blank' rel="noreferrer">
-              www.a16z.com
+            <a className={styles['official-website']} href={recordRef.current ? recordRef.current.fields['Website Link'] as string : 'www.google.com'} target='_blank' rel="noreferrer">
+              {isLoading ? 'loading...' : recordRef.current ? recordRef.current.fields['Website Link'] as string : 'no official website, please google it'}
             </a>
           </div>
           <div className={styles['location-layout']}>
             <LocationIcon className={styles['location-icon']} />
             <span className={styles['description']}>
-              Menlo Park, CA, United States
+              {
+                isLoading
+                  ? 
+                  <Skeleton className={styles['description']} width={'10rem'} />
+                  : 
+                  recordRef.current 
+                    ? 
+                    location as string
+                    : 'no location'
+              }
             </span>
           </div>
           <div className={styles['detail-layout']}>
@@ -126,7 +199,13 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'30rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>Biotech, Healthcare, Consumer, Crypto, Enterprise & Fintech</span>
+                  <span className={styles['detail-category-text-2']}>
+                    {
+                      recordRef.current ? (recordRef.current.fields['Company Industry Code'] as string[]).map((industryCode: string, index: number) => 
+                        index !== (recordRef.current!.fields['Company Industry Code'] as string[]).length - 1 ? industryCode + ', ' : industryCode )
+                        : 'no industry code'
+                    }
+                  </span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -137,7 +216,7 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'10rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>$35 Billion</span>
+                  <span className={styles['detail-category-text-2']} style={{ color: '#fff4' }}>currently unavailable</span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -147,19 +226,38 @@ export default function Profile(): JSX.Element {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
-                  :
-                  <span className={styles['detail-category-text-2']}>Seed, Early Stage Venture, Late Stage Venture</span>
+                  : recordRef.current ? (recordRef.current.fields['Deal Type 1'] as string[]).length > 1
+                    ?
+                    <span className={styles['detail-category-text-2']}>
+                      {(recordRef.current.fields['Deal Type 1'] as string[]).map((dealType: string, index: number) => 
+                        index !== (recordRef.current!.fields['Deal Type 1'] as string[]).length - 1 ? dealType + ', ' : dealType )}
+                    </span>
+                    :
+                    <span className={styles['detail-category-text-2']}>
+                      {recordRef.current.fields['Deal Type 1'] as string}
+                    </span>
+                    : 'no deal type'
               }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
-              <span className={styles['detail-category-text']}>ACCOUNT MANAGER</span>
+              <span className={styles['detail-category-text']}>Lead Partner</span>
               {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>Eliott Harfouche, Tyler Aroner</span>
+                  recordRef.current ? (recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).length > 1
+                    ?
+                    <span className={styles['detail-category-text-2']}>
+                      {(recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).map((accountManager: string, index: number) => 
+                        index !== (recordRef.current!.fields['Lead Partner at Investment Firm'] as string[]).length - 1 ? accountManager + ', ' : accountManager )}
+                    </span>
+                    :
+                    <span className={styles['detail-category-text-2']}>
+                      {recordRef.current.fields['Lead Partner at Investment Firm'] as string}
+                    </span>
+                    : 'no account manager recorded'
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -170,13 +268,13 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  <span className={styles['detail-category-text-2']}>$140M  |  (1592 Total Deals)</span>
+                  <span className={styles['detail-category-text-2']}  style={{ color: '#fff4' }}>currently unavailable</span>
               }
             </p>
           </div>
           <div className={styles['model-layout']}>
-            <NodesIcon className={styles['nodes-icon']}/>
-            <span className={styles['model-text']}>INTELLIGENCE</span>
+            <h2>Historical Log</h2>
+            
           </div>
         </div>
         <div className={styles['right-panel']}>
@@ -185,153 +283,123 @@ export default function Profile(): JSX.Element {
             <DotCircleIcon className={styles['dot-circle-investor-icon']} />
             <span className={styles['investor-title-text']}>TOP CO-INVESTORS</span>
           </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+          {
+            isLoading 
+              ? 
+              (
+                Array(5).fill(0).map((_, i) => (
+                  <div key={i} className={styles['investor-layout']}>
+      
+              
+                    <Skeleton className={styles['investor-logo']} />
+                    <div className={styles['investor-text']}>
+                      <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                      <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                    </div>
                   </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+                ))
+              )
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+            
+              :
+              
+              !recordRef.current!.fields['Co-investors'] || (recordRef.current!.fields['Co-investors'] as string[]).length === 0
+                ? 'no co-investors'
+                : (
+                recordRef.current!.fields['Co-investors'] as string[]).map((investor: string) => (
+                  <div key={investor} className={styles['investor-layout']}>
 
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
+                    <img src={YCLogo} alt='' className={styles['investor-logo']} />
+                    <div className={styles['investor-text']}>
+                      <span className={styles['investor-name']}>{investor}</span>
+                      <br />
+                      <span className={styles['stage-info']}>May not know</span>
+                    </div>
 
-          <div className={styles['investor-title-layout']}>
-            <DotCircleIcon className={styles['dot-circle-recent-investment-icon']} />
-            <span className={styles['investor-title-text']}>Recent Investment</span>
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
-
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
                   </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
-
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
-          <div className={styles['investor-layout']}>
-            {
-              isLoading
-                ?
-                <>
-                  <Skeleton className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
-
-                    <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
-                  </div>
-                </>
-                :
-                <>
-                  <img src={YCLogo} alt='' className={styles['investor-logo']} />
-                  <div className={styles['investor-text']}>
-                    <span className={styles['investor-name']}>Y-COMBINATOR</span>
-                    <br />
-                    <span className={styles['stage-info']}>SEED STAGE</span>
-                  </div>
-                </>
-            }
-          </div>
+                ),
+                )
+          }
+          
 
         </div>
-      </div>
 
-    </section>
+
+      </div>
+      <div className={styles['popover-background']} style={{ visibility: isPopoverOpen ? 'visible' : 'hidden' }}>
+        <div className={styles['popover-form']}>
+          <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
+            <div className={styles['popover-form-title']}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid ${randomColor()}` }}
+
+                  draggable='false' onContextMenu={e => e.preventDefault()} />
+                <div>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}</span></span>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
+                </div>
+              </div>
+              <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setPopoverOpen(false)} />
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
+                <option value="Letme">Bypass the approval</option>
+                <option value="Assign">Assign the fund request to</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers or Assignees</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Approvers or Assignees" id="">
+                <option value="Tyler Aroner">Tyler Aroner</option>
+                <option value="Eliott Harfouche">Eliott Harfouche</option>
+                <option value="Iman Ghavami">Iman Ghavami</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
+                <option value="Deal I">Deal I</option>
+                <option value="Deal II">Deal II</option>
+                <option value="Deal III">Deal III</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
+                <option value="Person A">Person A</option>
+                <option value="Person B">Person B</option>
+                <option value="Person C">Person C</option>
+                <option value="Not Referring Anyone">Not Referring Anyone</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
+              <select
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Additional details</span>
+              <textarea style={{ marginTop: '1rem', color: '#000', padding: '0.5rem 0 0.5rem 0.5rem', fontSize: '1.25rem', background: '#eee', border: 'none', outline: 'none', minWidth: '100%', maxWidth: '100%', height: '5rem',
+                borderBottom: details && details !== '' ? 'blue 1px solid' : 'transparent 1px solid' }}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder='If needed, add some extra info that will help recipients learn more about the request' />
+
+            </div>
+            <button onClick={() => setPopoverOpen(false)}>send</button>
+          </form>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,19 +1,21 @@
 {
   "name": "epsilon-frontend-web",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ts-node": "ts-node --esm"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.3",
     "@headlessui/react": "^1.7.17",
     "@types/lodash": "^4.14.202",
     "chart.js": "^4.4.1",
+    "airtable": "^0.12.2",
     "clsx": "^2.0.0",
     "cors": "^2.8.5",
     "eslint-plugin-react": "^7.33.2",
@@ -45,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.4.4",
     "less": "^4.2.0",
     "supertest": "^6.3.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.0.11"
   }
