@@ -34,6 +34,7 @@ export default {
 1. install the deps
 ```
 yarn
+npm install express cors axios
 ```
 
 2. start in dev mode
