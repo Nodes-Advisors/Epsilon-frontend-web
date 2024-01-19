@@ -148,7 +148,7 @@ export default function Home() {
 
         <div style={{ position: 'absolute', right: 0, top: 0 }}>
 
-        {/* <div style={{ position: 'absolute', right: 0, top: 0 }}>
+          {/* <div style={{ position: 'absolute', right: 0, top: 0 }}>
 
           {
             user 
@@ -162,8 +162,8 @@ export default function Home() {
               </div>
           }
         </div> */}
-      </div>
-      
+        </div>
+      </div> 
       
 
     </section>

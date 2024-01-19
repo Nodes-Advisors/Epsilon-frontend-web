@@ -540,208 +540,209 @@ export default function KPIDash () {
           </div>
           {
             category === 'dashboard' ? (
-              <div style={{  display: 'flex', flexDirection: 'column', gap: '3rem', position: 'relative', zIndex: 1 }} >
-                <div style={{ display: 'flex', gap: '1rem',
-                  position: 'absolute', left: '2rem', top: '-3rem', zIndex: 255 }}>
-                  <button className={focused === 'all' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('all'); setLoading(true)}} >All</button>
-                  <button className={focused === 'you' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('you'); setLoading(true)}} >You</button>
+              <div>
+                <div style={{  display: 'flex', flexDirection: 'column', gap: '3rem', position: 'relative', zIndex: 1 }} >
+                  <div style={{ display: 'flex', gap: '1rem',
+                    position: 'absolute', left: '2rem', top: '-3rem', zIndex: 255 }}>
+                    <button className={focused === 'all' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('all'); setLoading(true)}} >All</button>
+                    <button className={focused === 'you' ? styles['kpi-option-highlighted'] : styles['kpi-option']} onClick={() => {setFocused('you'); setLoading(true)}} >You</button>
 
        
-                </div>
-                <div className={styles['kpi-horizontal-layout']}>
-                  <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
+                  </div>
+                  <div className={styles['kpi-horizontal-layout']}>
+                    <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
 
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
+                      <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
 
-                    <div className={styles['kpi-miniboard-horizontal-layout']}>
-                      {
-                        isLoading 
-                          ?
-                          <>
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
-                          </>
-                          :
-                          <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
-                          </>
-                      }
-                    </div>
+                      <div className={styles['kpi-miniboard-horizontal-layout']}>
+                        {
+                          isLoading 
+                            ?
+                            <>
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
+                            </>
+                            :
+                            <>
+                              <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
+                              <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            </>
+                        }
+                      </div>
         
-                  </KPIBlock>
-                  <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Deck requests</KPIText>
-                    <div className={styles['kpi-miniboard-horizontal-layout']}>
-                      {
-                        isLoading 
-                          ?
-                          <>
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
-                          </>
-                          :
-                          <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
-                          </>
-                      }
-                    </div>
+                    </KPIBlock>
+                    <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
+                      <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Deck requests</KPIText>
+                      <div className={styles['kpi-miniboard-horizontal-layout']}>
+                        {
+                          isLoading 
+                            ?
+                            <>
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
+                            </>
+                            :
+                            <>
+                              <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
+                              <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            </>
+                        }
+                      </div>
         
-                  </KPIBlock>
-                  <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Conversion to qualified</KPIText>
-                    <div className={styles['kpi-miniboard-horizontal-layout']}>
-                      {
-                        isLoading 
-                          ?
-                          <>
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
-                          </>
-                          :
-                          <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
-                          </>
-                      }
-                    </div>
+                    </KPIBlock>
+                    <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
+                      <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Conversion to qualified</KPIText>
+                      <div className={styles['kpi-miniboard-horizontal-layout']}>
+                        {
+                          isLoading 
+                            ?
+                            <>
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
+                            </>
+                            :
+                            <>
+                              <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
+                              <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            </>
+                        }
+                      </div>
         
-                  </KPIBlock>
-                  <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
-                    <div className={styles['kpi-miniboard-horizontal-layout']}>
-                      {
-                        isLoading 
-                          ?
-                          <>
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
-                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
-                          </>
-                          :
-                          <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
-                          </>
-                      }
-                    </div>
+                    </KPIBlock>
+                    <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
+                      <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
+                      <div className={styles['kpi-miniboard-horizontal-layout']}>
+                        {
+                          isLoading 
+                            ?
+                            <>
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
+                              <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
+                            </>
+                            :
+                            <>
+                              <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
+                              <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            </>
+                        }
+                      </div>
         
-                  </KPIBlock>
+                    </KPIBlock>
 
 
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Deal Statistics</KPIText>
-            <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
-              <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='25.25rem' height='55.125rem' >
-                {/* Deal Data Table */}
-                <table style={tableStyle}>
-                  <thead>
-                    <tr>
-                      <th>Deal Name</th>
-                      <th>Total Outreach</th>
-                      <th>New Fund</th>
-                      <th>Respond or Not</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dealData.map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.dealName}</td>
-                        <td>{item.totalOutreach}</td>
-                        <td>{item.newFund}</td>
-                        <td>{item.respondOrNot}</td>
-                      </tr>
-                    ))}
-                    <tr>
-                      <td>Grand Total</td>
-                      <td>
-                        {dealData.reduce(
-                          (acc, item) => acc + item.totalOutreach,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {dealData.reduce((acc, item) => acc + item.newFund, 0)}
-                      </td>
-                      <td>
-                        {dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>              
-              </KPIBlock>
-              <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='55.125rem' >
-                {/* Horizontal Bar Plot for Each Deal's KPI */}
-                <div style={{ height: '800px', width: '950px' }}>
-                  <Bar data={dealChartData} options={chartOptions} />
-                </div>
-              </KPIBlock>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Account Holder's KPI</KPIText>
-            <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
-              <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='25.25rem' height='18.125rem' >
-                {/* Account Holder Data Table */}
-                <table style={tableStyle}>
-                  <thead>
-                    <tr>
-                      <th>Account Holder</th>
-                      <th>Total Outreach</th>
-                      <th>New Fund</th>
-                      <th>Respond or Not</th>
-                      <th>New Respond</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accountHolderData.map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.accountHolder}</td>
-                        <td>{item.totalOutreach}</td>
-                        <td>{item.newFund}</td>
-                        <td>{item.respondOrNot}</td>
-                        <td>{item.newRespond}</td>
-                      </tr>
-                    ))}
-                    <tr>
-                      <td>Grand Total</td>
-                      <td>
-                        {accountHolderData.reduce(
-                          (acc, item) => acc + item.totalOutreach,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {accountHolderData.reduce(
-                          (acc, item) => acc + item.newFund,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {accountHolderData.reduce(
-                          (acc, item) => acc + item.respondOrNot,
-                          0,
-                        )}
-                      </td>
-                      <td>
-                        {accountHolderData.reduce(
-                          (acc, item) => acc + item.newRespond,
-                          0,
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </KPIBlock>
-              <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='31.125rem' >
-                {/* Line Plot for Each Account Holder */}
-                <div style={{ height: '500px', width: '950px' }}>
-                  <Line data={accountHoldersLineData} options={lineChartOptions} />
-                </div>
-              </KPIBlock>
-            </div>
-          </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Deal Statistics</KPIText>
+                    <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
+                      <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='25.25rem' height='55.125rem' >
+                        {/* Deal Data Table */}
+                        <table style={tableStyle}>
+                          <thead>
+                            <tr>
+                              <th>Deal Name</th>
+                              <th>Total Outreach</th>
+                              <th>New Fund</th>
+                              <th>Respond or Not</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dealData.map((item, index) => (
+                              <tr key={index}>
+                                <td>{item.dealName}</td>
+                                <td>{item.totalOutreach}</td>
+                                <td>{item.newFund}</td>
+                                <td>{item.respondOrNot}</td>
+                              </tr>
+                            ))}
+                            <tr>
+                              <td>Grand Total</td>
+                              <td>
+                                {dealData.reduce(
+                                  (acc, item) => acc + item.totalOutreach,
+                                  0,
+                                )}
+                              </td>
+                              <td>
+                                {dealData.reduce((acc, item) => acc + item.newFund, 0)}
+                              </td>
+                              <td>
+                                {dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>              
+                      </KPIBlock>
+                      <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='55.125rem' >
+                        {/* Horizontal Bar Plot for Each Deal's KPI */}
+                        <div style={{ height: '800px', width: '950px' }}>
+                          <Bar data={dealChartData} options={chartOptions} />
+                        </div>
+                      </KPIBlock>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Account Holder's KPI</KPIText>
+                    <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
+                      <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='25.25rem' height='18.125rem' >
+                        {/* Account Holder Data Table */}
+                        <table style={tableStyle}>
+                          <thead>
+                            <tr>
+                              <th>Account Holder</th>
+                              <th>Total Outreach</th>
+                              <th>New Fund</th>
+                              <th>Respond or Not</th>
+                              <th>New Respond</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {accountHolderData.map((item, index) => (
+                              <tr key={index}>
+                                <td>{item.accountHolder}</td>
+                                <td>{item.totalOutreach}</td>
+                                <td>{item.newFund}</td>
+                                <td>{item.respondOrNot}</td>
+                                <td>{item.newRespond}</td>
+                              </tr>
+                            ))}
+                            <tr>
+                              <td>Grand Total</td>
+                              <td>
+                                {accountHolderData.reduce(
+                                  (acc, item) => acc + item.totalOutreach,
+                                  0,
+                                )}
+                              </td>
+                              <td>
+                                {accountHolderData.reduce(
+                                  (acc, item) => acc + item.newFund,
+                                  0,
+                                )}
+                              </td>
+                              <td>
+                                {accountHolderData.reduce(
+                                  (acc, item) => acc + item.respondOrNot,
+                                  0,
+                                )}
+                              </td>
+                              <td>
+                                {accountHolderData.reduce(
+                                  (acc, item) => acc + item.newRespond,
+                                  0,
+                                )}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </KPIBlock>
+                      <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='31.125rem' >
+                        {/* Line Plot for Each Account Holder */}
+                        <div style={{ height: '500px', width: '950px' }}>
+                          <Line data={accountHoldersLineData} options={lineChartOptions} />
+                        </div>
+                      </KPIBlock>
+                    </div>
+                  </div>
 
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -761,6 +762,7 @@ export default function KPIDash () {
                   </div>
                 </div>
               </div>
+
             ) : (
               <div className={styles['funnel-layout']}>
                 {Object.keys(tasks).map((stage, index) => (

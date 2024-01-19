@@ -23,8 +23,8 @@ process.on('SIGINT', async () => {
   process.exit(0)
 })
 
-afterAll(async () => {
-  await client.close()
-})
+// afterAll(async () => {
+//   await client.close()
+// })
 
 export default client
