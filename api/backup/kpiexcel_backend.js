@@ -14,8 +14,8 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 })
 
-const dbName = 'EpsilonEmailDB'
-const InboundCollectionName = 'KPIExcelSheet'
+const dbName = 'dev'
+const InboundCollectionName = 'KPIsInfo'
 
 async function connectToMongoDB() {
   try {
