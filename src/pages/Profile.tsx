@@ -19,14 +19,14 @@ import { Popover } from '@headlessui/react'
 import { FieldSet, Record } from 'airtable'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import LeftNavBar from '../components/left-nav-bar'
-import { throttle } from 'lodash'
+import { set, throttle } from 'lodash'
 import { STATUS_COLOR_LIST } from '../lib/constants'
 
 // import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
-  const recordRef = useRef<Record<FieldSet> | null>(null)
+  const [record, setRecord] = useState<object | null>(null)
   const [location, setLocation] = useState<string | null>(null)
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -38,22 +38,26 @@ export default function Profile(): JSX.Element {
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-  useEffect(() => {
-    // console.log(funds)
-    const record = funds.filter((record) => record.fields['Investor ID'] === id)[0]
-    // console.log(record.id)
-    // console.log(savedFunds)
-    setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
-      acc += record.fields[cur] ? curIndex !== array.length - 1 ? record.fields[cur] + ', ' : record.fields[cur] : '', ''))
-    recordRef.current = record
-    setTimeout(() => setLoading(false), 1000)
-  }, [])
-
+  
   const funds = useFundsStore(state => state.funds)
   const id = localStorage.getItem('fund-id')
   if (!id) {
     throw new Error('fund id not found')
   }
+  
+  useEffect(() => {
+    // console.log(funds)
+    const record = funds.filter((record) => record._id === id)[0]
+    console.log(record)
+    // console.log(record._id)
+    // console.log(savedFunds)
+    setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
+      acc += record[cur] ? curIndex !== array.length - 1 ? record[cur] + ', ' : record[cur] : '', ''))
+    setRecord(record)
+    setTimeout(() => setLoading(false), 1000)
+  }, [])
+
+
   
   const addRequest = () => {
     setPopoverOpen(true)
@@ -72,7 +76,7 @@ export default function Profile(): JSX.Element {
               <Skeleton className={styles['venture-logo']}  />
               : 
               <div style={{ position: 'relative' }}>
-                <AsyncImage src={(recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                <AsyncImage src={''} alt='' 
                   style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
                     border: '0.5rem solid #00aa00', 
                   }}
@@ -93,10 +97,10 @@ export default function Profile(): JSX.Element {
               textClass={styles['action-button-text']} 
               text='ADD A REQUEST' />
             <ActionButton
-              onClick={() => recordRef && recordRef.current && savedFunds.find((fund) => fund.id === recordRef.current?.id) ? deleteSavedFund(recordRef.current) : addSavedFund(recordRef.current)}
+              onClick={() => savedFunds.find((fund) => fund._id === record?._id) ? deleteSavedFund(record) : addSavedFund(record)}
               buttonClass={styles['action-button']} 
               textClass={styles['action-button-text']} 
-              text= {savedFunds.find((fund) => fund.id === recordRef.current?.id) ? 'REMOVE FROM LIST' : 'ADD TO LIST'} />
+              text= {savedFunds.find((fund) => fund._id === record?._id) ? 'REMOVE FROM LIST' : 'ADD TO LIST'} />
           </div>
           <div>
             <div className={styles['horizontal-flex-layout']} >
@@ -134,7 +138,7 @@ export default function Profile(): JSX.Element {
           <div className={styles['name-layout']}>
             <div className={styles.name}>
               <span className={styles['partial-name']}>
-                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}
+                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['Investor Name'] as string : 'no name'}
               </span>
             </div>
             {/* {
@@ -152,27 +156,27 @@ export default function Profile(): JSX.Element {
               loading...
                 </span>
                 : 
-                recordRef.current ? 
-                  (recordRef.current.fields['Deal Class'] as string[]).length === 0
+                record ? 
+                  Array.isArray(record['Deal Class']) && (record['Deal Class'] as string[]).length === 0
                     ?
                     'no description'
                     :
-                    (recordRef.current.fields['Deal Class'] as string[]).length > 1 
+                    Array.isArray(record['Deal Class']) && (record['Deal Class'] as string[]).length > 1 
                       ?
                       <span className={styles.description}>
-                        {(recordRef.current.fields['Deal Class'] as string[]).map((dealClass: string, index: number) => 
-                          index !== (recordRef.current!.fields['Deal Class'] as string[]).length - 1 ? dealClass + ', ' : dealClass )}
+                        {(record['Deal Class'] as string[]).map((dealClass: string, index: number) => 
+                          index !== (record!['Deal Class'] as string[]).length - 1 ? dealClass + ', ' : dealClass )}
                       </span>
                       :
                       <span className={styles.description}>
-                        {recordRef.current.fields['Deal Class'] as string}
+                        {record['Deal Class'] as string}
                       </span>
                   : 'no description'
             }
             
             <span >|</span>
-            <a className={styles['official-website']} href={recordRef.current ? recordRef.current.fields['Website Link'] as string : 'www.google.com'} target='_blank' rel="noreferrer">
-              {isLoading ? 'loading...' : recordRef.current ? recordRef.current.fields['Website Link'] as string : 'no official website, please google it'}
+            <a className={styles['official-website']} href={record ? record['Website Link'] as string : 'www.google.com'} target='_blank' rel="noreferrer">
+              {isLoading ? 'loading...' : record ? record['Website Link'] as string : 'no official website, please google it'}
             </a>
           </div>
           <div className={styles['location-layout']}>
@@ -183,7 +187,7 @@ export default function Profile(): JSX.Element {
                   ? 
                   <Skeleton className={styles['description']} width={'10rem'} />
                   : 
-                  recordRef.current 
+                  record 
                     ? 
                     location as string
                     : 'no location'
@@ -201,8 +205,7 @@ export default function Profile(): JSX.Element {
                   :
                   <span className={styles['detail-category-text-2']}>
                     {
-                      recordRef.current ? (recordRef.current.fields['Company Industry Code'] as string[]).map((industryCode: string, index: number) => 
-                        index !== (recordRef.current!.fields['Company Industry Code'] as string[]).length - 1 ? industryCode + ', ' : industryCode )
+                      record['Company Industry Code'] ? (record['Company Industry Code'] as string)
                         : 'no industry code'
                     }
                   </span>
@@ -226,15 +229,11 @@ export default function Profile(): JSX.Element {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
-                  : recordRef.current ? (recordRef.current.fields['Deal Type 1'] as string[]).length > 1
-                    ?
+                  : 
+                  record['Deal Type 1'] 
+                    ?          
                     <span className={styles['detail-category-text-2']}>
-                      {(recordRef.current.fields['Deal Type 1'] as string[]).map((dealType: string, index: number) => 
-                        index !== (recordRef.current!.fields['Deal Type 1'] as string[]).length - 1 ? dealType + ', ' : dealType )}
-                    </span>
-                    :
-                    <span className={styles['detail-category-text-2']}>
-                      {recordRef.current.fields['Deal Type 1'] as string}
+                      {record['Deal Type 1'] as string}
                     </span>
                     : 'no deal type'
               }
@@ -247,15 +246,10 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  recordRef.current ? (recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).length > 1
-                    ?
+                  record['Lead Partner at Investment Firm'] 
+                    ?          
                     <span className={styles['detail-category-text-2']}>
-                      {(recordRef.current.fields['Lead Partner at Investment Firm'] as string[]).map((accountManager: string, index: number) => 
-                        index !== (recordRef.current!.fields['Lead Partner at Investment Firm'] as string[]).length - 1 ? accountManager + ', ' : accountManager )}
-                    </span>
-                    :
-                    <span className={styles['detail-category-text-2']}>
-                      {recordRef.current.fields['Lead Partner at Investment Firm'] as string}
+                      {record['Lead Partner at Investment Firm'] as string}
                     </span>
                     : 'no account manager recorded'
               }
@@ -274,14 +268,42 @@ export default function Profile(): JSX.Element {
           </div>
           <div className={styles['model-layout']}>
             <h2>Historical Log</h2>
-            
+  
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <details>
+                <summary style={{ fontSize: '1.4rem' }}>2023</summary>
+                <ul>
+                  <li>a</li>
+                  <li>c</li>
+                  <li>b</li>
+                </ul>
+              </details>
+
+              <details>
+                <summary style={{ fontSize: '1.4rem' }}>2021</summary>
+                <ul>
+                  <li>a</li>
+                  <li>c</li>
+                  <li>b</li>
+                </ul>
+              </details>
+
+              <details>
+                <summary style={{ fontSize: '1.4rem' }}>2023</summary>
+                <ul>
+                  <li>a</li>
+                  <li>c</li>
+                  <li>b</li>
+                </ul>
+              </details>
+            </div>
           </div>
         </div>
         <div className={styles['right-panel']}>
         
           <div className={styles['investor-title-layout']}>
             <DotCircleIcon className={styles['dot-circle-investor-icon']} />
-            <span className={styles['investor-title-text']}>TOP CO-INVESTORS</span>
+            <span className={styles['investor-title-text']}>TOP Co-Investors</span>
           </div>
           {
             isLoading 
@@ -303,11 +325,10 @@ export default function Profile(): JSX.Element {
 
             
               :
-              
-              !recordRef.current!.fields['Co-investors'] || (recordRef.current!.fields['Co-investors'] as string[]).length === 0
-                ? 'no co-investors'
-                : (
-                recordRef.current!.fields['Co-investors'] as string[]).map((investor: string) => (
+
+              record['Co-Investors'] && (record['Co-Investors'] as string).length > 0
+                ? (
+                record['Co-Investors'] as string).split(',').map((investor: string) => (
                   <div key={investor} className={styles['investor-layout']}>
 
                     <img src={YCLogo} alt='' className={styles['investor-logo']} />
@@ -320,6 +341,7 @@ export default function Profile(): JSX.Element {
                   </div>
                 ),
                 )
+                : 'no co-investors'
           }
           
 
@@ -332,12 +354,12 @@ export default function Profile(): JSX.Element {
           <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                <AsyncImage src={isLoading  ? '' : ''} alt='' 
                   style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid ${randomColor()}` }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} />
                 <div>
-                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}</span></span>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{record ? record['Investor Name'] as string : 'no name'}</span></span>
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
                 </div>
               </div>

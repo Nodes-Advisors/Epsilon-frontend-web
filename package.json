@@ -13,6 +13,7 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.2.3",
     "@headlessui/react": "^1.7.17",
+    "@testing-library/react": "^14.1.2",
     "@types/lodash": "^4.14.202",
     "airtable": "^0.12.2",
     "axios": "^1.6.5",
@@ -21,6 +22,7 @@
     "cors": "^2.8.5",
     "eslint-plugin-react": "^7.33.2",
     "express": "^4.18.2",
+    "jest": "^29.7.0",
     "loadable-image": "^3.0.6",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/jest": "^29.5.11",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",

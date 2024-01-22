@@ -72,12 +72,12 @@ export const useSavedFundsStore = create<SavedFundsState>()(
       (set) => ({
         savedFunds: [],
         addSavedFund: (fund) => set((state) => {
-          if (!state.savedFunds.some((f) => f.id === fund.id)) {
+          if (!state.savedFunds.some((f) => f._id === fund._id)) {
             return { savedFunds: [...state.savedFunds, fund] }
           }
           return state
         }),
-        deleteSavedFund: (fund) => set((state) => ({ savedFunds: state.savedFunds.filter((f) => f.id !== fund.id) })),
+        deleteSavedFund: (fund) => set((state) => ({ savedFunds: state.savedFunds.filter((f) => f._id !== fund._id) })),
       }),
       {
         name: 'savedFundsStore',

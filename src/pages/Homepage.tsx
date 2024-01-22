@@ -101,68 +101,6 @@ export default function Home() {
         </div>
         <LiveUpdate />
 
-        <div className="app">
-          {/* Side bar buttons for selecting senders */}
-          {/* <div className="sidebar">
-            {senders.map(sender => (
-              <button key={sender} onClick={() => filterBySender(sender)}>
-                {sender}
-              </button>
-            ))}
-          </div> */}
-
-          {/* Side bar buttons for selecting investor emails (true / false)  */}
-          <div className="sidebar">
-            {investorEmails.map((investors) => (
-              <button
-                key={investors}
-                onClick={() => filterByInvestorEmail(investors)}
-              >
-                {investors}
-              </button>
-            ))}
-          </div>
-
-          {/* Side bar buttons for selecting deals */}
-          <div className="sidebar">
-            {deals != null &&
-              deals.map((deal) => (
-                <button key={deal} onClick={() => filterByDeal(deal)}>
-                  {deal}
-                </button>
-              ))
-            }
-            
-          </div> 
-
-          {/* Search bar and display info table */}
-          <div className="main-content">
-            <input
-              className="search"
-              placeholder="Search..."
-              onChange={(e) => setQuery(e.target.value.toLowerCase())}
-            />
-            <Table data={filteredData} />
-          </div>
-        </div>
-
-        <div style={{ position: 'absolute', right: 0, top: 0 }}>
-
-          {/* <div style={{ position: 'absolute', right: 0, top: 0 }}>
-
-          {
-            user 
-              ?
-              <button onClick={logoutauth0}>
-                Log Out
-              </button>
-              : 
-              <div>
-                <button onClick={() => loginWithRedirect()}>Login</button>
-              </div>
-          }
-        </div> */}
-        </div>
       </div> 
       
 

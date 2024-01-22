@@ -39,7 +39,6 @@ const router = createBrowserRouter([
   { path: 'gptdata', element: <GPTdata /> },
   { path: 'kpiexcel', element: <KPIExcel /> },
 
-
   { path: 'kpi-dash', element: <KPIDash /> },
   { path: 'my-saved-list', element: <SavedList /> },
   { path: 'user-profile', element: <UserProfile /> },

@@ -13,13 +13,12 @@ import { convertedOutput } from '../lib/utils'
 import { STATUS_COLOR_LIST, 
   LOCATION_LIST, 
   FIRM_NAMES, 
-  TYPE_LIST, 
-  SECTOR_LIST, 
-  COINVESTORS_LIST,
+  TYPE_LIST,
   STATUS_LIST,
 } from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
 import CancelButton from '../assets/images/cancel.png'
+import axios from 'axios'
 
 export default function FundCards() {
   const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
@@ -74,17 +73,17 @@ export default function FundCards() {
         // Apply the filter based on the filterName
         switch (filterName) {
         case 'Firm':
-          return filteredList[filterName].includes(record.get('Investor Name') as string)
+          return filteredList[filterName].includes(record['Investor Name'] as string)
         case 'Location':
-          return filteredList[filterName].includes(record.get('Investor HQ Country') as string)
+          return filteredList[filterName].includes(record['Investor HQ Country'] as string)
         case 'Status':
-          return filteredList[filterName].includes(record.get('Deal Class') as string)
+          return filteredList[filterName].includes(record['Deal Class'] as string)
         case 'Stage':
-          return filteredList[filterName].includes(record.get('Lead Partner at Investment Firm') as string)
+          return filteredList[filterName].includes(record['Lead Partner at Investment Firm'] as string)
         case 'Lead':
-          return filteredList[filterName].includes(record.get('Co-investors') as string)
+          return filteredList[filterName].includes(record['Co-Investors'] as string)
         case 'Advanced Search':
-          return filteredList[filterName].includes(record.get('Co-investors') as string)
+          return filteredList[filterName].includes(record['Co-Investors'] as string)
         default:
           return true
         }
@@ -92,10 +91,11 @@ export default function FundCards() {
     }))
   }, [filteredList])
 
+  
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
-  const inSavedFunds = (record: any) => savedFunds.find((fund) => fund.id === record.id)
+  const inSavedFunds = (record: any) => savedFunds.find((fund) => fund._id === record._id)
   
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const setFunds = useFundsStore(state => state.setFunds)
@@ -104,12 +104,11 @@ export default function FundCards() {
 
   useEffect(() => {
     setLoading(true)
-    getfcs(import.meta.env.VITE_AIRTABLE_API_KEY, import.meta.env.VITE_AIRTABLE_BASE_ID)
-    
-      .then((data) => {
-        setData(data)
-        setFunds(data)  
-        setFilteredData(data)      
+    axios.get('http://localhost:5001/fundcard')
+      .then((res) => {
+        setData(res.data)
+        setFunds(res.data)  
+        setFilteredData(res.data)      
         // console.log(
         //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
         // )
@@ -342,7 +341,7 @@ export default function FundCards() {
                 <span style={{ fontSize: '1.15rem' }}>Type</span>
                 <span style={{ fontSize: '1.15rem' }}>People at the Fund</span>
                 <span style={{ fontSize: '1.15rem' }}>Deals</span>
-                <span style={{ fontSize: '1.15rem' }}>Co-investors</span>
+                <span style={{ fontSize: '1.15rem' }}>Co-Investors</span>
                 <span style={{ fontSize: '1.15rem' }}>Suitability Score</span>
               </div>
               <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
@@ -353,15 +352,15 @@ export default function FundCards() {
                   ?
                   filterdData.map((record, index) => (
                     <>
-                      <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
-                              onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
+                              onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                               style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                             <button 
                               onClick={() => { 
-                                if (savedFunds.find((fund) => fund.id === record.id)) {
+                                if (savedFunds.find((fund) => fund._id === record._id)) {
                                   deleteSavedFund(record)
                                 } else {
                                   addSavedFund(record)
@@ -377,21 +376,22 @@ export default function FundCards() {
                           <div style={{ position: 'relative' }}>
                             <AsyncImage
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                              onClick={() => { localStorage.setItem('fund-id', record.get('Investor ID') as string); navigate(`/fund-card/${record.get('Investor ID')}`)  }}
-                              src={record.get('Logo') ? (record.get('Logo') as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid ${randomColor()}`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
+                              onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                              src={record['Logo'] ? (record['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
+                            <div style={{ width: '1.5rem', height: '1.5rem', backgroundColor: randomColor(), borderRadius: '50%', bottom: 0, position: 'absolute', right: 0 }}></div>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                            <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record.get('Investor Name') as string}</span>
-                            <span style={{  }}>{record.get('Investor HQ Country') as string}</span>
+                            <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record['Investor Name'] as string}</span>
+                            <span style={{  }}>{record['Investor HQ Country'] as string}</span>
                           </div>
                             
                         </div>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.get('Company Industry Code') as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Deal Class') as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Lead Partner at Investment Firm') as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Company Industry Code'] as string | string[]) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deal Class'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Lead Partner at Investment Firm'] as string[] | string) as string || 'n/a'}</span>
                         <span></span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.get('Co-investors') as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
                         
                       </div>
                       <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>

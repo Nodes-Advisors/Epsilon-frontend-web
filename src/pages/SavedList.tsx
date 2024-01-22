@@ -74,22 +74,22 @@ export default function SavedList() {
                     <span style={{ fontSize: '1.15rem' }}>Type</span>
                     <span style={{ fontSize: '1.15rem' }}>People at the Fund</span>
                     <span style={{ fontSize: '1.15rem' }}>Deals</span>
-                    <span style={{ fontSize: '1.15rem' }}>Co-investors</span>
+                    <span style={{ fontSize: '1.15rem' }}>Co-Investors</span>
                     <span style={{ fontSize: '1.15rem' }}>Suitability Score</span>
                   </div>
                   <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                   {
                     savedFunds.map((record, index) => (
                       <>
-                        <div key={record.id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
-                                onClick={() => { localStorage.setItem('fund-id', record.fields['Investor ID'] as string); navigate(`/fund-card/${record.fields['Investor ID']}`)  }}
+                                onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                                 style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                               <button 
                                 onClick={() => { 
-                                  if (savedFunds.find((fund) => fund.id === record.id)) {
+                                  if (savedFunds.find((fund) => fund._id === record._id)) {
                                     deleteSavedFund(record)
                                   } 
                                 }}
@@ -103,21 +103,21 @@ export default function SavedList() {
                             <div style={{ position: 'relative' }}>
                               <AsyncImage
                                 onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                                onClick={() => { localStorage.setItem('fund-id', record.fields['Investor ID'] as string); navigate(`/fund-card/${record.fields['Investor ID']}`)  }}
-                                src={record.fields['Logo'] ? (record.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid ${randomColor()}`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
+                                onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                                src={record['Logo'] ? (record['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid ${randomColor()}`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                              <span style={{ color: '#807cc5', fontWeight: '600' }}>{record.fields['Investor Name'] as string}</span>
-                              <span style={{  }}>{record.fields['Investor HQ Country'] as string}</span>
+                              <span style={{ color: '#807cc5', fontWeight: '600' }}>{record['Investor Name'] as string}</span>
+                              <span style={{  }}>{record['Investor HQ Country'] as string}</span>
                             </div>
                             
                           </div>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record.fields['Company Industry Code'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Deal Class'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Lead Partner at Investment Firm'] as string[] | string) || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Company Industry Code'] as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deal Class'] as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Lead Partner at Investment Firm'] as string[] | string) || 'n/a'}</span>
                           <span></span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record.fields['Co-investors'] as string[] | string) || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) || 'n/a'}</span>
                         </div>
                         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem'}}></div>
                       </>
@@ -138,12 +138,12 @@ export default function SavedList() {
           <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                {/* <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
+                {/* <AsyncImage src={isLoading  ? '' : (recordRef.current!['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
                   style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: '3px solid #5392d4' }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} /> */}
                 <div>
-                  {/* <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}</span></span> */}
+                  {/* <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current['Investor Name'] as string : 'no name'}</span></span> */}
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
                 </div>
               </div>

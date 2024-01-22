@@ -160,6 +160,32 @@ export default function UserProfile() {
           </KPIBlock>
         </div>
         <span style={{ marginTop: '2rem', fontSize: '2rem', fontWeight: 550 }}>User&apos;s Historical Logs</span>
+        <details>
+          <summary>2022</summary>
+          <ul>
+            <li>a</li>
+            <li>c</li>
+            <li>b</li>
+          </ul>
+        </details>
+
+        <details>
+          <summary>2021</summary>
+          <ul>
+            <li>a</li>
+            <li>c</li>
+            <li>b</li>
+          </ul>
+        </details>
+
+        <details open>
+          <summary>2023</summary>
+          <ul>
+            <li>a</li>
+            <li>c</li>
+            <li>b</li>
+          </ul>
+        </details>
         <ul>
           <li>
             <span 
