@@ -11,12 +11,16 @@ import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import Switch from './switch-button'
 import MenuIcon from '../assets/images/menu.png'
 import LeftNavBar from './left-nav-bar'
+import axios from 'axios'
+import toast, { Toaster } from 'react-hot-toast'
+import AuthComponent from './auth-component'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
   const navigate = useNavigate()
   const [openPanel, setOpenPanel] = useState(false)
+  const [openAuthPanel, setOpenAuthPanel] = useState(false)
   const { user: auth0User, 
-    logout, loginWithRedirect } = useAuth0()
+    logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -32,6 +36,10 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     await logout({ logoutParams: { returnTo: returnString }})
     setUser(undefined)
   }
+
+  useEffect(() => {
+    // toast.error('Please verify your email address to continue')
+  }, [openAuthPanel])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -69,6 +77,10 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           zIndex: 9999,
         }}
       >
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+        />
         {
           openLeftNavBar && <LeftNavBar show={true} />
         }
@@ -131,7 +143,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             </div>
           }
           {
-            user 
+            user && user.email_verified  
               ? 
               <div 
                 ref={panelRef}
@@ -157,14 +169,29 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                     >Sign Out</a>
                   </div>
                 }
+                
               </div>
-              : <span 
+              : 
+       
+              <span 
                 className={styles['nav-profile-login']}
-                onClick={() => loginWithRedirect()}>LOGIN</span>
+                onClick={() => setOpenAuthPanel(!openAuthPanel)}>LOGIN
+              </span>
+
+                
+          
 
           }
+          
         </div>
       </nav>
+      {
+        openAuthPanel && 
+              <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 255, background: '#fff2', top: 0, left: 0 }}>
+                
+                <AuthComponent setOpenAuthPanel={setOpenAuthPanel}/>
+              </div>
+      }
       {children}
     </>
   )
