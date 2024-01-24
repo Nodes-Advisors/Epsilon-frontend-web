@@ -19,6 +19,8 @@ import { STATUS_COLOR_LIST,
 import type { FILTER_NAME } from '../lib/constants'
 import CancelButton from '../assets/images/cancel.png'
 import axios from 'axios'
+import toast from 'react-hot-toast'
+import { useUserStore } from '../store/store'
 
 export default function FundCards() {
   const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
@@ -27,13 +29,17 @@ export default function FundCards() {
   const [filterdData, setFilteredData] = useState<Record<FieldSet>[]>([])
   const getfcs = useCallback((apikey: string | undefined, baseId: string | undefined) => getFundCards(apikey, baseId)
     , [])
-  const [requestName, setRequestName] = useState<string>('')
-  const [approvers, setApprovers] = useState<string>('')
-  const [details, setDetails] = useState<string>('')
+  const [requestName, setRequestName] = useState<string>('bypass approval')
+  const [approvers, setApprovers] = useState<string>('Tyler Aroner')
+  const [deal, setDeal] = useState<string>('Deal I')
+  const [contactPerson, setContactPerson] = useState<string>('Person A')
+  const [details, setDetails] = useState<string>('nothing')
+  const [priority, setPriority] = useState<string>('High')
+
   const inputRef = useRef<HTMLInputElement>(null)
   
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  
+  const user = useUserStore(state => state.user)
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
   const [filteredList, setFilteredList] = useState<{
@@ -203,6 +209,30 @@ export default function FundCards() {
       document.removeEventListener('click', handleClickOutside)
     }
   }, [])
+
+  const sendRequest = async (e) => {
+    e.preventDefault()
+    try {
+      // console.log('executed')
+      await axios.post('http://localhost:5001/sendRequest', {
+        requestName,
+        approvers,
+        deal,
+        contactPerson,
+        priority,
+        details,
+        email: user?.email,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      toast.success('Request sent successfully!')
+      setOpenRequestPanel(false)
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
@@ -405,7 +435,9 @@ export default function FundCards() {
       </div>
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
-          <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
+          <form 
+            onSubmit={sendRequest}
+            style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 {/* <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
@@ -422,14 +454,16 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
               <select
+                onChange={(e) => setRequestName(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
-                <option value="Letme">Bypass the approval</option>
-                <option value="Assign">Assign the fund request to</option>
+                <option value="bypass approval">Bypass the approval</option>
+                <option value="assign the fund request to">Assign the fund request to</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers or Assignees</span>
               <select
+                onChange={(e) => setApprovers(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Approvers or Assignees" id="">
                 <option value="Tyler Aroner">Tyler Aroner</option>
                 <option value="Eliott Harfouche">Eliott Harfouche</option>
@@ -439,6 +473,7 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
               <select
+                onChange={(e) => setDeal(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
                 <option value="Deal I">Deal I</option>
                 <option value="Deal II">Deal II</option>
@@ -448,6 +483,7 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
               <select
+                onChange={(e) => setContactPerson(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
                 <option value="Person A">Person A</option>
                 <option value="Person B">Person B</option>
@@ -458,6 +494,7 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
+                onChange={(e) => setPriority(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
@@ -472,7 +509,7 @@ export default function FundCards() {
               placeholder='If needed, add some extra info that will help recipients learn more about the request' />
 
             </div>
-            <button onClick={() => setOpenRequestPanel(false)}>send</button>
+            <button>send</button>
           </form>
         </div>
       </div>
