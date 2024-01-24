@@ -539,7 +539,8 @@ export default function KPIDash () {
               <KPIText extraClass={styles['kpi-filter-text-sub']} fontColor='#fff' fontSize='1.5rem' >Timescale</KPIText>
               <ul className={styles['kpi-ul']}>
                 <li>today</li>
-                <li>1 week</li>
+                <li>this week</li>
+                <li>last week</li>
                 <li>1 month</li>
                 <li>since this year</li>
               </ul>

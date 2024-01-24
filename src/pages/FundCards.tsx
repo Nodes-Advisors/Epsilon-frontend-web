@@ -23,6 +23,8 @@ import toast from 'react-hot-toast'
 import { useUserStore } from '../store/store'
 
 export default function FundCards() {
+
+  const [fundStatus, setFundStatus] = useState<object[]>([])
   const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
@@ -97,7 +99,14 @@ export default function FundCards() {
     }))
   }, [filteredList])
 
-  
+  useEffect(() => {
+    axios.get('http://localhost:5001/fundStatus').then((res) => { 
+      setFundStatus(res.data)
+    }).catch((error) => {
+      toast.error(error?.response?.data)
+    })
+  }, [])
+
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
@@ -408,7 +417,7 @@ export default function FundCards() {
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                               onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                               src={record['Logo'] ? (record['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
-                            <div style={{ width: '1.5rem', height: '1.5rem', backgroundColor: randomColor(), borderRadius: '50%', bottom: 0, position: 'absolute', right: 0 }}></div>
+                            <div style={{ width: '1.5rem', height: '1.5rem', backgroundColor: fundStatus.filter(fund => fund.name === record['Investor Name']).length > 0 ? 'black' : randomColor(), border: 'white 2px solid', borderRadius: '50%', bottom: '-0.25rem', position: 'absolute', right: '-0.25rem' }}></div>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record['Investor Name'] as string}</span>

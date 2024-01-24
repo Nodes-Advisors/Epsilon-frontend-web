@@ -162,10 +162,10 @@ export default function UserProfile() {
               <h1 style={{ padding: '0', marginTop: '1rem', marginBottom: '1rem' }}>{data?.name || 'Unknown user'}</h1>
               
               <div>
-                <span style={{ fontSize: '1.8rem' }}>Last Online Time: {data['last_time_online'] || 'Dummy Time'}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span style={{ fontSize: '1.8rem' }}>Last Online Time: {'' || 'Dummy Time'}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {/* <span style={{ fontSize: '1.8rem' }}>{'No Lead'}</span> */}
               </div>
-              <span style={{ fontSize: '1.6rem', opacity: '0.6' }}>{data?.department} at {'Nodes Advsiors AG' }</span>
+              <span style={{ fontSize: '1.6rem', opacity: '0.6' }}>{data?.department} at {'Nodes Advisors AG' }</span>
               <div >
                 <a style={{ textDecoration: 'none', color: 'white', opacity: '0.6', marginRight: '2rem', fontSize: '1.6rem' }} href='www.google.com'>{user?.email || 'www.personal_web.com'}</a>
                 <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location || 'Zurich, Switzerland'}</span>
