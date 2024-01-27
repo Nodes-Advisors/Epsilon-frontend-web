@@ -33,21 +33,21 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
   const logout = async() => {
     try {
-      const response = await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
+      await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
         headers: {
           'Content-Type': 'application/json',
         },
       })
+      toast.success('Successfully logged out')
     } catch (error) {
       toast.error(error?.response?.data)
     }
-    
-    const lastSlashIndex = window.location.href.lastIndexOf('/')
-    const returnString = window.location.origin.substring(0, lastSlashIndex) + '/home'
+  
     localStorage.setItem('logout', 'true')
-    // await logout({ logoutParams: { returnTo: returnString }})
+
     setUser(undefined)
     setToken(undefined)
+    navigate('/')
   }
 
   useEffect(() => {

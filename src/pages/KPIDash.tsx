@@ -3,10 +3,13 @@ import { KPIBlock, KPIText } from '../components/kpi-component'
 import styles from '../styles/kpi-block.module.less'
 import TICKIcon from '../assets/svgs/tick.svg?react'
 import EpsilonLogo from '../assets/images/epsilon-logo.png'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Skeleton from 'react-loading-skeleton'
 import { Bar, Line } from 'react-chartjs-2'
 import axios from 'axios'
+import cancelButton from '../assets/images/cancel.png'
+import { useTokenStore } from '../store/store'
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -49,14 +52,14 @@ interface AccountHolderData {
 }
 
 
-import { throttle } from 'lodash'
-import LeftNavBar from '../components/left-nav-bar'
-
-
 export default function KPIDash () {
+  const filterRef = useRef<HTMLDivElement>(null)
+  const [clients, setClients] = useState<string[]>([])
+  const [selectedClients, setSelectedClients] = useState<string[]>([])
+  const [showAllFilters, setShowAllFilters] = useState<boolean>(false)
   const [focused, setFocused] = useState<'all' | 'you'>('all')
   const [isLoading, setLoading] = useState(true)
-
+  const token = useTokenStore(state => state.token)
   const [dealData, setDealData] = useState<DealData[]>([])
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
@@ -66,6 +69,41 @@ export default function KPIDash () {
     datasets: [],
   })
   
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowAllFilters(false)
+      }
+    }
+  
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Fetch all clients
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get<string[]>(
+          'http://localhost:5001/getClients',
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token,
+            },
+          },
+        )
+        setClients(response.data)
+      } catch (error) {
+        console.error('Error fetching clients:', error)
+      }
+    }
+    fetchClients()
+  }, [])
+
+
   const [monthlyTotals, setMonthlyTotals] = useState([])
   const [monthlyLineData, setMonthlyLineData] = useState({})
   const [accountHoldersLineData, setAccountHoldersLineData] = useState({ labels: [], datasets: [] })
@@ -510,7 +548,7 @@ export default function KPIDash () {
      
       <div>
         <div className={styles['kpi-head']} style={{  }}>
-          <img src={EpsilonLogo} id={styles['epsilon-logo']} alt="" />
+          <img src={EpsilonLogo} className={styles['epsilon-logo']} alt="" />
           <span className={styles['kpi-dashboard-text']} >KPI Dashboard</span>
         </div>
 
@@ -533,7 +571,7 @@ export default function KPIDash () {
                 <KPIText fontSize={'1.25rem'} fontColor={'#fff'} >Deal Funnel</KPIText>
               </div>
             </KPIBlock>
-            <KPIBlock extraClass={styles['kpi-filter']} width='21.75rem' height='30.25rem' >
+            <KPIBlock extraClass={styles['kpi-filter']} width='21.75rem' height='42.75rem' >
               <KPIText extraClass={styles['kpi-filter-text']} fontColor='#fff' fontSize='1.8125rem' >Filters</KPIText>
               <KPIText extraClass={styles['kpi-filter-text-restore']}>Restore default</KPIText>
               <KPIText extraClass={styles['kpi-filter-text-sub']} fontColor='#fff' fontSize='1.5rem' >Timescale</KPIText>
@@ -541,9 +579,42 @@ export default function KPIDash () {
                 <li>today</li>
                 <li>this week</li>
                 <li>last week</li>
-                <li>1 month</li>
-                <li>since this year</li>
+                <li>month to date</li>
+                <li>year to date</li>
               </ul>
+              <KPIText extraClass={styles['kpi-filter-text-sub']} fontColor='#fff' fontSize='1.5rem' >Clients</KPIText>
+              <div ref={filterRef}
+                onClick={() => setShowAllFilters(true)}
+                style={{ position: 'relative', width: '100%' }}>
+                <div style={{ width: '85%', maxHeight: '18rem', overflowY: 'auto', background: '#12183499', marginLeft: '1.5rem', marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                  
+                  {
+                    selectedClients.map((selectedClient, index) => (
+                      <div key={index} style={{ background: '#fff5', borderRadius: '0.125rem', padding: '0.25rem', margin: '0.25rem' }}>
+                        <span style={{ textTransform: 'uppercase' }}>{selectedClient}</span>
+                        <img
+                          onClick={() => setSelectedClients(selectedClients.filter(client => client !== selectedClient))}
+                          src={cancelButton} className={styles['client-cancel-button']} alt="" />
+                      </div>
+                    ))
+                  }
+                  <span style={{ fontSize: '1rem', padding: '0.5rem' }}>Choose one or more client(s)</span>
+                </div>
+                {
+                  showAllFilters &&
+                <ul style={{ maxHeight: '20rem', overflowY: 'auto', position: 'absolute', top: '100%', left: 0, background: '#12183499', listStyleType: 'none', margin: '0 0 0 1.5rem', padding: 0, textAlign: 'left', width: '85%' }}>
+                  {
+                    clients.filter(clients => !selectedClients.includes(clients)).map((client, index) => (
+                      <li 
+                        onClick={() => setSelectedClients([...selectedClients, client])}
+                        key={index} style={{ border: '0.5px #fff5 solid', padding: '0.5rem' }}>
+                        <span style={{ textTransform: 'uppercase' }}>{client}</span>
+                      </li>
+                    ))
+                  }
+                </ul>
+                }
+              </div>
             </KPIBlock>
           </div>
           {
@@ -572,8 +643,8 @@ export default function KPIDash () {
                           </>
                           :
                           <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            <KPIText fontColor={focused === 'all' ? '#fff' : '#817777'} fontSize='1.875rem' >200</KPIText>
+                            <KPIText fontColor={focused === 'you' ? '#fff' : '#817777'} fontSize='1.875rem' >50</KPIText>
                           </>
                       }
                     </div>
@@ -591,15 +662,15 @@ export default function KPIDash () {
                           </>
                           :
                           <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            <KPIText fontColor={focused === 'all' ? '#fff' : '#817777'} fontSize='1.875rem' >200</KPIText>
+                            <KPIText fontColor={focused === 'you' ? '#fff' : '#817777'} fontSize='1.875rem' >50</KPIText>
                           </>
                       }
                     </div>
         
                   </KPIBlock>
                   <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Conversion to qualified</KPIText>
+                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total meetings</KPIText>
                     <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
@@ -610,15 +681,15 @@ export default function KPIDash () {
                           </>
                           :
                           <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            <KPIText fontColor={focused === 'all' ? '#fff' : '#817777'} fontSize='1.875rem' >200</KPIText>
+                            <KPIText fontColor={focused === 'you' ? '#fff' : '#817777'} fontSize='1.875rem' >50</KPIText>
                           </>
                       }
                     </div>
         
                   </KPIBlock>
                   <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
-                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total Outreach</KPIText>
+                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem' >Total new funds</KPIText>
                     <div className={styles['kpi-miniboard-horizontal-layout']}>
                       {
                         isLoading 
@@ -629,14 +700,32 @@ export default function KPIDash () {
                           </>
                           :
                           <>
-                            <KPIText fontColor='#fff' fontSize='1.875rem' >200</KPIText>
-                            <KPIText fontColor='#817777' fontSize='1.875rem' >50</KPIText>
+                            <KPIText fontColor={focused === 'all' ? '#fff' : '#817777'} fontSize='1.875rem' >200</KPIText>
+                            <KPIText fontColor={focused === 'you' ? '#fff' : '#817777'} fontSize='1.875rem' >50</KPIText>
                           </>
                       }
                     </div>
         
                   </KPIBlock>
-
+                  <KPIBlock extraClass={styles['kpi-mini-dashboard']} width='17.5625rem' height='8.25rem' >
+                    <KPIText extraClass={styles['kpi-align-center-text']} fontColor='#fff' fontSize='0.9375rem'>Number of passes</KPIText>
+                    <div className={styles['kpi-miniboard-horizontal-layout']}>
+                      {
+                        isLoading 
+                          ?
+                          <>
+                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'}  />
+                            <Skeleton className={styles['kpi-text']} duration={2.0} width={'4.5rem'} height={'1.7rem'} />
+                          </>
+                          :
+                          <>
+                            <KPIText fontColor={focused === 'all' ? '#fff' : '#817777'} fontSize='1.875rem' >200</KPIText>
+                            <KPIText fontColor={focused === 'you' ? '#fff' : '#817777'} fontSize='1.875rem' >50</KPIText>
+                          </>
+                      }
+                    </div>
+        
+                  </KPIBlock>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column' }}>

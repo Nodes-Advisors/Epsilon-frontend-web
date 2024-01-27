@@ -11,9 +11,6 @@ import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
 import { STATUS_COLOR_LIST, 
-  LOCATION_LIST, 
-  FIRM_NAMES, 
-  TYPE_LIST,
   STATUS_LIST,
 } from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
@@ -21,11 +18,12 @@ import CancelButton from '../assets/images/cancel.png'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useUserStore } from '../store/store'
+import FundStatus from '../components/status'
 
 export default function FundCards() {
 
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Stage', 'Lead', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Lead', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
   const [filterdData, setFilteredData] = useState<Record<FieldSet>[]>([])
@@ -49,7 +47,7 @@ export default function FundCards() {
     'Firm': string[],
     'Location': string[],
     'Status': string[],
-    'Stage': string[],
+    'Type': string[],
     'Lead': string[],
     'Advanced Search': string[],
     'Clear Filters': string[],
@@ -58,7 +56,7 @@ export default function FundCards() {
     'Firm': [],
     'Location': [],
     'Status': [],
-    'Stage': [],
+    'Type': [],
     'Lead': [],
     'Advanced Search': [],
     'Clear Filters': [],
@@ -85,9 +83,9 @@ export default function FundCards() {
         case 'Location':
           return filteredList[filterName].includes(record['Investor HQ Country'] as string)
         case 'Status':
+          return STATUS_LIST
+        case 'Type':
           return filteredList[filterName].includes(record['Deal Class'] as string)
-        case 'Stage':
-          return filteredList[filterName].includes(record['Lead Partner at Investment Firm'] as string)
         case 'Lead':
           return filteredList[filterName].includes(record['Co-Investors'] as string)
         case 'Advanced Search':
@@ -116,7 +114,7 @@ export default function FundCards() {
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-
+  const rcolor = randomColor()
   useEffect(() => {
     setLoading(true)
     axios.get('http://localhost:5001/fundcard')
@@ -136,16 +134,21 @@ export default function FundCards() {
       })
   }, [])
 
+  function removeDuplicatesAndNull(arr) {
+    return arr.filter((item,
+      index) => item && arr.indexOf(item) === index)
+  }
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
     case 'Firm':
-      return FIRM_NAMES
+      return removeDuplicatesAndNull(data.map((record) => record['Investor Name'] as string))
     case 'Location':
-      return LOCATION_LIST
+      return removeDuplicatesAndNull(data.map((record) => record['Investor HQ Country'] as string))
     case 'Status':
-      return STATUS_LIST
-    case 'Stage':
-      return TYPE_LIST
+      return removeDuplicatesAndNull(STATUS_LIST)
+    case 'Type':
+      console.log(data.map((record) => (record['Deal Class'])))
+      return removeDuplicatesAndNull(data.map((record) => record['Deal Class'] as string))
     case 'Lead':
       return ['Tyler Aroner', 'Eliott Harfouche', 'Iman Ghavami']
     case 'Advanced Search':
@@ -168,7 +171,7 @@ export default function FundCards() {
           'Firm': [],
           'Location': [],
           'Status': [],
-          'Stage': [],
+          'Type': [],
           'Lead': [],
           'Advanced Search': [],
           'Clear Filters': [],
@@ -417,7 +420,7 @@ export default function FundCards() {
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                               onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                               src={record['Logo'] ? (record['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
-                            <div style={{ width: '1.5rem', height: '1.5rem', backgroundColor: fundStatus.filter(fund => fund.name === record['Investor Name']).length > 0 ? 'black' : randomColor(), border: 'white 2px solid', borderRadius: '50%', bottom: '-0.25rem', position: 'absolute', right: '-0.25rem' }}></div>
+                            <FundStatus color={randomColor()} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record['Investor Name'] as string}</span>
