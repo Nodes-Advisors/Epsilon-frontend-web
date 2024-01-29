@@ -4,7 +4,7 @@
 /* eslint-disable no-undef */
 import { MongoClient } from 'mongodb'
 
-const uri = 'mongodb+srv://GraceLTQ:Apple_030711@outboundemailcluster.xapxelz.mongodb.net/'
+const uri = 'mongodb+srv://Admin:NodesAdvisors2024@dev.jq8me.mongodb.net/'
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 async function connectToMongoDB() {
