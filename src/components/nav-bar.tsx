@@ -2,8 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import EpsilonLogo from '../assets/images/epsilon-logo.png'
 import SearchBarIcon from '../assets/svgs/search-bar-icon.svg?react'
 import styles from '../styles/nav-bar.module.less'
-import { useAuth0 } from '@auth0/auth0-react'
-import { useUserStore } from '../store/store'
 import { AsyncImage } from 'loadable-image'
 import { useEffect, useRef, useState } from 'react'
 import NotificationBellIcon from '../assets/svgs/notification-bell.svg?react'
@@ -14,13 +12,17 @@ import LeftNavBar from './left-nav-bar'
 import axios from 'axios'
 import toast, { Toaster } from 'react-hot-toast'
 import AuthComponent from './auth-component'
+import { useTokenStore, useUserStore } from '../store/store'
+import UserProfileIcon from '../assets/images/github-mark-white.png'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
+  const token = useTokenStore(state => state.token)
+  const setToken = useTokenStore(state => state.setToken)
   const navigate = useNavigate()
   const [openPanel, setOpenPanel] = useState(false)
   const [openAuthPanel, setOpenAuthPanel] = useState(false)
-  const { user: auth0User, 
-    logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
+  // const { user: auth0User, 
+  //   logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -29,12 +31,23 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [option, setOption] = useState<boolean>(false)
   const [numNewMsg, setNumNewMsg] = useState<number>(8)
   const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
-  const logoutauth0 = async() => {
-    const lastSlashIndex = window.location.href.lastIndexOf('/')
-    const returnString = window.location.origin.substring(0, lastSlashIndex) + '/home'
+  const logout = async() => {
+    try {
+      await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      toast.success('Successfully logged out')
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  
     localStorage.setItem('logout', 'true')
-    await logout({ logoutParams: { returnTo: returnString }})
+
     setUser(undefined)
+    setToken(undefined)
+    navigate('/')
   }
 
   useEffect(() => {
@@ -143,7 +156,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             </div>
           }
           {
-            user && user.email_verified  
+            token  
               ? 
               <div 
                 ref={panelRef}
@@ -154,7 +167,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                     // if ()
                     }}
                     onClick={() => setOpenPanel(!openPanel)}
-                    src={auth0User?.picture || user.picture || ''}
+                    src={UserProfileIcon}
                     style={{ width: '4rem', height: '4rem', borderRadius: '0.25rem'  }}
     
                   />
@@ -165,7 +178,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                   <div style={{ textAlign: 'start', position: 'absolute', right: '-1rem', top: '5rem', zIndex: 1000 }}>
                     <a className={styles['toggle']} href='/user-profile' style={{ display: 'block', width: '8rem', zIndex: 1001 }}>Go To My Profile</a>
                     <a className={styles['toggle']} style={{ display: 'block', zIndex: 1001, position: 'relative' }}
-                      onClick={logoutauth0}
+                      onClick={logout}
                     >Sign Out</a>
                   </div>
                 }

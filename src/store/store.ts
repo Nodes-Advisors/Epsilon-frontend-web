@@ -1,19 +1,10 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import type { User } from '@auth0/auth0-react'
 import { FieldSet, Record } from 'airtable'
 
-type TUser = User & { 
+type TUser = { 
   status: 'busy' | 'online' | 'offline' | 'not-login'
-  position?: string
-  company?: string
-  website?: string
-  location?: string
-  stage?: string
-  raised?: string
-  lead?: string
-  interested_investors?: string[]
-  historical_logs?: string[]
+  email: string
 }
 
 type UserState = {
@@ -81,6 +72,25 @@ export const useSavedFundsStore = create<SavedFundsState>()(
       }),
       {
         name: 'savedFundsStore',
+      },
+    ),
+  ),
+)
+
+type TokenState = {
+  token: string | undefined
+  setToken: (token: string | undefined) => void
+}
+
+export const useTokenStore = create<TokenState>()(
+  devtools(
+    persist(
+      (set) => ({
+        token: undefined,
+        setToken: (token) => set({ token }),
+      }),
+      {
+        name: 'tokenStore',
       },
     ),
   ),

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Table from "./Table";
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import Table from './Table'
+import { useTokenStore } from '../store/store'
 // import './app.css'
 
 interface IDataItem {
@@ -10,18 +11,24 @@ interface IDataItem {
 }
 
 function GPTdata() {
-  const [query, setQuery] = useState<string>("");
-  const [data, setData] = useState<IDataItem[]>([]);
-  const [filteredData, setFilteredData] = useState<IDataItem[]>([]);
-  const [senders, setSenders] = useState<string[]>([]);
-  const [investorEmails, setInvestorEmails] = useState<string[]>([]);
-  const [deals, setDeals] = useState<string[]>([]);
+  const token = useTokenStore((state) => state.token)
+  const [query, setQuery] = useState<string>('')
+  const [data, setData] = useState<IDataItem[]>([])
+  const [filteredData, setFilteredData] = useState<IDataItem[]>([])
+  const [senders, setSenders] = useState<string[]>([])
+  const [investorEmails, setInvestorEmails] = useState<string[]>([])
+  const [deals, setDeals] = useState<string[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get(`http://localhost:5001?q=${query}`);
-      setData(res.data);
-      setFilteredData(res.data);
+      const res = await axios.get(`http://localhost:5001?q=${query}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+      })
+      setData(res.data)
+      setFilteredData(res.data)
 
       // // Extract unique senders
       // const uniqueSenders = Array.from(
@@ -42,9 +49,9 @@ function GPTdata() {
       //   new Set(res.data.map((item: IDataItem) => item.project))
       // );
       // setDeals(uniqueDeals as string[]);
-    };
-    if (query.length === 0 || query.length > 2) fetchData();
-  }, [query]);
+    }
+    if (query.length === 0 || query.length > 2) fetchData()
+  }, [query])
 
   // const filterBySender = (sender: string) => {
   //   const filteredSender = data.filter(
@@ -109,7 +116,7 @@ function GPTdata() {
         <Table data={filteredData} />
       </div>
     </div>
-  );
+  )
 }
 
-export default GPTdata;
+export default GPTdata

@@ -2,7 +2,12 @@ import React, { FormEventHandler, useEffect, useState } from 'react'
 import axios from 'axios'
 import CancelButton from '../assets/images/cancel.png'
 import styles from '../styles/auth-component.module.less'
+import toast from 'react-hot-toast'
+import { useTokenStore, useUserStore } from '../store/store'
+
 const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<React.SetStateAction<boolean>>}) => {
+  const setToken = useTokenStore((state) => state.setToken)
+  const setUser = useUserStore((state) => state.setUser)
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
@@ -28,10 +33,16 @@ const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<
       } 
       //   console.log(response.data) -> token
       if (response?.status === 200) {
+        setToken(response.data.token)
+        setUser({
+          email: email,
+          status: 'online',
+        })
+        toast.success(mode === 'login' ? 'Logged in successfully!' : 'Signed up successfully!')
         setOpenAuthPanel(false)
       }
     } catch (error) {
-      console.error(error)
+      toast.error(error?.response?.data)
     }
   }
 
@@ -50,7 +61,7 @@ const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<
           },
         })
     } catch (error) {
-      console.error(error)
+      toast.error(error?.response?.data)
     } 
   }
   

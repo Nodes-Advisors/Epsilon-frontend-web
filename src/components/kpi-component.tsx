@@ -9,8 +9,8 @@ type TKPIBlock = {
 }
 
 type TKPIText = {
-    fontSize: string
-    fontColor: string
+    fontSize?: string
+    fontColor?: string
     children: React.ReactNode
     extraClass?: string
     style?: React.CSSProperties
