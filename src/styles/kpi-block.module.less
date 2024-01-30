@@ -185,6 +185,7 @@
 
 // create a triangle in ::after
 .stage-first-container {
+    border-radius: 0.1rem;
     font-weight: 700;
     font-size: 1.5rem;
     text-align: center;
@@ -207,6 +208,20 @@
     }
 }
 
+
+.stage-last-container {
+    border-radius: 0.1rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 15rem;
+    height: 6rem;
+    background-color: rgba(213, 212, 225, 0.26);
+}
+
 .stage-container {
     font-weight: 700;
     font-size: 1.5rem;
@@ -214,30 +229,29 @@
     display: flex;
     align-items: center;
     position: relative;
-    top: 0;
-    left: -25%;
-    width: 0rem;
-    height: 0rem;
-    border-left: 3rem solid transparent;
-    border-bottom: 3rem solid rgba(213, 212, 225, 0.26);
-    border-top: 3rem solid rgba(213, 212, 225, 0.26);
+    width: 15rem;
+    height: 6rem;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    background-color: rgba(213, 212, 225, 0.26);
+    
     
     &::before {
         content: "";
         position: absolute;
-        top: -3rem;
-        left: 0;
-        width: 15rem;
-        height: 6rem;
-        display: grid;
-        place-items: center;
-        font-size: 1.5rem;
-        background-color: rgba(213, 212, 225, 0.26);
+        top: 0rem;
+        left: -3rem;
+        width: 0rem;
+        height: 0rem;
+        border-left: 3rem solid transparent;
+        border-bottom: 3rem solid rgba(213, 212, 225, 0.26);
+        border-top: 3rem solid rgba(213, 212, 225, 0.26);
     }
     &::after {
         content: "";
         position: absolute;
-        top: -3rem;
+        top: 0rem;
         left: 15rem;
         width: 0rem;
         height: 0rem;
@@ -248,9 +262,28 @@
 }
 
 .funnel-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     gap: 6rem;
+    max-height: 60rem;
+    overflow: auto;
+    padding-right: 2rem;
+}
 
+.funnel-layout::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.funnel-layout::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.funnel-layout::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.funnel-layout::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .stage-task-layout {
@@ -264,7 +297,7 @@
     font-size: 1.2rem;
     font-weight: 700;
     width: 15rem;
-    height: 6rem; 
+    height: 5rem; 
     // padding: 0 2rem;
     background-color: rgba(213, 212, 225, 0.26);
     &:hover {

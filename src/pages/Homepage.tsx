@@ -1,25 +1,23 @@
 import styles from '../styles/home.module.less'
-import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useState } from 'react'
-import { useUserStore } from '../store/store'
+import { useUserStore, useTokenStore } from '../store/store'
 import TodayNews from '../components/today-news'
 import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
 import LiveUpdate from '../components/live-update'
-import Table from '../components/Table'
 import axios from 'axios'
 
 export default function Home() {
   
-  const { isAuthenticated, user: auth0User } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
-
+  const token = useTokenStore(state => state.token)
   const [query, setQuery] = useState<string>('')
   const [data, setData] = useState<IDataItem[]>([])
   const [filteredData, setFilteredData] = useState<IDataItem[]>([])
   const [senders, setSenders] = useState<string[]>([])
   const [investorEmails, setInvestorEmails] = useState<string[]>([])
   const [deals, setDeals] = useState<string[]>([])
+  const [userInfo, setUserInfo] = useState<any>({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,60 +48,46 @@ export default function Home() {
     if (query.length === 0 || query.length > 2) fetchData()
   }, [query])
 
-  const filterBySender = (sender: string) => {
-    const filteredSender = data.filter(
-      (item: IDataItem) => item.sender === sender,
-    )
-    setFilteredData(filteredSender)
-  }
-
-  const filterByInvestorEmail = (investors: string) => {
-    const filteredInvestor = data.filter(
-      (item: IDataItem) => item.isInvestorEmail.toString() === investors,
-    )
-    setFilteredData(filteredInvestor)
-  }
-
-  const filterByDeal = (deals: string) => {
-    const filteredDeal = data.filter(
-      (item: IDataItem) => item.project === deals,
-    )
-    setFilteredData(filteredDeal)
-  }
-
   useEffect(() => {
-    if (localStorage.getItem('logout') && localStorage.getItem('logout') === 'true') {
-      setUser(undefined)
-      localStorage.removeItem('logout')
+    const fetchUser = async () => {
+      const res = await axios.get('http://localhost:5001/getUser', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        params: {
+          email: user?.email,
+        },
+      })
+      // console.log(res)
+      if (res.status === 200) {
+        
+        setUserInfo(res.data)
+      }
     }
-
-    if (isAuthenticated) {
-      const user = {...auth0User, status: 'online' as const } 
-      setUser(user)
-    } 
-  }, [isAuthenticated])
+    fetchUser()
+  }, [])
 
 
 
   return (
-    <section style={{ zIndex: 10, width: '100%', minHeight: '90vh' }} >
-      <div style={{ zIndex: 10 }} className={styles['middle-panel']}>
-        <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{user ? user?.name || user?.nickname || user?.given_name || 'Guest': 'Guest'}</span>!</p>
+    // <div style={{ width: '100%', minHeight: '90vh' }} >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
+      <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p>
+      {/* <SearchBar /> */}
 
-        {/* <SearchBar /> */}
-
-        <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
-        <TodayNews />
+      <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+      <TodayNews />
         
-        <div className={styles['live-update-layout']}>
-          <h2 className={styles['news-title']}>Live update</h2>
-          <LiveUpdateIcon className={styles['live-update-icon']} />
-        </div>
-        <LiveUpdate />
+      <div className={styles['live-update-layout']}>
+        <h2 className={styles['news-title']}>Live update</h2>
+        <LiveUpdateIcon className={styles['live-update-icon']} />
+      </div>
+      <LiveUpdate />
 
-      </div> 
+    </div> 
       
 
-    </section>
+  // </div>
   )
 }

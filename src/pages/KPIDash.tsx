@@ -9,6 +9,7 @@ import { Bar, Line } from 'react-chartjs-2'
 import axios from 'axios'
 import cancelButton from '../assets/images/cancel.png'
 import { useTokenStore } from '../store/store'
+import { STAGES } from '../lib/constants'
 
 import {
   Chart as ChartJS,
@@ -53,6 +54,7 @@ interface AccountHolderData {
 
 
 export default function KPIDash () {
+  
   const filterRef = useRef<HTMLDivElement>(null)
   const [clients, setClients] = useState<string[]>([])
   const [selectedClients, setSelectedClients] = useState<string[]>([])
@@ -100,6 +102,32 @@ export default function KPIDash () {
         console.error('Error fetching clients:', error)
       }
     }
+
+    const fetchCompanyData = async() => {
+      const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        setLoading(false)
+        const allTasks = res.data
+        const stageITasks = allTasks.filter(task => task.contacted === 1)
+        const stageIITasks = allTasks.filter(task => task.deck_request === 1)
+        const stageIIITasks = allTasks.filter(task => task.meeting_request === 1)
+        const stageIVTasks = allTasks.filter(task => task.dd === 1)
+        const stageVTasks = allTasks.filter(task => task.pass_contacted === 1 || task.pass_deck === 1 || task.pass_meeting === 1 || task.pass_dd === 1)
+        setTasks({
+          I: stageITasks,
+          II: stageIITasks,
+          III: stageIIITasks,
+          IV: stageIVTasks,
+          V: stageVTasks,
+        })
+      }
+    }
+
+    fetchCompanyData()
     fetchClients()
   }, [])
 
@@ -512,10 +540,11 @@ export default function KPIDash () {
 
   const [category, setCategory] = useState<'dashboard' | 'deal-funnel'>('dashboard')
   const [tasks, setTasks] = useState({
-    I: ['Fund Card I', 'Fund Card II', 'Fund Card III'],
-    II: ['Fund Card IV', 'Fund Card V', 'Fund Card VI'],
-    III: ['Fund Card VII', 'Fund Card VIII', 'Fund Card IX'],
-    IV: ['Fund Card X', 'Fund Card XI', 'Fund Card XII'],
+    I: [],
+    II: [],
+    III: [],
+    IV: [],
+    V: [],
   })
  
 
@@ -540,8 +569,12 @@ export default function KPIDash () {
     }
   }
   useEffect(() => {
-    setTimeout(() => setLoading(false), 3000)
+    setTimeout(() => setLoading(false), 1000)
   }, [isLoading])
+
+  useEffect(() => {
+    console.log(selectedClients)
+  }, [selectedClients])
 
   return (
     <div className={styles['kpi-main']} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'calc(10vh + 5rem)', gap: '3rem' }} >
@@ -847,23 +880,36 @@ export default function KPIDash () {
 
               : 
               <div className={styles['funnel-layout']}>
-                {Object.keys(tasks).map((stage, index) => (
-                  <div className={styles['stage-task-layout']} key={index} onDrop={handleDrop(stage)} onDragOver={(e) => e.preventDefault()}>
-                    <div className={index === 0 ? styles['stage-first-container'] : styles['stage-container']}>
-                      {index === 0 ? 'Stage' : '\u00A0\u00A0\u00A0\u00A0\u00A0Stage'} {stage}
-                    </div>
-                    {tasks[stage].map((deal, index) => (
-                      <div 
-                        className={styles['task']} 
-                        draggable 
-                        onDragStart={(e) => handleDragStart(e, deal)} 
-                        key={index}
-                      >
-                        {deal}
+                {Object.keys(tasks).map((stage, index) => {
+                  const filteredTasks = tasks[stage].filter(deal => {
+                    if (selectedClients.length === 0) {
+                      return true
+                    }
+                    return selectedClients.map(client => client.toUpperCase()).includes(deal.company_acronym.toUpperCase())
+                    // return selectedClients.includes(deal.company_acronym)
+                  })
+
+                  return (
+                    <div className={styles['stage-task-layout']} key={index} onDrop={handleDrop(stage)} onDragOver={(e) => e.preventDefault()}>
+                      <div className={ index === 0 ? styles['stage-first-container'] : index === Object.keys(tasks).length - 1 ? styles['stage-last-container'] : styles['stage-container']}>
+                        {STAGES[index]}
                       </div>
-                    ))}
-                  </div>
-                ))}
+                      {filteredTasks.map((deal, index) => (
+                        <div 
+                          // onMouseOver={() => console.log(deal.company_acronym)}
+                          className={styles['task']} 
+                          draggable 
+                          onDragStart={(e) => handleDragStart(e, deal)} 
+                          key={index}
+                        >
+                          <span style={{ display: 'inline-block', fontWeight: '400', fontSize: '1rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}><span style={{ fontWeight: '600', fontSize: '1.2rem', color: 'violet' }}>{deal.company_acronym}</span>({deal.company_name})</span>
+                          <br />
+                          <span style={{ display: 'inline-block', color: 'orange', fontWeight: '600', fontSize: '1.5rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}>{deal.LP_pitched}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
 
           }

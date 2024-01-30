@@ -269,34 +269,51 @@ export default function Profile(): JSX.Element {
           <div className={styles['model-layout']}>
             <h2>Historical Log</h2>
   
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <details>
-                <summary style={{ fontSize: '1.4rem' }}>2023</summary>
-                <ul>
-                  <li>a</li>
-                  <li>c</li>
-                  <li>b</li>
-                </ul>
-              </details>
-
-              <details>
-                <summary style={{ fontSize: '1.4rem' }}>2021</summary>
-                <ul>
-                  <li>a</li>
-                  <li>c</li>
-                  <li>b</li>
-                </ul>
-              </details>
-
-              <details>
-                <summary style={{ fontSize: '1.4rem' }}>2023</summary>
-                <ul>
-                  <li>a</li>
-                  <li>c</li>
-                  <li>b</li>
-                </ul>
-              </details>
+            <div>
+              <table style={{ textAlign: 'left' }}>
+                <thead>
+                  <tr>
+                    <th>Company</th>
+                    <th>Stage</th>
+                    <th>Date</th>
+                    <th>Round Size</th>
+                    <th>Toal Raised</th>
+                    <th>Co-investors</th>
+                    <th>VC Contact</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td >2023</td>
+                    <td >a</td>
+                    <td >c</td>
+                    <td >b</td>
+                    <td >Toal Raised</td>
+                    <td >Co-investors</td>
+                    <td >Contact</td>
+                  </tr>
+                  <tr>
+                    <td>2021</td>
+                    <td>a</td>
+                    <td>c</td>
+                    <td>b</td>
+                    <td>Toal Raised</td>
+                    <td>Co-investors</td>
+                    <td >Contact</td>
+                  </tr>
+                  <tr>
+                    <td>2023</td>
+                    <td>a</td>
+                    <td>c</td>
+                    <td>b</td>
+                    <td>Toal Raised</td>
+                    <td>Co-investors</td>
+                    <td >Contact</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
           </div>
         </div>
         <div className={styles['right-panel']}>
