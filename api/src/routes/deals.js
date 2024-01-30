@@ -27,6 +27,9 @@ router.get("/deals", async (req, res) => {
                 ]
               }
             },
+            deckRequested: {$sum: "$deck_request"},
+            meetingRequested: {$sum: "$meeting_request"},
+            ddRequested: {$sum: "$dd"},
           },
         },
         {
@@ -36,6 +39,9 @@ router.get("/deals", async (req, res) => {
             totalOutreach: 1,
             newFund: 1,
             respondOrNot: 1,
+            deckRequested: 1,
+            meetingRequested: 1,
+            ddRequested: 1,
           },
         },
         { $sort: { totalOutreach: -1 } },
