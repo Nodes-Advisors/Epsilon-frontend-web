@@ -23,10 +23,10 @@ import FundStatus from '../components/status'
 export default function FundCards() {
 
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Lead', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Contact', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
-  const [filterdData, setFilteredData] = useState<Record<FieldSet>[]>([])
+  const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
   const getfcs = useCallback((apikey: string | undefined, baseId: string | undefined) => getFundCards(apikey, baseId)
     , [])
   const [requestName, setRequestName] = useState<string>('bypass approval')
@@ -35,20 +35,21 @@ export default function FundCards() {
   const [contactPerson, setContactPerson] = useState<string>('Person A')
   const [details, setDetails] = useState<string>('nothing')
   const [priority, setPriority] = useState<string>('High')
-
+  // const [requestStatus, setRequestStatus] = useState<'Pending' | 'Request'>('Request')
   const inputRef = useRef<HTMLInputElement>(null)
-  
+  const [pendingList, setPendingList] = useState<string[]>([])
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
   const user = useUserStore(state => state.user)
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
+  const [selectedFundName, setSelectedFundName] = useState<string>('')
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Firm': string[],
     'Location': string[],
     'Status': string[],
     'Type': string[],
-    'Lead': string[],
+    'Contact': string[],
     'Advanced Search': string[],
     'Clear Filters': string[],
   }>({
@@ -57,7 +58,7 @@ export default function FundCards() {
     'Location': [],
     'Status': [],
     'Type': [],
-    'Lead': [],
+    'Contact': [],
     'Advanced Search': [],
     'Clear Filters': [],
   })
@@ -79,14 +80,14 @@ export default function FundCards() {
         // Apply the filter based on the filterName
         switch (filterName) {
         case 'Firm':
-          return filteredList[filterName].includes(record['Investor Name'] as string)
+          return filteredList[filterName].includes(record['Funds'] as string)
         case 'Location':
-          return filteredList[filterName].includes(record['Investor HQ Country'] as string)
+          return filteredList[filterName].includes(record['HQ Country'] as string)
         case 'Status':
           return STATUS_LIST
         case 'Type':
-          return filteredList[filterName].includes(record['Deal Class'] as string)
-        case 'Lead':
+          return filteredList[filterName].includes(record['Type'] as string)
+        case 'Contact':
           return filteredList[filterName].includes(record['Co-Investors'] as string)
         case 'Advanced Search':
           return filteredList[filterName].includes(record['Co-Investors'] as string)
@@ -114,10 +115,10 @@ export default function FundCards() {
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-  const rcolor = randomColor()
+  // const []
   useEffect(() => {
     setLoading(true)
-    axios.get('http://localhost:5001/fundcard')
+    axios.get('http://localhost:5001/getAllFunds')
       .then((res) => {
         setData(res.data)
         setFunds(res.data)  
@@ -141,15 +142,15 @@ export default function FundCards() {
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
     case 'Firm':
-      return removeDuplicatesAndNull(data.map((record) => record['Investor Name'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
-      return removeDuplicatesAndNull(data.map((record) => record['Investor HQ Country'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
     case 'Status':
       return removeDuplicatesAndNull(STATUS_LIST)
     case 'Type':
-      console.log(data.map((record) => (record['Deal Class'])))
-      return removeDuplicatesAndNull(data.map((record) => record['Deal Class'] as string))
-    case 'Lead':
+      // console.log(data.map((record) => (record['Type'])))
+      return removeDuplicatesAndNull(data.map((record) => record['Type'] as string))
+    case 'Contact':
       return ['Tyler Aroner', 'Eliott Harfouche', 'Iman Ghavami']
     case 'Advanced Search':
       return ['Advanced Search']
@@ -172,7 +173,7 @@ export default function FundCards() {
           'Location': [],
           'Status': [],
           'Type': [],
-          'Lead': [],
+          'Contact': [],
           'Advanced Search': [],
           'Clear Filters': [],
         })
@@ -222,6 +223,24 @@ export default function FundCards() {
     }
   }, [])
 
+  useEffect(() => {
+    async function fetchPendingList() {
+      await axios.get('http://localhost:5001/getPendingRequests', {
+        // params: {
+        //   email: user?.email,
+        // },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        setPendingList(res.data.map((record) => record['Fund Name'] as string))
+      }).catch((error) => {
+        toast.error(error?.response?.data)
+      })
+    }
+    fetchPendingList()
+  }, [])
+
   const sendRequest = async (e) => {
     e.preventDefault()
     try {
@@ -233,6 +252,7 @@ export default function FundCards() {
         contactPerson,
         priority,
         details,
+        selectedFundName,
         email: user?.email,
       }, {
         headers: {
@@ -241,6 +261,7 @@ export default function FundCards() {
       })
       toast.success('Request sent successfully!')
       setOpenRequestPanel(false)
+      setPendingList([...pendingList, selectedFundName])
     } catch (error) {
       toast.error(error?.response?.data)
     }
@@ -355,7 +376,7 @@ export default function FundCards() {
             
           </div>
         }
-        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem', margin: '1rem' }}></div>
+        <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem', margin: '1rem 0' }}></div>
         {
           isLoading 
             ? 
@@ -374,27 +395,26 @@ export default function FundCards() {
             </div>
             :
 
-            <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filterdData.length} Funds</span>
-              <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))', width: '100%', textAlign: 'left'  }}>
-                <span style={{ fontSize: '1.15rem' }}>Funds</span>
-                <span style={{ fontSize: '1.15rem' }}>Account Manager</span>
-                <span style={{ fontSize: '1.15rem' }}>Sector</span>
-                <span style={{ fontSize: '1.15rem' }}>Type</span>
-                <span style={{ fontSize: '1.15rem' }}>People at the Fund</span>
-                <span style={{ fontSize: '1.15rem' }}>Deals</span>
-                <span style={{ fontSize: '1.15rem' }}>Co-Investors</span>
-                <span style={{ fontSize: '1.15rem' }}>Suitability Score</span>
+            <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds</span>
+              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 2fr 2.5fr repeat(5, 1.5fr)', width: '100%', textAlign: 'left'  }}>
+                <span>Funds</span>
+                <span>Account Manager</span>
+                <span>Sector</span>
+                <span>Type</span>
+                <span>Contact</span>
+                <span>Deals</span>
+                <span>Co-Investors</span>
+                <span>Suitability Score</span>
               </div>
               <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                               
-              
               {
-                filterdData.length > 0
+                filteredData.length > 0
                   ?
-                  filterdData.map((record, index) => (
+                  filteredData.map((record, index) => (
                     <>
-                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '1rem', gridTemplateColumns: '3.2fr 2fr 2.5fr repeat(5, minmax(100px, 1.5fr))' }}> 
+                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 2fr 2.5fr repeat(5, 1.5fr)' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
@@ -410,9 +430,18 @@ export default function FundCards() {
                               }}
                               style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{inSavedFunds(record) ? 'SAVED' : 'SAVE'}</button>
                             <button 
-                              onClick={() => setOpenRequestPanel(true)}
+                              
+                              onClick={() => {
+                                if (pendingList.includes(record.Funds as string)) {
+                                  toast.error('You have already sent a request for this fund')
+                                  return
+                                
+                                }
+                                setSelectedFundName(record.Funds as string)
+                                setOpenRequestPanel(true)
+                              }}
                               style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>
-                              {'REQUEST'}
+                              {pendingList.includes(record.Funds) ? 'PENDING' : 'REQUEST'}
                             </button>
                           </div>
                           <div style={{ position: 'relative' }}>
@@ -423,23 +452,24 @@ export default function FundCards() {
                             <FundStatus color={randomColor()} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                            <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600' }}>{record['Investor Name'] as string}</span>
-                            <span style={{  }}>{record['Investor HQ Country'] as string}</span>
+                            <span style={{ color: 'rgb(128, 124, 197)', fontWeight: '600', textAlign: 'left' }}>{record['Funds'] as string}</span>
+                            <span style={{  }}>{record['HQ Country'] as string}</span>
                           </div>
                             
                         </div>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{'Tyler Aroner, Eliott Harfouche, Iman Ghavami'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Company Industry Code'] as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deal Class'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Lead Partner at Investment Firm'] as string[] | string) as string || 'n/a'}</span>
-                        <span></span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{record['Account Manager'] ? record['Account Manager'] : 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Contact'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deals'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
-                        
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
                       </div>
                       <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                     </>
                   )) : <p>No data</p>
               }
+
             </div>
            
             

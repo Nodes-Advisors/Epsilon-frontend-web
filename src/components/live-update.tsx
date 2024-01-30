@@ -187,18 +187,18 @@ function LiveUpdate() {
                 top: popupPosition.y, left: popupPosition.x, 
                 width: '25rem', height: '30rem', 
                 background: '#fff', borderRadius: '0.5rem', boxShadow: '0 0  1rem violet' }}>
-              <div style={{ marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'start' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'pink', width: '4rem', height: '4rem', borderRadius: '50%' }}>
+              <div style={{ marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
+                {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'pink', width: '4rem', height: '4rem', borderRadius: '50%' }}>
                   <h2 style={{ color: '#111', fontSize: '2rem' }}>{hoveredName ? hoveredName[0] : 'U'}</h2>
-                </div>
+                </div> */}
                 <span style={{ color: '#333', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
               </div>
               <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
-              <div style={{ justifyItems: 'start', placeItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
+              <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
                 <span style={{  color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contact</span>
                 <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.contacted, 0)}</span>
-                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Request</span>
+                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
                 <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
                 <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Request</span>
@@ -217,38 +217,37 @@ function LiveUpdate() {
                     return (
                       <li key={item.id} style={{ padding: '0.5rem' }}>
                         <span style={{ color: 'violet' }}>{new Date(item.last_updated_status_date).toLocaleDateString()}</span>
-                  &nbsp;- &nbsp;
+                        {' - '}
                         {item.LP_contact_pitched && <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched} <span style={{ color: '#111' }}>From&nbsp;</span></span>}
-                        <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> &nbsp;
+                        <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span>
+                        {' '}
                         {
-                          item.pass_contacted === 1 && 'Pass Contact'
+                          item.pass_contacted === 1 && 'Passes Contact'
                         }
                   
                         {
-                          item.deck_request === 1 && 'Request Deck'
+                          item.deck_request === 1 && 'Requests Deck'
                         }
                         {
-                          item.pass_deck === 1 && 'Pass Deck'
+                          item.pass_deck === 1 && 'Passes Deck'
                         }
                         {
-                          item.meeting_request === 1 && 'Request Meeting'
+                          item.meeting_request === 1 && 'Requests Meeting'
                         }
                         {
-                          item.pass_meeting === 1 && 'Pass Meeting'
+                          item.pass_meeting === 1 && 'Passes Meeting'
                         }
                         {
-                          item.dd === 1 && 'Duel Diligence'
+                          item.dd === 1 && 'Does Duel Diligence'
                         }
                         {
-                          item.pass_dd === 1 && 'Pass Duel Diligence'
+                          item.pass_dd === 1 && 'Passes Duel Diligence'
                         }
                         {
                           item.pass_contacted === 0 && item.deck_request === 0 && item.pass_deck === 0 && item.meeting_request === 0 && item.pass_meeting === 0
                       && item.dd === 0  && item.pass_dd === 0 && 'Has No Response'
                         }
-                  &nbsp;
-                  For 
-                  &nbsp;
+                        {' For '}
                         <span className={styles['company-manager']}>
                           {item.company_name}
                         </span>

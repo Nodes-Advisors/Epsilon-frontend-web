@@ -21,8 +21,8 @@ import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import LeftNavBar from '../components/left-nav-bar'
 import { set, throttle } from 'lodash'
 import { STATUS_COLOR_LIST } from '../lib/constants'
+import FundStatusLarger from '../components/status-larger'
 
-// import { useAuth0 } from '@auth0/auth0-react'
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
@@ -51,7 +51,7 @@ export default function Profile(): JSX.Element {
     console.log(record)
     // console.log(record._id)
     // console.log(savedFunds)
-    setLocation(['Investor HQ City', 'Investor HQ State/Province', 'Investor HQ Country' ].reduce((acc, cur, curIndex, array) =>
+    setLocation(['HQ Country' ].reduce((acc, cur, curIndex, array) =>
       acc += record[cur] ? curIndex !== array.length - 1 ? record[cur] + ', ' : record[cur] : '', ''))
     setRecord(record)
     setTimeout(() => setLoading(false), 1000)
@@ -78,11 +78,11 @@ export default function Profile(): JSX.Element {
               <div style={{ position: 'relative' }}>
                 <AsyncImage src={''} alt='' 
                   style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
-                    border: '0.5rem solid #00aa00', 
+                    border: '1px solid transparent', borderRadius: '0.5px',
                   }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} />
-                {/* <div style={{ position: 'absolute', width: '2rem', height: '2rem', right: 0, bottom: 0, borderRadius: '50%', backgroundColor: '#ff0000' }}></div> */}
+                <FundStatusLarger color={randomColor()} />
               </div>
           }
           <div className={styles['action-buttons']}>
@@ -138,7 +138,7 @@ export default function Profile(): JSX.Element {
           <div className={styles['name-layout']}>
             <div className={styles.name}>
               <span className={styles['partial-name']}>
-                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['Investor Name'] as string : 'no name'}
+                {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['Funds'] as string : 'no name'}
               </span>
             </div>
             {/* {
@@ -157,20 +157,7 @@ export default function Profile(): JSX.Element {
                 </span>
                 : 
                 record ? 
-                  Array.isArray(record['Deal Class']) && (record['Deal Class'] as string[]).length === 0
-                    ?
-                    'no description'
-                    :
-                    Array.isArray(record['Deal Class']) && (record['Deal Class'] as string[]).length > 1 
-                      ?
-                      <span className={styles.description}>
-                        {(record['Deal Class'] as string[]).map((dealClass: string, index: number) => 
-                          index !== (record!['Deal Class'] as string[]).length - 1 ? dealClass + ', ' : dealClass )}
-                      </span>
-                      :
-                      <span className={styles.description}>
-                        {record['Deal Class'] as string}
-                      </span>
+                  <span className={styles['description']}>{record['Type']}</span>
                   : 'no description'
             }
             
@@ -205,7 +192,7 @@ export default function Profile(): JSX.Element {
                   :
                   <span className={styles['detail-category-text-2']}>
                     {
-                      record['Company Industry Code'] ? (record['Company Industry Code'] as string)
+                      record['Sector'] ? (record['Sector'] as string)
                         : 'no industry code'
                     }
                   </span>
@@ -224,34 +211,40 @@ export default function Profile(): JSX.Element {
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
-              <span className={styles['detail-category-text']}>DEAL TYPE</span>
+              <span className={styles['detail-category-text']}>DEALS</span>
               {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
                   : 
-                  record['Deal Type 1'] 
+                  record['Deals'] 
                     ?          
                     <span className={styles['detail-category-text-2']}>
-                      {record['Deal Type 1'] as string}
+                      {record['Deals'] as string}
                     </span>
-                    : 'no deal type'
+                    : 
+                    <span className={styles['detail-category-text-2']}>
+                      No Deals Found
+                    </span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
             <p className={styles['detail-category']}>
-              <span className={styles['detail-category-text']}>Lead Partner</span>
+              <span className={styles['detail-category-text']}>CONTACT</span>
               {
                 isLoading
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'15rem'} />
                   :
-                  record['Lead Partner at Investment Firm'] 
+                  record['Contact'] 
                     ?          
                     <span className={styles['detail-category-text-2']}>
-                      {record['Lead Partner at Investment Firm'] as string}
+                      {record['Contact'] as string}
                     </span>
-                    : 'no account manager recorded'
+                    :
+                    <span className={styles['detail-category-text-2']}>
+                      Np Contact Found
+                    </span>
               }
             </p>
             <div className={styles['detail-divider']}></div>
@@ -370,13 +363,14 @@ export default function Profile(): JSX.Element {
         <div className={styles['popover-form']}>
           <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', position: 'relative' }}>
                 <AsyncImage src={isLoading  ? '' : ''} alt='' 
-                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid ${randomColor()}` }}
+                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid transparent` }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} />
+               
                 <div>
-                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{record ? record['Investor Name'] as string : 'no name'}</span></span>
+                  <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{record ? record['Funds'] as string : 'no name'}</span></span>
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
                 </div>
               </div>

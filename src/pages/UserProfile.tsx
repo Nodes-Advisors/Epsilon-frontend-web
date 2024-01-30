@@ -34,7 +34,7 @@ export default function UserProfile() {
           email: user?.email,
         },
       })
-      const data = await result.data
+      const data = result.data
       console.log(data)
       setData(data)
       setLoading(false)
@@ -62,7 +62,7 @@ export default function UserProfile() {
                   cursor: 'pointer',
                 }}
               />
-              <span style={{ marginTop: '2rem' }}>User&apos;s investing connections</span>
+              <span style={{ marginTop: '2rem' }}>{data?.name || data?.username|| data?.email}&apos;s connections</span>
               <ul>
                 {
                   Array.from({ length: 3 }).map((_, i) => (
@@ -89,7 +89,7 @@ export default function UserProfile() {
                   <h3>179 Investors</h3>
                 </li>
               </ul>
-              <span style={{ marginTop: '2rem' }}>User&apos;s interested investors</span>
+              <span style={{ marginTop: '2rem' }}>{data?.name || data?.username || data?.email}&apos;s active investors</span>
               <ul>
                 {
                   Array.from({ length: 3 }).map((_, i) => (
@@ -116,7 +116,7 @@ export default function UserProfile() {
                   <h3>34 Investors</h3>
                 </li>
               </ul>
-              <span style={{ marginTop: '4rem' }}>FIND USER ON</span>
+              <span style={{ marginTop: '4rem' }}>FIND {data ? data?.name || data?.username : 'USER'} ON</span>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <TwitterIcon
                   style={{
@@ -168,10 +168,10 @@ export default function UserProfile() {
                 <span style={{ fontSize: '1.8rem' }}>Last Online Time: {data?.last_time_online as string || 'Dummy Time'}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {/* <span style={{ fontSize: '1.8rem' }}>{'No Lead'}</span> */}
               </div>
-              <span style={{ fontSize: '1.6rem', opacity: '0.6' }}>{data?.department} at {'Nodes Advisors AG' }</span>
+              <span style={{ fontSize: '1.6rem', opacity: '0.6' }}><span style={{ textTransform: 'capitalize' }}>{data?.department}</span> at {'Nodes Advisors AG' }</span>
               <div >
                 <a style={{ textDecoration: 'none', color: 'white', opacity: '0.6', marginRight: '2rem', fontSize: '1.6rem' }} href='www.google.com'>{user?.email || 'www.personal_web.com'}</a>
-                <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location || 'Zurich, Switzerland'}</span>
+                <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Zurich, Switzerland'}</span>
               </div>
               <span style={{ marginTop: '2rem', fontSize: '2rem', fontWeight: 550 }}>User&apos;s KPI Dashboard</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', marginTop: '2rem' }}>
@@ -237,12 +237,12 @@ export default function UserProfile() {
                   <span 
                     onClick={() => { navigate('/fund-card/1', { replace: true }) }}
                     style={{ color: '#00BBF9', fontWeight: 550 }}>Google Venture</span></li>
-                {
+                {/* {
                   (user?.historical_logs ? user.historical_logs : ['historical_logs', 'historical_logs', 'historical_logs'])
                     .map((log, i) => (
                       <li key={i}>{log}</li>
                     ))
-                }
+                } */}
               </ul>
             </div>
           </>
