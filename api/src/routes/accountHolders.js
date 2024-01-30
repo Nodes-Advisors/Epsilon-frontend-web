@@ -2,8 +2,8 @@ import express from 'express'
 import client from '../db/client.js'
 
 const router = express.Router()
-const dbName = 'EpsilonEmailDB'
-const collectionName = 'KPIExcelSheet'
+const dbName = "dev";
+const collectionName = "FundraisingPipeline";
 
 router.get('/account-holders', async (req, res) => {
   try {
@@ -14,10 +14,18 @@ router.get('/account-holders', async (req, res) => {
       .aggregate([
         {
           $group: {
-            _id: '$account_holder', // Group by the account_holder field
+            _id: '$account_holder',  // Group by the account_holder field
             totalOutreach: { $sum: 1 },
             newFund: { $sum: '$new_fund' }, // Assuming new_fund is a number
-            respondOrNot: { $sum: '$repond_or_not' }, // Assuming repond_or_not is a number
+            respondOrNot: {
+              $sum: {
+                $cond: [
+                  { $ne: ['$current_status', 'waiting for response'] }, // Condition: current_status is not "waiting for response"
+                  1,  // If condition is true, count this row (add 1)
+                  0   // If condition is false, do not count this row (add 0)
+                ]
+              }
+            },
             newRespond: { $sum: '$new_respond' }, // Assuming new_respond is a number
           },
         },

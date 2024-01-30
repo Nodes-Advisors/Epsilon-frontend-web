@@ -2,8 +2,8 @@ import express from 'express'
 import client from '../db/client.js'
 
 const router = express.Router()
-const dbName = 'EpsilonEmailDB'
-const collectionName = 'KPIExcelSheet'
+const dbName = "dev";
+const collectionName = "FundraisingPipeline";
 
 router.get('/monthly-totals', async (req, res) => {
   try {
@@ -20,8 +20,8 @@ router.get('/monthly-totals', async (req, res) => {
             },
             totalOutreach: { $sum: 1 },
             totalNewFund: { $sum: '$new_fund' },
-            totalResponse: { $sum: '$repond_or_not' },
-            averageResponse: { $avg: '$repond_or_not' },
+            totalResponse: { $sum: '$follow_up' },
+            averageResponse: { $avg: '$follow_up' },
           },
         },
         {
