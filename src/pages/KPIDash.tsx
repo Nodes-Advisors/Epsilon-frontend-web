@@ -1427,6 +1427,7 @@ export default function KPIDash () {
               ))}
             </div>
           )}
+              <div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Deal Statistics</KPIText>
                   <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
@@ -1577,10 +1578,6 @@ export default function KPIDash () {
                   )
                 })}
               </div>
-
-          }
-
-          
         </div>
       </div>
     </div>
