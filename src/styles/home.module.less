@@ -210,14 +210,6 @@ section {
     box-shadow: 0px 0px 0px 0px rgba(255, 255, 255, 0.90);
 }
 
-.middle-panel {
-    margin-left: 10.25rem;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    position: relative;
-}
-
 .log-in {
     position: absolutes;
     right: 0;
@@ -319,7 +311,9 @@ section {
 }
 
 .news-ul {
-    max-width: 75rem;
+    max-height: 20rem;
+    overflow: auto;
+    max-width: 135rem;
     width: -moz-fit-content;
     width: fit-content;
     border: none;
@@ -332,9 +326,26 @@ section {
     font-family: Inter;
 }
 
+.news-ul::-webkit-scrollbar { /* For WebKit browsers */
+    width: 6px;
+}
+
+.news-ul::-webkit-scrollbar-track { /* For WebKit browsers */
+    background: #eee;
+}
+
+.news-ul::-webkit-scrollbar-thumb { /* For WebKit browsers */
+    background: #888;
+    height: 50px;
+}
+
+.news-ul::-webkit-scrollbar-thumb:hover { /* For WebKit browsers */
+    background: #555;
+}
+
 .news-ul > li {
     position: relative;
-    z-index: -10;
+    z-index: 10;
     text-wrap: wrap;
     margin-top: 0.5rem;
     text-wrap: wrap;
@@ -344,9 +355,14 @@ section {
     }
 }
 
-.news-ul > li > span {
+.company-manager {
     text-wrap: wrap;
     color: #754DCA;
+    &:hover {
+        // background-color: #D23548;
+        cursor: pointer;
+        text-decoration: underline;
+    }
 }
 
 .new-ul-skeleton {
@@ -444,4 +460,27 @@ section {
     margin: 0;
     border: none;
     outline: none;
+}
+
+.contact-list-scroll {
+    list-style-type: disc;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #888 #eee; /* For Firefox */
+}
+
+.contact-list-scroll::-webkit-scrollbar { /* For WebKit browsers */
+    width: 6px;
+}
+
+.contact-list-scroll::-webkit-scrollbar-track { /* For WebKit browsers */
+    background: #eee;
+}
+
+.contact-list-scroll::-webkit-scrollbar-thumb { /* For WebKit browsers */
+    background: #888;
+    height: 30px;
+}
+
+.contact-list-scroll::-webkit-scrollbar-thumb:hover { /* For WebKit browsers */
+    background: #555;
 }

@@ -1,14 +1,15 @@
 //@ts-nocheck
-import { KPIBlock, KPIText } from "../components/kpi-component";
-import styles from "../styles/kpi-block.module.less";
-import TICKIcon from "../assets/svgs/tick.svg?react";
-import EpsilonLogo from "../assets/images/epsilon-logo.png";
-import { useEffect, useState, useRef } from "react";
-import Skeleton from "react-loading-skeleton";
-import { Bar, Line } from "react-chartjs-2";
-import axios from "axios";
-import cancelButton from "../assets/images/cancel.png";
-import { useTokenStore } from "../store/store";
+import { KPIBlock, KPIText } from '../components/kpi-component'
+import styles from '../styles/kpi-block.module.less'
+import TICKIcon from '../assets/svgs/tick.svg?react'
+import EpsilonLogo from '../assets/images/epsilon-logo.png'
+import { useEffect, useState, useRef } from 'react'
+import Skeleton from 'react-loading-skeleton'
+import { Bar, Line } from 'react-chartjs-2'
+import axios from 'axios'
+import cancelButton from '../assets/images/cancel.png'
+import { useTokenStore } from '../store/store'
+import { STAGES } from '../lib/constants'
 
 import {
   Chart as ChartJS,
@@ -51,15 +52,17 @@ interface AccountHolderData {
   newRespond: number;
 }
 
-export default function KPIDash() {
-  const filterRef = useRef<HTMLDivElement>(null);
-  const [clients, setClients] = useState<string[]>([]);
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const [showAllFilters, setShowAllFilters] = useState<boolean>(false);
-  const [focused, setFocused] = useState<"all" | "you">("all");
-  const [isLoading, setLoading] = useState(true);
-  const token = useTokenStore((state) => state.token);
-  const [dealData, setDealData] = useState<DealData[]>([]);
+
+export default function KPIDash () {
+  
+  const filterRef = useRef<HTMLDivElement>(null)
+  const [clients, setClients] = useState<string[]>([])
+  const [selectedClients, setSelectedClients] = useState<string[]>([])
+  const [showAllFilters, setShowAllFilters] = useState<boolean>(false)
+  const [focused, setFocused] = useState<'all' | 'you'>('all')
+  const [isLoading, setLoading] = useState(true)
+  const token = useTokenStore(state => state.token)
+  const [dealData, setDealData] = useState<DealData[]>([])
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
   >([]);
@@ -100,9 +103,35 @@ export default function KPIDash() {
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
-    };
-    fetchClients();
-  }, []);
+    }
+
+    const fetchCompanyData = async() => {
+      const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        setLoading(false)
+        const allTasks = res.data
+        const stageITasks = allTasks.filter(task => task.contacted === 1)
+        const stageIITasks = allTasks.filter(task => task.deck_request === 1)
+        const stageIIITasks = allTasks.filter(task => task.meeting_request === 1)
+        const stageIVTasks = allTasks.filter(task => task.dd === 1)
+        const stageVTasks = allTasks.filter(task => task.pass_contacted === 1 || task.pass_deck === 1 || task.pass_meeting === 1 || task.pass_dd === 1)
+        setTasks({
+          I: stageITasks,
+          II: stageIITasks,
+          III: stageIIITasks,
+          IV: stageIVTasks,
+          V: stageVTasks,
+        })
+      }
+    }
+
+    fetchCompanyData()
+    fetchClients()
+  }, [])
 
   const [monthlyTotals, setMonthlyTotals] = useState([]);
   const [monthlyLineData, setMonthlyLineData] = useState({});
@@ -677,8 +706,12 @@ export default function KPIDash() {
     };
   };
   useEffect(() => {
-    setTimeout(() => setLoading(false), 3000);
-  }, [isLoading]);
+    setTimeout(() => setLoading(false), 1000)
+  }, [isLoading])
+
+  useEffect(() => {
+    console.log(selectedClients)
+  }, [selectedClients])
 
   return (
     <div
@@ -1394,6 +1427,160 @@ export default function KPIDash() {
               ))}
             </div>
           )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Deal Statistics</KPIText>
+                  <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
+                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='37.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
+                      {/* Deal Data Table */}
+                      <table style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>Deal Name</th>
+                            <th>Total Outreach</th>
+                            <th>New Fund</th>
+                            <th>Respond or Not</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dealData.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.dealName}</td>
+                              <td>{item.totalOutreach}</td>
+                              <td>{item.newFund}</td>
+                              <td>{item.respondOrNot}</td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td>Grand Total</td>
+                            <td>
+                              {dealData.reduce(
+                                (acc, item) => acc + item.totalOutreach,
+                                0,
+                              )}
+                            </td>
+                            <td>
+                              {dealData.reduce((acc, item) => acc + item.newFund, 0)}
+                            </td>
+                            <td>
+                              {dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>              
+                    </KPIBlock>
+                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
+                      {/* Horizontal Bar Plot for Each Deal's KPI */}
+                      <div style={{ height: '57rem', width: '55rem' }}>
+                        <Bar data={dealChartData} options={chartOptions} />
+                      </div>
+                    </KPIBlock>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Account Holder's KPI</KPIText>
+                  <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
+                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='37.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
+                      {/* Account Holder Data Table */}
+                      <table style={tableStyle}>
+                        <thead>
+                          <tr>
+                            <th>Account Holder</th>
+                            <th>Total Outreach</th>
+                            <th>New Fund</th>
+                            <th>Respond or Not</th>
+                            <th>New Respond</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {accountHolderData.map((item, index) => (
+                            <tr key={index}>
+                              <td>{item.accountHolder}</td>
+                              <td>{item.totalOutreach}</td>
+                              <td>{item.newFund}</td>
+                              <td>{item.respondOrNot}</td>
+                              <td>{item.newRespond}</td>
+                            </tr>
+                          ))}
+                          <tr>
+                            <td>Grand Total</td>
+                            <td>
+                              {accountHolderData.reduce(
+                                (acc, item) => acc + item.totalOutreach,
+                                0,
+                              )}
+                            </td>
+                            <td>
+                              {accountHolderData.reduce(
+                                (acc, item) => acc + item.newFund,
+                                0,
+                              )}
+                            </td>
+                            <td>
+                              {accountHolderData.reduce(
+                                (acc, item) => acc + item.respondOrNot,
+                                0,
+                              )}
+                            </td>
+                            <td>
+                              {accountHolderData.reduce(
+                                (acc, item) => acc + item.newRespond,
+                                0,
+                              )}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </KPIBlock>
+                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
+                      {/* Line Plot for Each Account Holder */}
+                      <div style={{ height: '21rem', width: '57rem' }}>
+                        <Line data={accountHoldersLineData} options={lineChartOptions} />
+                      </div>
+                    </KPIBlock>
+                  </div>
+                </div>
+
+              
+          
+              </div>
+
+              : 
+              <div className={styles['funnel-layout']}>
+                {Object.keys(tasks).map((stage, index) => {
+                  const filteredTasks = tasks[stage].filter(deal => {
+                    if (selectedClients.length === 0) {
+                      return true
+                    }
+                    return selectedClients.map(client => client.toUpperCase()).includes(deal.company_acronym.toUpperCase())
+                    // return selectedClients.includes(deal.company_acronym)
+                  })
+
+                  return (
+                    <div className={styles['stage-task-layout']} key={index} onDrop={handleDrop(stage)} onDragOver={(e) => e.preventDefault()}>
+                      <div className={ index === 0 ? styles['stage-first-container'] : index === Object.keys(tasks).length - 1 ? styles['stage-last-container'] : styles['stage-container']}>
+                        {STAGES[index]}
+                      </div>
+                      {filteredTasks.map((deal, index) => (
+                        <div 
+                          // onMouseOver={() => console.log(deal.company_acronym)}
+                          className={styles['task']} 
+                          draggable 
+                          onDragStart={(e) => handleDragStart(e, deal)} 
+                          key={index}
+                        >
+                          <span style={{ display: 'inline-block', fontWeight: '400', fontSize: '1rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}><span style={{ fontWeight: '600', fontSize: '1.2rem', color: 'violet' }}>{deal.company_acronym}</span>({deal.company_name})</span>
+                          <br />
+                          <span style={{ display: 'inline-block', color: 'orange', fontWeight: '600', fontSize: '1.5rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}>{deal.LP_pitched}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+
+          }
+
+          
         </div>
       </div>
     </div>
