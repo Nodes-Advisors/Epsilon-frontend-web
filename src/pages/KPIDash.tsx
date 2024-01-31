@@ -1,15 +1,16 @@
 //@ts-nocheck
-import { KPIBlock, KPIText } from '../components/kpi-component'
-import styles from '../styles/kpi-block.module.less'
-import TICKIcon from '../assets/svgs/tick.svg?react'
-import EpsilonLogo from '../assets/images/epsilon-logo.png'
-import { useEffect, useState, useRef } from 'react'
-import Skeleton from 'react-loading-skeleton'
-import { Bar, Line } from 'react-chartjs-2'
-import axios from 'axios'
-import cancelButton from '../assets/images/cancel.png'
-import { useTokenStore } from '../store/store'
-import { STAGES } from '../lib/constants'
+import { KPIBlock, KPIText } from "../components/kpi-component";
+import styles from "../styles/kpi-block.module.less";
+import TICKIcon from "../assets/svgs/tick.svg?react";
+import EpsilonLogo from "../assets/images/epsilon-logo.png";
+import { useEffect, useState, useRef } from "react";
+import Skeleton from "react-loading-skeleton";
+import { Bar, Line } from "react-chartjs-2";
+import axios from "axios";
+import cancelButton from "../assets/images/cancel.png";
+import { useTokenStore } from "../store/store";
+import { STAGES } from "../lib/constants";
+import { Chart, registerables } from "chart.js";
 
 import {
   Chart as ChartJS,
@@ -52,17 +53,15 @@ interface AccountHolderData {
   newRespond: number;
 }
 
-
-export default function KPIDash () {
-  
-  const filterRef = useRef<HTMLDivElement>(null)
-  const [clients, setClients] = useState<string[]>([])
-  const [selectedClients, setSelectedClients] = useState<string[]>([])
-  const [showAllFilters, setShowAllFilters] = useState<boolean>(false)
-  const [focused, setFocused] = useState<'all' | 'you'>('all')
-  const [isLoading, setLoading] = useState(true)
-  const token = useTokenStore(state => state.token)
-  const [dealData, setDealData] = useState<DealData[]>([])
+export default function KPIDash() {
+  const filterRef = useRef<HTMLDivElement>(null);
+  const [clients, setClients] = useState<string[]>([]);
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
+  const [showAllFilters, setShowAllFilters] = useState<boolean>(false);
+  const [focused, setFocused] = useState<"all" | "you">("all");
+  const [isLoading, setLoading] = useState(true);
+  const token = useTokenStore((state) => state.token);
+  const [dealData, setDealData] = useState<DealData[]>([]);
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
   >([]);
@@ -72,6 +71,308 @@ export default function KPIDash () {
   });
   const [selectedDeal, setSelectedDeal] = useState("");
   const [chartData, setChartData] = useState({});
+  const [aggregatedKPIs, setAggregatedKPIs] = useState({
+    totalOutreach: 0,
+    deckRequested: 0,
+    meetingRequested: 0,
+    ddRequested: 0,
+  });
+
+  // Inside your KPIDash component
+  const [companies, setCompanies] = useState([]);
+
+  useEffect(() => {
+    const fetchAggregatedKPIs = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5002/total-outreach",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token, // if you're using authentication
+            },
+          }
+        );
+        setAggregatedKPIs(response.data);
+      } catch (error) {
+        console.error("Error fetching aggregated KPIs:", error);
+      }
+    };
+
+    fetchAggregatedKPIs();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const kpiChartData = {
+    labels: [
+      "Total Outreach",
+      "Deck Requested",
+      "Meeting Requested",
+      "DD Requested",
+    ],
+    datasets: [
+      {
+        label: "KPIs",
+        data: [
+          aggregatedKPIs.totalOutreach,
+          aggregatedKPIs.deckRequested,
+          aggregatedKPIs.meetingRequested,
+          aggregatedKPIs.ddRequested,
+        ],
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.2)",
+          "rgba(54, 162, 235, 0.2)",
+          "rgba(255, 206, 86, 0.2)",
+          "rgba(75, 192, 192, 0.2)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(75, 192, 192, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const kpiChartOptions = {
+    showPercentageDifferences: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      percentageDifferences: {},
+      legend: {
+        display: false, // Set to true if you want a legend
+      },
+    },
+  };
+
+  useEffect(() => {
+    const fetchAggregatedKPIs = async () => {
+      // Existing fetch logic...
+
+      if (response.data) {
+        const data = response.data;
+        const differences = calculateDifferences([
+          data.totalOutreach,
+          data.deckRequested,
+          data.meetingRequested,
+          data.ddRequested,
+        ]);
+        // You might want to store the differences in the state or construct the chart data here
+      }
+    };
+
+    fetchAggregatedKPIs();
+  }, []);
+
+  const calculateDifferences = (dataPoints) => {
+    return dataPoints.slice(1).map((current, index) => {
+      const previous = dataPoints[index];
+      return (((current - previous) / previous) * 100).toFixed(1); // Calculate percentage difference
+    });
+  };
+
+  Chart.register(...registerables);
+
+  // Define a plugin to draw percentage differences
+  const percentagePlugin = {
+    id: "percentageDifferences",
+    afterDraw: (chart) => {
+      const ctx = chart.ctx;
+      const datasets = chart.data.datasets;
+
+      if (chart.options.showPercentageDifferences) {
+        if (datasets.length > 0) {
+          const dataset = datasets[0]; // Assuming only one dataset
+          const meta = chart.getDatasetMeta(0); // Meta data of the first (0 index) dataset
+
+          ctx.font = "12px Arial";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "black";
+
+          for (let i = 1; i < dataset.data.length; i++) {
+            const currentElement = meta.data[i];
+            const previousElement = meta.data[i - 1];
+
+            // Use getProps to get x and y values
+            const { x: currentX, y: currentY } = currentElement.getProps(
+              ["x", "y"],
+              true
+            );
+            const { x: previousX, y: previousY } = previousElement.getProps(
+              ["x", "y"],
+              true
+            );
+
+            // Draw line between tops of bars
+            ctx.beginPath();
+            ctx.moveTo(previousX, previousY);
+            ctx.lineTo(currentX, currentY);
+            ctx.strokeStyle = "#000"; // Line color
+            ctx.stroke();
+
+            // Calculate percentage difference
+            const currentValue = dataset.data[i];
+            const previousValue = dataset.data[i - 1];
+            const percentageDifference = (
+              ((currentValue - previousValue) / previousValue) *
+              100
+            ).toFixed(1);
+
+            // Position the percentage text above the line
+            const midX = (previousX + currentX) / 2;
+            const midY = (previousY + currentY) / 2;
+
+            // Adjust text position based on the slope of the line
+            const slope = (currentY - previousY) / (currentX - previousX);
+            const angle = Math.atan(slope);
+            const yAdjustment = Math.cos(angle) * 10; // 10 is the distance above the line
+            ctx.fillText(percentageDifference + "%", midX, midY - yAdjustment);
+          }
+        }
+      }
+    },
+  };
+
+  // Register the plugin
+  Chart.register(percentagePlugin);
+
+  /////////////////////////////////// Trying plot for "You" focus only on Tyler
+  const [tylerKPIs, setTylerKPIs] = useState({
+    totalOutreach: 0,
+    deckRequested: 0,
+    meetingRequested: 0,
+    ddRequested: 0,
+  });
+
+  useEffect(() => {
+    if (focused === "you") {
+      const fetchTylerKPIs = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:5002/account-holder-kpis/Tyler",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: token, // Include this if you're using token-based auth
+              },
+            }
+          );
+          setTylerKPIs(response.data);
+        } catch (error) {
+          console.error("Error fetching KPIs for Tyler:", error);
+        }
+      };
+
+      fetchTylerKPIs();
+    }
+  }, [focused]); // This effect runs when the 'focused' state changes
+
+  function createChartDataFromKPIs(kpis) {
+    return {
+      labels: [
+        "Total Outreach",
+        "Deck Requested",
+        "Meeting Requested",
+        "DD Requested",
+      ],
+      datasets: [
+        {
+          label: "KPIs for Tyler",
+          data: [
+            kpis.totalOutreach,
+            kpis.deckRequested,
+            kpis.meetingRequested,
+            kpis.ddRequested,
+          ],
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+          ],
+          borderColor: [
+            "rgba(255,99,132,1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
+  }
+
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
+
+  // Example of a multi-select dropdown
+  <select multiple value={selectedCompanies} onChange={handleDealSelectChange}>
+    {companies.map((company) => (
+      <option key={company} value={company}>
+        {company}
+      </option>
+    ))}
+  </select>;
+
+  function handleDealSelectChange(event) {
+    const { options } = event.target;
+    const value = [];
+    for (let i = 0, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        value.push(options[i].value);
+      }
+    }
+    setSelectedCompanies(value);
+  }
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const responses = await Promise.all(
+          selectedCompanies.map((company) =>
+            axios.get(`http://localhost:5001/deals/${company}`)
+          )
+        );
+        // Assuming the backend returns data in the format: { dealName: ..., totalOutreach: ..., ... }
+        const data = responses.map((response) => response.data);
+        // Store the data for charting
+        setChartData(prepareChartData2(data));
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    }
+
+    if (selectedCompanies.length > 0) {
+      fetchData();
+    }
+  }, [selectedCompanies]);
+
+  function prepareChartData2(data) {
+    // Transform data to fit Chart.js
+    const chartData = {
+      labels: [
+        "Total Outreach",
+        "Deck Requested",
+        "Meeting Requested",
+        "DD Requested",
+      ],
+      datasets: data.map((companyData) => ({
+        label: companyData.dealName,
+        data: [
+          companyData.totalOutreach,
+          companyData.deckRequested,
+          companyData.meetingRequested,
+          companyData.ddRequested,
+        ],
+        // Add more properties like backgroundColor, etc.
+      })),
+    };
+    return chartData;
+  }
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -103,35 +404,43 @@ export default function KPIDash () {
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
-    }
+    };
 
-    const fetchCompanyData = async() => {
-      const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
+    const fetchCompanyData = async () => {
+      const res = await axios.get("http://localhost:5001/fundrisingpipeline", {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      })
+      });
       if (res.status === 200) {
-        setLoading(false)
-        const allTasks = res.data
-        const stageITasks = allTasks.filter(task => task.contacted === 1)
-        const stageIITasks = allTasks.filter(task => task.deck_request === 1)
-        const stageIIITasks = allTasks.filter(task => task.meeting_request === 1)
-        const stageIVTasks = allTasks.filter(task => task.dd === 1)
-        const stageVTasks = allTasks.filter(task => task.pass_contacted === 1 || task.pass_deck === 1 || task.pass_meeting === 1 || task.pass_dd === 1)
+        setLoading(false);
+        const allTasks = res.data;
+        const stageITasks = allTasks.filter((task) => task.contacted === 1);
+        const stageIITasks = allTasks.filter((task) => task.deck_request === 1);
+        const stageIIITasks = allTasks.filter(
+          (task) => task.meeting_request === 1
+        );
+        const stageIVTasks = allTasks.filter((task) => task.dd === 1);
+        const stageVTasks = allTasks.filter(
+          (task) =>
+            task.pass_contacted === 1 ||
+            task.pass_deck === 1 ||
+            task.pass_meeting === 1 ||
+            task.pass_dd === 1
+        );
         setTasks({
           I: stageITasks,
           II: stageIITasks,
           III: stageIIITasks,
           IV: stageIVTasks,
           V: stageVTasks,
-        })
+        });
       }
-    }
+    };
 
-    fetchCompanyData()
-    fetchClients()
-  }, [])
+    fetchCompanyData();
+    fetchClients();
+  }, []);
 
   const [monthlyTotals, setMonthlyTotals] = useState([]);
   const [monthlyLineData, setMonthlyLineData] = useState({});
@@ -139,7 +448,6 @@ export default function KPIDash () {
     labels: [],
     datasets: [],
   });
-  const [accountHoldersPieData, setAccountHoldersPieData] = useState({});
   const [combinedChartData, setCombinedChartData] = useState({});
 
   const tableStyle = {
@@ -554,25 +862,6 @@ export default function KPIDash () {
     fetchAccountHolderKPIs();
   }, []);
 
-  useEffect(() => {
-    const fetchTotalOutreachPerAccountHolder = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5002/total-outreach-per-account-holder"
-        );
-        const dataForPieChart = transformDataForPieChart(response.data);
-        setAccountHoldersPieData(dataForPieChart);
-      } catch (error) {
-        console.error(
-          "Error fetching total outreach per account holder:",
-          error
-        );
-      }
-    };
-
-    fetchTotalOutreachPerAccountHolder();
-  }, []);
-
   // Helper function to transform the data into Chart.js format for the doughnut chart
   const transformDataForPieChart = (data) => {
     return {
@@ -706,12 +995,12 @@ export default function KPIDash () {
     };
   };
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000)
-  }, [isLoading])
+    setTimeout(() => setLoading(false), 1000);
+  }, [isLoading]);
 
   useEffect(() => {
-    console.log(selectedClients)
-  }, [selectedClients])
+    console.log(selectedClients);
+  }, [selectedClients]);
 
   return (
     <div
@@ -860,6 +1149,7 @@ export default function KPIDash () {
                   <span style={{ fontSize: "1rem", padding: "0.5rem" }}>
                     Choose one or more client(s)
                   </span>
+                  <Bar data={chartData} />
                 </div>
                 {showAllFilters && (
                   <ul
@@ -1281,7 +1571,7 @@ export default function KPIDash () {
                     style={{ overflow: "auto" }}
                   >
                     {/* Account Holder Data Table */}
-                    <table style={tableStyle}>
+                    {/* <table style={tableStyle}>
                       <thead>
                         <tr>
                           <th>Account Holder</th>
@@ -1329,7 +1619,32 @@ export default function KPIDash () {
                           </td>
                         </tr>
                       </tbody>
-                    </table>
+                    </table> */}
+
+                    {focused === "all" ? (
+                      <div
+                        style={{
+                          width: "550px",
+                          height: "600px",
+                          padding: "20px",
+                        }}
+                      >
+                        <Bar data={kpiChartData} options={kpiChartOptions} />
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          width: "550px",
+                          height: "600px",
+                          padding: "20px",
+                        }}
+                      >
+                        <Bar
+                          data={createChartDataFromKPIs(tylerKPIs)}
+                          options={kpiChartOptions}
+                        />
+                      </div>
+                    )}
                   </KPIBlock>
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
@@ -1346,17 +1661,10 @@ export default function KPIDash () {
                     </div> */}
                     <div>
                       {/* Dropdown for selecting the deal */}
-                      {/* <select
+                      <select
                         value={selectedDeal}
-                        onChange={(e) => setSelectedDeal(e.target.value)}
+                        onChange={handleSelectChange}
                       >
-                        {dealData.map((deal, index) => (
-                          <option key={index} value={deal.dealName}>
-                            {deal.dealName}
-                          </option>
-                        ))}
-                      </select> */}
-                      <select value={selectedDeal} onChange={handleSelectChange}>
                         {dealData.map((deal, index) => (
                           <option key={index} value={deal.dealName}>
                             {deal.dealName}
@@ -1427,157 +1735,6 @@ export default function KPIDash () {
               ))}
             </div>
           )}
-              <div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Deal Statistics</KPIText>
-                  <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
-                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='37.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
-                      {/* Deal Data Table */}
-                      <table style={tableStyle}>
-                        <thead>
-                          <tr>
-                            <th>Deal Name</th>
-                            <th>Total Outreach</th>
-                            <th>New Fund</th>
-                            <th>Respond or Not</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dealData.map((item, index) => (
-                            <tr key={index}>
-                              <td>{item.dealName}</td>
-                              <td>{item.totalOutreach}</td>
-                              <td>{item.newFund}</td>
-                              <td>{item.respondOrNot}</td>
-                            </tr>
-                          ))}
-                          <tr>
-                            <td>Grand Total</td>
-                            <td>
-                              {dealData.reduce(
-                                (acc, item) => acc + item.totalOutreach,
-                                0,
-                              )}
-                            </td>
-                            <td>
-                              {dealData.reduce((acc, item) => acc + item.newFund, 0)}
-                            </td>
-                            <td>
-                              {dealData.reduce((acc, item) => acc + item.respondOrNot, 0)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>              
-                    </KPIBlock>
-                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
-                      {/* Horizontal Bar Plot for Each Deal's KPI */}
-                      <div style={{ height: '57rem', width: '55rem' }}>
-                        <Bar data={dealChartData} options={chartOptions} />
-                      </div>
-                    </KPIBlock>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <KPIText fontColor='#fff' fontSize='0.9375rem' style={{ textAlign: 'left' }} >Account Holder's KPI</KPIText>
-                  <div className={styles['kpi-horizontal-layout']} style={{ gap: '3rem' }} >
-                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='37.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
-                      {/* Account Holder Data Table */}
-                      <table style={tableStyle}>
-                        <thead>
-                          <tr>
-                            <th>Account Holder</th>
-                            <th>Total Outreach</th>
-                            <th>New Fund</th>
-                            <th>Respond or Not</th>
-                            <th>New Respond</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {accountHolderData.map((item, index) => (
-                            <tr key={index}>
-                              <td>{item.accountHolder}</td>
-                              <td>{item.totalOutreach}</td>
-                              <td>{item.newFund}</td>
-                              <td>{item.respondOrNot}</td>
-                              <td>{item.newRespond}</td>
-                            </tr>
-                          ))}
-                          <tr>
-                            <td>Grand Total</td>
-                            <td>
-                              {accountHolderData.reduce(
-                                (acc, item) => acc + item.totalOutreach,
-                                0,
-                              )}
-                            </td>
-                            <td>
-                              {accountHolderData.reduce(
-                                (acc, item) => acc + item.newFund,
-                                0,
-                              )}
-                            </td>
-                            <td>
-                              {accountHolderData.reduce(
-                                (acc, item) => acc + item.respondOrNot,
-                                0,
-                              )}
-                            </td>
-                            <td>
-                              {accountHolderData.reduce(
-                                (acc, item) => acc + item.newRespond,
-                                0,
-                              )}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </KPIBlock>
-                    <KPIBlock extraClass={styles['kpi-medium-dashboard']} width='60.25rem' height='21.125rem' style={{ overflow: 'auto' }} >
-                      {/* Line Plot for Each Account Holder */}
-                      <div style={{ height: '21rem', width: '57rem' }}>
-                        <Line data={accountHoldersLineData} options={lineChartOptions} />
-                      </div>
-                    </KPIBlock>
-                  </div>
-                </div>
-
-              
-          
-              </div>
-
-              : 
-              <div className={styles['funnel-layout']}>
-                {Object.keys(tasks).map((stage, index) => {
-                  const filteredTasks = tasks[stage].filter(deal => {
-                    if (selectedClients.length === 0) {
-                      return true
-                    }
-                    return selectedClients.map(client => client.toUpperCase()).includes(deal.company_acronym.toUpperCase())
-                    // return selectedClients.includes(deal.company_acronym)
-                  })
-
-                  return (
-                    <div className={styles['stage-task-layout']} key={index} onDrop={handleDrop(stage)} onDragOver={(e) => e.preventDefault()}>
-                      <div className={ index === 0 ? styles['stage-first-container'] : index === Object.keys(tasks).length - 1 ? styles['stage-last-container'] : styles['stage-container']}>
-                        {STAGES[index]}
-                      </div>
-                      {filteredTasks.map((deal, index) => (
-                        <div 
-                          // onMouseOver={() => console.log(deal.company_acronym)}
-                          className={styles['task']} 
-                          draggable 
-                          onDragStart={(e) => handleDragStart(e, deal)} 
-                          key={index}
-                        >
-                          <span style={{ display: 'inline-block', fontWeight: '400', fontSize: '1rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}><span style={{ fontWeight: '600', fontSize: '1.2rem', color: 'violet' }}>{deal.company_acronym}</span>({deal.company_name})</span>
-                          <br />
-                          <span style={{ display: 'inline-block', color: 'orange', fontWeight: '600', fontSize: '1.5rem', textOverflow: 'ellipsis', overflow: 'hidden', width: '12rem', whiteSpace: 'nowrap' }}>{deal.LP_pitched}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
         </div>
       </div>
     </div>
