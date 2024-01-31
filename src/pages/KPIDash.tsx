@@ -78,9 +78,6 @@ export default function KPIDash() {
     ddRequested: 0,
   });
 
-  // Inside your KPIDash component
-  const [companies, setCompanies] = useState([]);
-
   useEffect(() => {
     const fetchAggregatedKPIs = async () => {
       try {
@@ -172,7 +169,7 @@ export default function KPIDash() {
   const calculateDifferences = (dataPoints) => {
     return dataPoints.slice(1).map((current, index) => {
       const previous = dataPoints[index];
-      return (((current - previous) / previous) * 100).toFixed(1); // Calculate percentage difference
+      return (((previous - current) / previous) * 100).toFixed(1); // Calculate percentage difference
     });
   };
 
@@ -241,7 +238,7 @@ export default function KPIDash() {
   // Register the plugin
   Chart.register(percentagePlugin);
 
-  /////////////////////////////////// Trying plot for "You" focus only on Tyler
+  //////////////////////////////////// Trying plot for "You" focus only on Tyler
   const [tylerKPIs, setTylerKPIs] = useState({
     totalOutreach: 0,
     deckRequested: 0,
@@ -253,20 +250,17 @@ export default function KPIDash() {
     if (focused === "you") {
       const fetchTylerKPIs = async () => {
         try {
-          const response = await axios.get(
-            "http://localhost:5002/account-holder-kpis/Tyler",
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: token, // Include this if you're using token-based auth
-              },
+          const response = await axios.get("http://localhost:5002/account-holder-kpis/Tyler", {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token, // Include this if you're using token-based auth
             }
-          );
+          });
           setTylerKPIs(response.data);
         } catch (error) {
           console.error("Error fetching KPIs for Tyler:", error);
         }
-      };
+      };      
 
       fetchTylerKPIs();
     }
@@ -305,73 +299,6 @@ export default function KPIDash() {
         },
       ],
     };
-  }
-
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-
-  // Example of a multi-select dropdown
-  <select multiple value={selectedCompanies} onChange={handleDealSelectChange}>
-    {companies.map((company) => (
-      <option key={company} value={company}>
-        {company}
-      </option>
-    ))}
-  </select>;
-
-  function handleDealSelectChange(event) {
-    const { options } = event.target;
-    const value = [];
-    for (let i = 0, l = options.length; i < l; i++) {
-      if (options[i].selected) {
-        value.push(options[i].value);
-      }
-    }
-    setSelectedCompanies(value);
-  }
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const responses = await Promise.all(
-          selectedCompanies.map((company) =>
-            axios.get(`http://localhost:5001/deals/${company}`)
-          )
-        );
-        // Assuming the backend returns data in the format: { dealName: ..., totalOutreach: ..., ... }
-        const data = responses.map((response) => response.data);
-        // Store the data for charting
-        setChartData(prepareChartData2(data));
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      }
-    }
-
-    if (selectedCompanies.length > 0) {
-      fetchData();
-    }
-  }, [selectedCompanies]);
-
-  function prepareChartData2(data) {
-    // Transform data to fit Chart.js
-    const chartData = {
-      labels: [
-        "Total Outreach",
-        "Deck Requested",
-        "Meeting Requested",
-        "DD Requested",
-      ],
-      datasets: data.map((companyData) => ({
-        label: companyData.dealName,
-        data: [
-          companyData.totalOutreach,
-          companyData.deckRequested,
-          companyData.meetingRequested,
-          companyData.ddRequested,
-        ],
-        // Add more properties like backgroundColor, etc.
-      })),
-    };
-    return chartData;
   }
 
   useEffect(() => {
@@ -1149,7 +1076,6 @@ export default function KPIDash() {
                   <span style={{ fontSize: "1rem", padding: "0.5rem" }}>
                     Choose one or more client(s)
                   </span>
-                  <Bar data={chartData} />
                 </div>
                 {showAllFilters && (
                   <ul
