@@ -9,10 +9,33 @@ export default function Database() {
   const [filters, setFilters] = useState({})
   const loader = useRef(null)
   const [filterOptions, setFilterOptions] = useState({})
+  const [fields, setFields] = useState<string[]>([])
   // const [isFilterActive, setIsFilterActive] = useState(false)
 
   // const [filters, setFilters] = useState({})
   
+  useEffect(() => {
+    if (query === '') return
+    const fetchFields = async (query) => {
+      const res = await axios.get(`http://localhost:5001/getFields/${query}`, {
+      })
+      setFields(res.data)
+      // console.log(res.data)
+      const newFilterOptions = {}
+      // console.log(res.data)
+      for (const field of res.data) {
+        const res2 = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`)
+        // console.log(res2.data)
+        newFilterOptions[field] = res2.data
+      }
+
+      setFilterOptions(newFilterOptions)
+    }
+
+    fetchFields(query)
+   
+  }, [query])
+
   useEffect(() => {
     if (query === '') return
     const fetchData = async (query, page) => {
@@ -28,23 +51,6 @@ export default function Database() {
     console.log(page)
     fetchData(query, page)
   }, [query, page, filters])
-
-  useEffect(() => {
-    if (query === '') return
-    const fetchFilterOptions = async (query) => {
-      const fields = Object.keys(data[0])
-      const newFilterOptions = {}
-
-      for (const field of fields) {
-        const res = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`)
-        newFilterOptions[field] = res.data
-      }
-
-      setFilterOptions(newFilterOptions)
-    }
-
-    fetchFilterOptions(query)
-  }, [query, data])
 
   useEffect(() => {
     const options = {
@@ -108,7 +114,7 @@ export default function Database() {
       </div>
       <form onSubmit={handleFilterSubmit}>
         {
-          data.length > 0 && Object.keys(data[0]).map((key, index) => (
+          fields.length > 0 && fields.map((key, index) => (
             <div key={index}>
               <label>{key}</label>
               <select
@@ -128,7 +134,7 @@ export default function Database() {
         <button type="submit">Apply filters</button>
       </form>
       <button onClick={() => {
-        setFilters([])
+        setFilters({})
         // setIsFilterActive(false)
       }
       }>Clear filter</button>
