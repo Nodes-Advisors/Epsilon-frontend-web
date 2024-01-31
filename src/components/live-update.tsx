@@ -14,6 +14,8 @@ function LiveUpdate() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hoveredName, setHoveredName] = useState('')
+
+
   useEffect(() => {
     const fetchCompanyData = async() => {
       const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
@@ -195,13 +197,13 @@ function LiveUpdate() {
               </div>
               <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
               <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
-                <span style={{  color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contact</span>
+                <span style={{  color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
                 <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.contacted, 0)}</span>
                 <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
                 <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
-                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Request</span>
+                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
                 <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.meeting_request, 0)}</span>
                 <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>

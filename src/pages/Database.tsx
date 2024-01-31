@@ -1,28 +1,137 @@
 import axios from 'axios'
-import { MouseEvent, useEffect, useState } from 'react'
+import { MouseEvent, useEffect, useRef, useState } from 'react'
 export default function Database() {
   const [query, setQuery] = useState<string>('')
   const [data, setData] = useState<any[]>([])
+  const [filteredData, setFilteredData] = useState<any[]>([])
+  const [buttonNames, setButtonNames] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [filters, setFilters] = useState({})
+  const loader = useRef(null)
+  const [filterOptions, setFilterOptions] = useState({})
+  // const [isFilterActive, setIsFilterActive] = useState(false)
+
+  // const [filters, setFilters] = useState({})
+  
+  useEffect(() => {
+    if (query === '') return
+    const fetchData = async (query, page) => {
+      const res = await axios.get(`http://localhost:5001/getCollections/${query}`, {
+        params: {
+          page: page,
+          pageSize: 500,
+          filters: JSON.stringify(filters),
+        },
+      })
+      setData(prevData => [...prevData, ...res.data])
+    }
+    console.log(page)
+    fetchData(query, page)
+  }, [query, page, filters])
 
   useEffect(() => {
     if (query === '') return
-    const fetchData = async (query) => {
-      const res = await axios.get(`http://localhost:5001/${query}`)
-      setData(res.data)
+    const fetchFilterOptions = async (query) => {
+      const fields = Object.keys(data[0])
+      const newFilterOptions = {}
+
+      for (const field of fields) {
+        const res = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`)
+        newFilterOptions[field] = res.data
+      }
+
+      setFilterOptions(newFilterOptions)
     }
-    fetchData(query)
-  }, [query])
+
+    fetchFilterOptions(query)
+  }, [query, data])
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '20px',
+      threshold: 1.0,
+    }
+
+    const observer = new IntersectionObserver(handleObserver, options)
+    if (loader.current) {
+      observer.observe(loader.current)
+    }
+
+  }, [])
+
+  const handleFilterChange = (event) => {
+    setFilters({
+      ...filters,
+      [event.target.name]: event.target.value,
+    })
+    setData([])
+    setPage(1)
+  }
+
+  const handleFilterSubmit = (event) => {
+    event.preventDefault()
+    // setIsFilterActive(true)
+    // setData([])
+    // setPage(1)
+  }
+
+  const handleObserver = (entities) => {
+    const target = entities[0]
+    if (target.isIntersecting) {   
+      setPage((prev) => prev + 1)
+    }
+  }
+
+  useEffect(() => {
+    const fetchCollections = async() => {
+      const res = await axios.get('http://localhost:5001/getCollections', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        setButtonNames(res.data)
+      }
+    }
+    fetchCollections()
+  }, [])
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '3rem' }}>
       <h1>Database</h1>
-      <div style={{ display: 'flex', gap: '1rem' }} onClick={(e: MouseEvent) => setQuery(e.target.innerText)}>
-        <button>Employees</button>
-        <button>FundCard</button>
-        <button>InboundEmails</button>
-        <button>KPIsINFO</button>
-        <button>OutboundEmails</button>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', width: '70%' }} onClick={(e: MouseEvent) => { setPage(1); setQuery(e.target.innerText); setData([]) }}>
+        {
+          buttonNames.map((name, index) => <button key={index} style={{ padding: '1rem', fontSize: '1.5rem', borderRadius: '0.5rem', border: 'none' }}>{name}</button>)
+        }
+        
       </div>
+      <form onSubmit={handleFilterSubmit}>
+        {
+          data.length > 0 && Object.keys(data[0]).map((key, index) => (
+            <div key={index}>
+              <label>{key}</label>
+              <select
+                name={key}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                {
+                  filterOptions[key] && filterOptions[key].map((option, i) => (
+                    <option key={i} value={option}>{option}</option>
+                  ))
+                }
+              </select>
+            </div>
+          ))
+        }
+        <button type="submit">Apply filters</button>
+      </form>
+      <button onClick={() => {
+        setFilters([])
+        // setIsFilterActive(false)
+      }
+      }>Clear filter</button>
       <table style={{ gap: '1rem' }}>
         <thead>
           <tr>
@@ -47,6 +156,9 @@ export default function Database() {
           }
         </tbody>
       </table>
+      <div className="loading" ref={loader}>
+        <h2>Load More</h2>
+      </div>
     </div>
   )
 }
