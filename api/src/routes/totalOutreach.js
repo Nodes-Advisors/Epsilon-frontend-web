@@ -18,6 +18,7 @@ router.get("/total-outreach", async (req, res) => {
           deckRequested: {$sum: "$deck_request"},
           meetingRequested: {$sum: "$meeting_request"},
           ddRequested: {$sum: "$dd"},
+          passes: {$sum: "$pass_contacted"}
         },
       },
       {
@@ -27,6 +28,7 @@ router.get("/total-outreach", async (req, res) => {
           deckRequested: 1, // Include the deckRequested field
           meetingRequested: 1, // Include the meetingRequested field
           ddRequested: 1, // Include the ddRequested field
+          passes: 1,
         },
       },
     ]).toArray();

@@ -37,6 +37,23 @@ ChartJS.register(
   Filler
 );
 
+const bodyStyle = {
+  background: "#eff2f7",
+};
+
+const chartStyle = {
+  background: "#eff2f7",
+  borderRadius: "8px",
+  width: "fit-content",
+  height: "fit-content",
+};
+
+const headerStyle = {
+  padding: "10px",
+  borderBottom: "1px solid #cdcdcd",
+  fontFamily: "sans-serif",
+};
+
 // Define the structure of the data for deals and account holders
 interface DealData {
   dealName: string;
@@ -76,6 +93,7 @@ export default function KPIDash() {
     deckRequested: 0,
     meetingRequested: 0,
     ddRequested: 0,
+    passes: 0,
   });
 
   useEffect(() => {
@@ -250,17 +268,20 @@ export default function KPIDash() {
     if (focused === "you") {
       const fetchTylerKPIs = async () => {
         try {
-          const response = await axios.get("http://localhost:5002/account-holder-kpis/Tyler", {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token, // Include this if you're using token-based auth
+          const response = await axios.get(
+            "http://localhost:5002/account-holder-kpis/Tyler",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: token, // Include this if you're using token-based auth
+              },
             }
-          });
+          );
           setTylerKPIs(response.data);
         } catch (error) {
           console.error("Error fetching KPIs for Tyler:", error);
         }
-      };      
+      };
 
       fetchTylerKPIs();
     }
@@ -929,6 +950,109 @@ export default function KPIDash() {
     console.log(selectedClients);
   }, [selectedClients]);
 
+  const data: any[] = [
+    {
+      name: "Total Outreach",
+      value: aggregatedKPIs.totalOutreach,
+      color: "#6f7aff",
+    },
+    {
+      name: "Deck Requested",
+      value: aggregatedKPIs.deckRequested,
+      color: "#8e97ff",
+    },
+    {
+      name: "Meeting Rquested",
+      value: aggregatedKPIs.meetingRequested,
+      color: "#5dbef2",
+    },
+    {
+      name: "DD Requested",
+      value: aggregatedKPIs.ddRequested,
+      color: "#78ddea",
+    },
+  ];
+
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      let height = 300;
+      let width = 800;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      let scale = window.devicePixelRatio;
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      ctx.scale(scale, scale);
+
+      let graphHeight = height - 100;
+
+      let maxValue = Math.max.apply(
+        Math,
+        data.map(function (o) {
+          return o.value;
+        })
+      );
+
+      data.forEach((item) => {
+        item["height"] = (item.value / maxValue) * graphHeight;
+      });
+
+      let boxes = data.length;
+      ctx.strokeStyle = "#eee";
+      for (let i = 0; i < boxes; i++) {
+        let x = Math.round(i * (width / boxes));
+
+        // draw separation lines
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0.5);
+        ctx.lineTo(x + 0.5, height + 0.5);
+        ctx.stroke();
+
+        // draw item area
+        ctx.fillStyle = data[i].color;
+        ctx.beginPath();
+        ctx.moveTo(x, height - 50 - data[i].height);
+        ctx.lineTo(
+          x + width / boxes + 0.5,
+          height - 50 - (data[i + 1] ? data[i + 1].height : data[i].height)
+        );
+        ctx.lineTo(x + width / boxes + 0.5, height - 50);
+        ctx.lineTo(x, height - 50);
+        ctx.closePath();
+        ctx.fill();
+
+        // draw header
+        ctx.font = "lighter 12px sans-serif";
+        ctx.fillStyle = "#888888";
+        ctx.fillText(data[i].name, x + 10, 20);
+
+        ctx.font = "bolder 12px sans-serif";
+        ctx.fillStyle = "#000";
+        ctx.fillText(data[i].value, x + 10, 40);
+
+        // draw footer
+        if (i < boxes - 1) {
+          ctx.font = "lighter 12px sans-serif";
+          ctx.fillStyle = "#888888";
+          ctx.fillText("Conversion Ratio  ---->", x + 10, height - 30);
+
+          ctx.font = "bolder 12px sans-serif";
+          ctx.fillStyle = "#777";
+          // const text = (data[i+1].value - data[i].value) / data[i].value
+          const percentageChange =
+            (data[i + 1].value / data[i].value) * 100;
+          const percentageString = "                                        "+ percentageChange.toFixed(2) + "%";
+          ctx.fillText(percentageString, x + 10, height - 10);
+        }
+      }
+    }
+  }, []);
+
   return (
     <div
       className={styles["kpi-main"]}
@@ -1200,13 +1324,13 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          200
+                          {aggregatedKPIs.totalOutreach}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          50
+                          0
                         </KPIText>
                       </>
                     )}
@@ -1246,13 +1370,13 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          200
+                          {aggregatedKPIs.deckRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          50
+                          0
                         </KPIText>
                       </>
                     )}
@@ -1268,7 +1392,7 @@ export default function KPIDash() {
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
-                    Total meetings
+                    Total meeting Requested
                   </KPIText>
                   <div className={styles["kpi-miniboard-horizontal-layout"]}>
                     {isLoading ? (
@@ -1292,13 +1416,13 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          200
+                          {aggregatedKPIs.meetingRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          50
+                          0
                         </KPIText>
                       </>
                     )}
@@ -1314,7 +1438,7 @@ export default function KPIDash() {
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
-                    Total new funds
+                    Total Due Dilligence
                   </KPIText>
                   <div className={styles["kpi-miniboard-horizontal-layout"]}>
                     {isLoading ? (
@@ -1338,13 +1462,13 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          200
+                          {aggregatedKPIs.ddRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          50
+                          0
                         </KPIText>
                       </>
                     )}
@@ -1384,13 +1508,13 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          200
+                          {aggregatedKPIs.passes}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          50
+                          0
                         </KPIText>
                       </>
                     )}
@@ -1412,8 +1536,8 @@ export default function KPIDash() {
                 >
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
-                    width="37.25rem"
-                    height="21.125rem"
+                    width="52.25rem"
+                    height="24.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Deal Data Table */}
@@ -1468,7 +1592,7 @@ export default function KPIDash() {
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="60.25rem"
-                    height="21.125rem"
+                    height="24.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Horizontal Bar Plot for Each Deal's KPI */}
@@ -1492,8 +1616,8 @@ export default function KPIDash() {
                 >
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
-                    width="37.25rem"
-                    height="21.125rem"
+                    width="52.25rem"
+                    height="24.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Account Holder Data Table */}
@@ -1555,7 +1679,13 @@ export default function KPIDash() {
                           padding: "20px",
                         }}
                       >
-                        <Bar data={kpiChartData} options={kpiChartOptions} />
+                        {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
+                        <div className="chart" style={chartStyle}>
+                          <div className="header" style={headerStyle}>
+                            Performance
+                          </div>
+                          <canvas ref={canvasRef}></canvas>{" "}
+                        </div>
                       </div>
                     ) : (
                       <div
@@ -1575,7 +1705,7 @@ export default function KPIDash() {
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="60.25rem"
-                    height="21.125rem"
+                    height="24.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Line Plot for Each Account Holder */}
