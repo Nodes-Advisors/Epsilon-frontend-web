@@ -1,6 +1,6 @@
 export const STATUS_LIST = ['online', 'offline', 'not-login']
 export const STATUS_COLOR_LIST = ['#009900', '#ffa500', '#990000']
-export type FILTER_NAME = '' | 'Location' | 'Firm' | 'Status' | 'Type' | 'Lead' | 'Advanced Search' | 'Clear Filters'
+export type FILTER_NAME = '' | 'Location' | 'Firm' | 'Status' | 'Type' | 'Lead' | 'Advanced Search' | 'Clear Filters' | 'Contact' | 'Suitability Score'
 export const STAGES = ['outreach', 'deck request', 'meeting request', 'dd', 'passes']
 
 export const FIRM_NAMES = [

@@ -76,7 +76,7 @@ export default function Profile(): JSX.Element {
               <Skeleton className={styles['venture-logo']}  />
               : 
               <div style={{ position: 'relative' }}>
-                <AsyncImage src={''} alt='' 
+                <AsyncImage src={record.Logo ? record.Logo : ''} alt='' 
                   style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
                     border: '1px solid transparent', borderRadius: '0.5px',
                   }}

@@ -10,6 +10,8 @@ export default function Database() {
   const loader = useRef(null)
   const [filterOptions, setFilterOptions] = useState({})
   const [fields, setFields] = useState<string[]>([])
+  const formRef = useRef(null)
+  const [remaining, setRemaining] = useState(true)
   // const [isFilterActive, setIsFilterActive] = useState(false)
 
   // const [filters, setFilters] = useState({})
@@ -46,25 +48,28 @@ export default function Database() {
           filters: JSON.stringify(filters),
         },
       })
+      if (res.data.length === 0) {
+        setRemaining(false)
+      }
       setData(prevData => [...prevData, ...res.data])
     }
     console.log(page)
     fetchData(query, page)
   }, [query, page, filters])
 
-  useEffect(() => {
-    const options = {
-      root: null,
-      rootMargin: '20px',
-      threshold: 1.0,
-    }
+  // useEffect(() => {
+  //   const options = {
+  //     root: null,
+  //     rootMargin: '20px',
+  //     threshold: 1.0,
+  //   }
 
-    const observer = new IntersectionObserver(handleObserver, options)
-    if (loader.current) {
-      observer.observe(loader.current)
-    }
+  //   const observer = new IntersectionObserver(handleObserver, options)
+  //   if (loader.current) {
+  //     observer.observe(loader.current)
+  //   }
 
-  }, [])
+  // }, [])
 
   const handleFilterChange = (event) => {
     setFilters({
@@ -112,12 +117,13 @@ export default function Database() {
         }
         
       </div>
-      <form onSubmit={handleFilterSubmit}>
+      <form onSubmit={handleFilterSubmit} ref={formRef}>
         {
           fields.length > 0 && fields.map((key, index) => (
             <div key={index}>
               <label>{key}</label>
               <select
+                style={{width: '200px'}}
                 name={key}
                 onChange={handleFilterChange}
               >
@@ -131,14 +137,19 @@ export default function Database() {
             </div>
           ))
         }
-        <button type="submit">Apply filters</button>
+        {/* <button type="submit">Apply filters</button> */}
       </form>
       <button onClick={() => {
         setFilters({})
+        setPage(1)
+        setData([])
+        if (formRef.current) {
+          formRef.current.reset()
+        }
         // setIsFilterActive(false)
       }
       }>Clear filter</button>
-      <table style={{ gap: '1rem' }}>
+      <table style={{ gap: '1rem', padding: '3rem', alignSelf: 'start' }}>
         <thead>
           <tr>
             {
@@ -147,7 +158,8 @@ export default function Database() {
                 data.forEach(item => {
                   Object.keys(item).forEach(key => allKeys.add(key))
                 })
-                return Array.from(allKeys).map((key, index) => <th key={index} style={{padding: '0 10px', maxWidth: '200px', wordWrap: 'break-word'}}>{key}</th>)
+                return Array.from(allKeys).map((key, index) => <th key={index} style={{
+                  padding: '0 10px', maxWidth: '100px', wordWrap: 'break-word'}}>{key}</th>)
               })()
             }
           </tr>
@@ -156,14 +168,21 @@ export default function Database() {
           {
             data.map((item: object, index: number) => (
               <tr key={index}>
-                {Object.values(item).map((value, i) => <td key={i} style={{padding: '0 10px', maxWidth: '200px', wordWrap: 'break-word'}}>{value === false ? 'False' : value}</td>)}
+                {Object.values(item).map((value, i) => <td key={i} style={{padding: '0 10px', maxWidth: '100px', wordWrap: 'break-word'}}>{value === false ? 'False' : value}</td>)}
               </tr>
             ))
           }
         </tbody>
       </table>
-      <div className="loading" ref={loader}>
-        <h2>Load More</h2>
+      <div  className="loading" ref={loader}>
+        {
+          !remaining 
+            ?
+            <h2>no more data</h2>
+            :
+            <button onClick={() => setPage(page => page + 1)}>Load More</button>
+
+        }
       </div>
     </div>
   )

@@ -18,7 +18,7 @@ import FundStatus from '../components/status'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Contact', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const [isLoading, setLoading] = useState(true)
@@ -37,6 +37,7 @@ export default function SavedList() {
   const [requestStatus, setRequestStatus] = useState<string>('Pending')
   const user = useUserStore(state => state.user)
   const [deal, setDeal] = useState<string>('Deal I')
+  const [pendingList, setPendingList] = useState<string[]>([])
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Firm': string[],
@@ -44,6 +45,7 @@ export default function SavedList() {
     'Status': string[],
     'Type': string[],
     'Contact': string[],
+    'Suitability Score': string[],
     'Advanced Search': string[],
     'Clear Filters': string[],
   }>({
@@ -53,6 +55,7 @@ export default function SavedList() {
     'Status': [],
     'Type': [],
     'Contact': [],
+    'Suitability Score': [],
     'Advanced Search': [],
     'Clear Filters': [],
   })
@@ -103,11 +106,29 @@ export default function SavedList() {
       })
       toast.success('Request sent successfully!')
       setOpenRequestPanel(false)
-      setRequestStatus('Pending')
+      setPendingList([...pendingList, selectedFundName])
     } catch (error) {
       toast.error(error?.response?.data)
     }
   }
+
+  useEffect(() => {
+    async function fetchPendingList() {
+      await axios.get('http://localhost:5001/getPendingRequests', {
+        // params: {
+        //   email: user?.email,
+        // },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        setPendingList(res.data.map((record) => record['Fund Name'] as string))
+      }).catch((error) => {
+        toast.error(error?.response?.data)
+      })
+    }
+    fetchPendingList()
+  }, [])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -345,13 +366,14 @@ export default function SavedList() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds</span>
-                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 2fr 2.5fr repeat(5, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
+                    <span>Deals</span>
                     <span>Account Manager</span>
                     <span>Sector</span>
                     <span>Type</span>
-                    <span>Contact</span>
-                    <span>Deals</span>
+                    <span>Connections</span>
+                    
                     <span>Co-Investors</span>
                     <span>Suitability Score</span>
                   </div>
@@ -359,7 +381,7 @@ export default function SavedList() {
                   {
                     filteredData.map((record, index) => (
                       <>
-                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 2fr 2.5fr repeat(5, 1.5fr)' }}> 
+                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
@@ -374,29 +396,38 @@ export default function SavedList() {
                                 }}
                                 style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{ 'DELETE'}</button>
                               <button 
-                                onClick={() => setOpenRequestPanel(true)}
+                                onClick={() => {
+                                  if (pendingList.includes(record.Funds as string)) {
+                                    toast.error('You have already sent a request for this fund')
+                                    return
+                                  
+                                  }
+                                  setSelectedFundName(record.Funds as string)
+                                  setOpenRequestPanel(true)
+                                }}
                                 style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>
-                                {'REQUEST'}
+                                {pendingList.includes(record.Funds) ? 'PENDING' : 'REQUEST'}
                               </button>
                             </div>
                             <div style={{ position: 'relative' }}>
                               <AsyncImage
                                 onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                                 onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
-                                src={record['Logo'] ? (record['Logo'] as ReadonlyArray<{ url: string }>)[0].url : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid transparent`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
+                                src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid transparent`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
                               <FundStatus color={randomColor()} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                              <span style={{ color: '#807cc5', fontWeight: '600', textAlign: 'left' }}>{record['Funds'] as string}</span>
+                              <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
                               <span style={{  }}>{record['HQ Country'] as string}</span>
                             </div>
                             
                           </div>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deals'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{record['Account Manager'] ? record['Account Manager'] : 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Contact'] as string[] | string) || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deals'] as string[] | string) as string || 'n/a'}</span>
+                          
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
                         </div>
