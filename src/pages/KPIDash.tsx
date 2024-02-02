@@ -11,6 +11,9 @@ import cancelButton from "../assets/images/cancel.png";
 import { useTokenStore } from "../store/store";
 import { STAGES } from "../lib/constants";
 import { Chart, registerables } from "chart.js";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 import {
   Chart as ChartJS,
@@ -52,6 +55,16 @@ const headerStyle = {
   padding: "10px",
   borderBottom: "1px solid #cdcdcd",
   fontFamily: "sans-serif",
+};
+
+const bodyStyle2 = {
+  fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+};
+
+const chartStyle2 = {
+  width: "100%",
+  height: "500px",
+  backgroundColor: "#fff",
 };
 
 // Define the structure of the data for deals and account holders
@@ -1027,29 +1040,217 @@ export default function KPIDash() {
         ctx.fill();
 
         // draw header
-        ctx.font = "lighter 12px sans-serif";
-        ctx.fillStyle = "#888888";
+        ctx.font = "lighter 16px sans-serif";
+        ctx.fillStyle = "#000";
         ctx.fillText(data[i].name, x + 10, 20);
 
-        ctx.font = "bolder 12px sans-serif";
+        ctx.font = "bolder 16x sans-serif";
         ctx.fillStyle = "#000";
         ctx.fillText(data[i].value, x + 10, 40);
 
         // draw footer
         if (i < boxes - 1) {
-          ctx.font = "lighter 12px sans-serif";
-          ctx.fillStyle = "#888888";
-          ctx.fillText("Conversion Ratio  ---->", x + 10, height - 30);
+          ctx.font = "lighter 16px sans-serif";
+          ctx.fillStyle = "#000";
+          ctx.fillText("Conversion Ratio --->", x + 10, height - 30);
 
-          ctx.font = "bolder 12px sans-serif";
+          ctx.font = "bolder 16px sans-serif";
           ctx.fillStyle = "#777";
           // const text = (data[i+1].value - data[i].value) / data[i].value
-          const percentageChange =
-            (data[i + 1].value / data[i].value) * 100;
-          const percentageString = "                                        "+ percentageChange.toFixed(2) + "%";
+          const percentageChange = (data[i + 1].value / data[i].value) * 100;
+          const percentageString =
+            "                           " +
+            percentageChange.toFixed(2) +
+            "%";
           ctx.fillText(percentageString, x + 10, height - 10);
         }
       }
+    }
+  }, []);
+
+  const filteredDealData = dealData.filter((item) => {
+    return [
+      "Remedium Bio",
+      "Avivo Biomedical",
+      "PineTree",
+      "Lanier Therapeutics",
+    ].includes(item.dealName);
+  });
+
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      // Apply the body style
+      document.body.style = bodyStyle2;
+
+      // Create root element
+      // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+      var root = am5.Root.new("chartdiv");
+
+      // Set themes
+      // https://www.amcharts.com/docs/v5/concepts/themes/
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      // Create chart
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/
+      var chart = root.container.children.push(
+        am5xy.XYChart.new(root, {
+          panX: false,
+          panY: false,
+          paddingLeft: 0,
+          wheelX: "panX",
+          wheelY: "zoomX",
+          layout: root.verticalLayout,
+        })
+      );
+
+      // Add legend
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
+      var legend = chart.children.push(
+        am5.Legend.new(root, {
+          centerX: am5.p50,
+          x: am5.p50,
+        })
+      );
+
+      var data2 = [
+        {
+          year: "Total Outreach",
+          Remedium: filteredDealData.find(
+            (deal) => deal.dealName === "Remedium Bio"
+          )?.totalOutreach,
+          Avivo: filteredDealData.find(
+            (deal) => deal.dealName === "Avivo Biomedical"
+          )?.totalOutreach,
+          PineTree: filteredDealData.find(
+            (deal) => deal.dealName === "Lanier Therapeutics"
+          )?.totalOutreach,
+        },
+        {
+          year: "Deck Requested",
+          Remedium: filteredDealData.find(
+            (deal) => deal.dealName === "Remedium Bio"
+          )?.deckRequested,
+          Avivo: filteredDealData.find(
+            (deal) => deal.dealName === "Avivo Biomedical"
+          )?.deckRequested,
+          PineTree: filteredDealData.find(
+            (deal) => deal.dealName === "Lanier Therapeutics"
+          )?.deckRequested,
+        },
+        {
+          year: "Meeting Requested",
+          Remedium: filteredDealData.find(
+            (deal) => deal.dealName === "Remedium Bio"
+          )?.meetingRequested,
+          Avivo: filteredDealData.find(
+            (deal) => deal.dealName === "Avivo Biomedical"
+          )?.meetingRequested,
+          PineTree: filteredDealData.find(
+            (deal) => deal.dealName === "Lanier Therapeutics"
+          )?.meetingRequested,
+        },
+        {
+          year: "Due Dilligence Requested",
+          Remedium: filteredDealData.find(
+            (deal) => deal.dealName === "Remedium Bio"
+          )?.ddRequested,
+          Avivo: filteredDealData.find(
+            (deal) => deal.dealName === "Avivo Biomedical"
+          )?.ddRequested,
+          PineTree: filteredDealData.find(
+            (deal) => deal.dealName === "Lanier Therapeutics"
+          )?.ddRequested,
+        },
+      ];
+
+      // Create axes
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+      var xRenderer = am5xy.AxisRendererX.new(root, {
+        cellStartLocation: 0.1,
+        cellEndLocation: 0.9,
+        minorGridEnabled: true,
+      });
+
+      var xAxis = chart.xAxes.push(
+        am5xy.CategoryAxis.new(root, {
+          categoryField: "year",
+          renderer: xRenderer,
+          tooltip: am5.Tooltip.new(root, {}),
+        })
+      );
+
+      xRenderer.grid.template.setAll({
+        location: 1,
+      });
+
+      xAxis.data.setAll(data2);
+
+      var yAxis = chart.yAxes.push(
+        am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererY.new(root, {
+            strokeOpacity: 0.1,
+          }),
+        })
+      );
+
+      // Add series
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+      function makeSeries(name, fieldName) {
+        var series = chart.series.push(
+          am5xy.ColumnSeries.new(root, {
+            name: name,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueYField: fieldName,
+            categoryXField: "year",
+          })
+        );
+
+        series.columns.template.setAll({
+          tooltipText: "{name}, {categoryX}:{valueY}",
+          width: am5.percent(90),
+          tooltipY: 0,
+          strokeOpacity: 0,
+        });
+
+        series.data.setAll(data2);
+
+        // Make stuff animate on load
+        // https://www.amcharts.com/docs/v5/concepts/animations/
+        series.appear();
+
+        series.bullets.push(function () {
+          return am5.Bullet.new(root, {
+            locationY: 0,
+            sprite: am5.Label.new(root, {
+              text: "{valueY}",
+              fill: root.interfaceColors.get("alternativeText"),
+              centerY: 0,
+              centerX: am5.p50,
+              populateText: true,
+            }),
+          });
+        });
+
+        legend.data.push(series);
+      }
+
+      makeSeries("Remedium Bio", "Remedium");
+      makeSeries("Avivo Biomedical", "Avivo");
+      makeSeries("PineTree", "PineTree");
+      // makeSeries("Latin America", "lamerica");
+      // makeSeries("Middle East", "meast");
+      // makeSeries("Africa", "africa");
+
+      // Make stuff animate on load
+      // https://www.amcharts.com/docs/v5/concepts/animations/
+      chart.appear(1000, 100);
+
+      return () => {
+        root.dispose();
+      };
     }
   }, []);
 
@@ -1617,7 +1818,7 @@ export default function KPIDash() {
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="52.25rem"
-                    height="24.125rem"
+                    height="26.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Account Holder Data Table */}
@@ -1682,7 +1883,7 @@ export default function KPIDash() {
                         {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
                         <div className="chart" style={chartStyle}>
                           <div className="header" style={headerStyle}>
-                            Performance
+                            {/* Performance */}
                           </div>
                           <canvas ref={canvasRef}></canvas>{" "}
                         </div>
@@ -1705,7 +1906,7 @@ export default function KPIDash() {
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="60.25rem"
-                    height="24.125rem"
+                    height="26.125rem"
                     style={{ overflow: "auto" }}
                   >
                     {/* Line Plot for Each Account Holder */}
@@ -1713,45 +1914,9 @@ export default function KPIDash() {
                       <Line
                         data={accountHoldersLineData}
                         options={lineChartOptions}
-                      />
+                      /> 
                     </div> */}
-                    <div>
-                      {/* Dropdown for selecting the deal */}
-                      <select
-                        value={selectedDeal}
-                        onChange={handleSelectChange}
-                      >
-                        {dealData.map((deal, index) => (
-                          <option key={index} value={deal.dealName}>
-                            {deal.dealName}
-                          </option>
-                        ))}
-                      </select>
-                      {/* Chart component */}
-                      {chartData && chartData.labels && (
-                        <Bar
-                          data={chartData}
-                          options={{
-                            // ... (other chart options)
-                            plugins: {
-                              tooltip: {
-                                callbacks: {
-                                  afterBody: function (context) {
-                                    // Display the percentage change between bars in the tooltip
-                                    const index = context[0].dataIndex;
-                                    return index > 0
-                                      ? `Change: ${
-                                          chartData.percentages[index - 1]
-                                        }`
-                                      : "";
-                                  },
-                                },
-                              },
-                            },
-                          }}
-                        />
-                      )}
-                    </div>
+                    <div id="chartdiv" ref={chartRef} style={chartStyle2}></div>
                   </KPIBlock>
                 </div>
               </div>

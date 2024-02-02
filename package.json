@@ -13,6 +13,7 @@
     "start": "concurrently \"npm run dev-api\" \"npm run dev\""
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.8.0",
     "@auth0/auth0-react": "^2.2.3",
     "@headlessui/react": "^1.7.17",
     "@types/lodash": "^4.14.202",
