@@ -1,0 +1,23 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "indexInbound.js",
+  "scripts": {
+    "start": "nodemon indexInbound.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "memjs": "^1.3.2",
+    "mongodb": "^6.3.0",
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^6.9.8",
+    "nodemon": "^2.0.15"
+  },
+  "type": "module"
+}

@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev-api2": "cd api2 && npm i && npm start",
     "dev-api": "cd api && npm install cors express axios && npm start",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "ts-node": "ts-node --esm",
-    "start": "concurrently \"npm run dev-api\" \"npm run dev\""
+    "start": "concurrently \"npm run dev-api\" \"npm run dev\" \"npm run dev-api2\""
   },
   "dependencies": {
     "@amcharts/amcharts5": "^5.8.0",
