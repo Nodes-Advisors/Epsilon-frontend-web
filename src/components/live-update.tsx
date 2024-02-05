@@ -14,22 +14,43 @@ function LiveUpdate() {
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hoveredName, setHoveredName] = useState('')
-
+  const [page, setPage] = useState(1)
+  const [hoveredData, setHoveredData] = useState([])
+  const [isAccoundHolder, setIsAccountHolder] = useState(false)
 
   useEffect(() => {
     const fetchCompanyData = async() => {
-      const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
+      const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
         headers: {
           'Content-Type': 'application/json',
         },
       })
       if (res.status === 200) {
         setLoading(false)
-        setData(res.data)
+        setHoveredData(res.data)
       }
     }
     fetchCompanyData()
   }, [])
+
+  useEffect(() => {
+    const fetchCompanyData = async() => {
+      const res = await axios.get(`http://localhost:5001/fundrisingpipeline?page=${page}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        setLoading(false)
+        setData(data => [...data, ...res.data])
+      }
+    }
+    fetchCompanyData()
+  }, [page])
+
+  const handleNextPage = () => {
+    setPage(page + 1)
+  }
 
   const handleMouseOver = (e: React.MouseEvent<HTMLSpanElement>) => {
     if (hideTimeout) {
@@ -132,7 +153,7 @@ function LiveUpdate() {
           </ul>
         </div>
       ) : focused === 'all' ? (
-        <ul className={styles['news-ul']}>
+        <ul style={{ width: '100%' }} className={styles['news-ul']}>
           {
             data.map((item: any) => {
               return (
@@ -143,11 +164,14 @@ function LiveUpdate() {
                         
                     { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 0
                         && <>
-                          <span className={styles['company-manager']}>{item.account_holder}</span> 
+                          <span 
+                            onMouseEnter={handleMouseOver}
+                            onMouseLeave={handleMouseOut}
+                            className={styles['account_holder']}>{item.account_holder}</span> 
                           <span>{' contacted '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' at '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span>
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' for '}</span>
                           <span 
                             onMouseEnter={handleMouseOver}
@@ -157,9 +181,9 @@ function LiveUpdate() {
                     }
                     { item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0
                         && <>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
                           {/* this should be deal name  */}
                           <span 
@@ -176,9 +200,9 @@ function LiveUpdate() {
                         &&
                         <>
                           {/* [person at a fund] from [Fund Name] requested the [company] deck  */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' requested the '}</span>
                          
                           <span
@@ -193,9 +217,9 @@ function LiveUpdate() {
                         && item.pass_deck === 1 && 
                         <>
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after reviewing the deck */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
                      
                           <span 
@@ -210,9 +234,9 @@ function LiveUpdate() {
                         && item.dd === 0 && item.pass_dd === 0 &&
                         <>
                           {/* [person at a fund] from [Fund Name] requested a [company name] meeting  - (user) */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' requested a '}</span>
              
                           <span
@@ -220,7 +244,10 @@ function LiveUpdate() {
                             onMouseLeave={handleMouseOut}
                             className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' meeting - '}</span>
-                          <span className={styles['company-manager']}>{item.account_holder}</span>
+                          <span 
+                            onMouseEnter={handleMouseOver}
+                            onMouseLeave={handleMouseOut}
+                            className={styles['account_holder']}>{item.account_holder}</span>
                         </>
                     } 
                     { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
@@ -228,9 +255,9 @@ function LiveUpdate() {
                         && item.dd === 0 && item.pass_dd === 0 &&
                         <>
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after a meeting  */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
              
                           <span
@@ -245,7 +272,7 @@ function LiveUpdate() {
                         && item.dd === 1 && item.pass_dd === 0 &&
                         <>
                           {/* [Fund Name] entered in dd phase on [Company Name] */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' entered in dd phase on '}</span>
                           <span 
                             onMouseEnter={handleMouseOver}
@@ -260,6 +287,9 @@ function LiveUpdate() {
               )
             })
           }
+          <li style={{ alignSelf: 'center' }}>
+            <button onClick={handleNextPage}>Load more...</button>
+          </li>
           {showPopup && (
             <div 
               onMouseLeave={() => {
@@ -274,142 +304,155 @@ function LiveUpdate() {
                 setHideTimeout(timeout)
               }}
               style={{ 
+                backdropFilter: 'blur(25px)',
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 transition: 'all 0.5s ease',
                 zIndex: 10, 
                 position: 'absolute', 
                 gap: '1rem',
                 top: popupPosition.y, left: popupPosition.x, 
-                width: '25rem', height: '30rem', 
-                background: '#fff', borderRadius: '0.5rem', boxShadow: '0 0  1rem violet' }}>
-              <div style={{ marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
+                width: '25rem', height: isAccoundHolder ? '15rem' : '30rem', 
+                background: '#fff1', borderRadius: '0.5rem' }}>
+              <div style={{ color: '#fff', marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
                 {/* <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'pink', width: '4rem', height: '4rem', borderRadius: '50%' }}>
                   <h2 style={{ color: '#111', fontSize: '2rem' }}>{hoveredName ? hoveredName[0] : 'U'}</h2>
                 </div> */}
-                <span style={{ color: '#333', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
+                <span style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
               </div>
               <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
               <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
-                <span style={{  color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
+                <span style={{   fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
+                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.contacted, 0)}</span>
-                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
+                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
+                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
-                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
+                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
+                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.meeting_request, 0)}</span>
-                <span style={{ color: '#333', fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{data.filter(item => item?.company_name === hoveredName)
+                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>
+                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
                   .reduce((sum, item) => sum + item?.dd, 0)}</span>
               </div>
-              <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
-              <ul className={styles['contact-list-scroll']} style={{ textAlign: 'left', padding: '0 3% 3% 0', width: '80%', 
-                maxHeight: '40%', overflow: 'auto', color: '#111',
-              }}>
-                {
-                  data.filter(item => item?.company_name === hoveredName).map(item => {
-                    return (
-                      <li key={item.id} style={{ padding: '0.5rem' }}>
-                        <span style={{ color: 'violet' }}>{getDateDiff(item.last_updated_status_date)}</span>
-                        {' - '}
+              {
+                !isAccoundHolder &&
+                <>
+                  <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
+                  <ul className={styles['contact-list-scroll']} style={{ textAlign: 'left', padding: '0 3% 3% 0', width: '80%', 
+                    maxHeight: '40%', overflow: 'auto', color: '#111',
+                  }}>
+                    {
+                      hoveredData.filter(item => item?.company_name === hoveredName).map(item => {
+                        return (
+                          <li key={item.id} style={{ padding: '0.5rem', color: '#eee' }}>
+                            <span style={{ color: 'violet' }}>{getDateDiff(item.last_updated_status_date)}</span>
+                            {' - '}
                        
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 0
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 0
                         && <>
-                          <span className={styles['company-manager']}>{item.account_holder}</span> 
+                          <span
+                            onMouseEnter={handleMouseOver}
+                            onMouseLeave={handleMouseOut}
+                            className={styles['account_holder']}>{item.account_holder}</span> 
                           <span>{' contacted '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' at '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span>
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' for '}</span>
                           <span className={styles['company-manager']}>{item.company_name}</span>
                         </>
-                        }
-                        { item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0
+                            }
+                            { item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0
                         && <>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
                           {/* this should be deal name  */}
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' after initial pitch'}</span>
                           
                         </>
-                        }
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
+                            }
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
                         && item.pass_deck === 0 &&  item.meeting_request === 0 
                         && item.pass_meeting === 0 && item.dd === 0 && item.pass_dd === 0
                         &&
                         <>
                           {/* [person at a fund] from [Fund Name] requested the [company] deck  */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' requested the '}</span>
                          
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' deck'}</span>
                           
                         </>
-                        } 
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
+                            } 
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
                         && item.pass_deck === 1 && 
                         <>
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after reviewing the deck */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
                      
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' after reviewing the deck'}</span>
                         </>
-                        } 
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
+                            } 
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
                         && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 0
                         && item.dd === 0 && item.pass_dd === 0 &&
                         <>
                           {/* [person at a fund] from [Fund Name] requested a [company name] meeting  - (user) */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' requested a '}</span>
              
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' meeting - '}</span>
-                          <span className={styles['company-manager']}>{item.account_holder}</span>
+                          <span 
+                            onMouseEnter={handleMouseOver}
+                            onMouseLeave={handleMouseOut}
+                            className={styles['account_holder']}>{item.account_holder}</span>
                         </>
-                        } 
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
+                            } 
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
                         && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 1
                         && item.dd === 0 && item.pass_dd === 0 &&
                         <>
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after a meeting  */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' passed on '}</span>
              
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' after a meeting'}</span>
                         </>
-                        } 
-                        { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
+                            } 
+                            { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1
                         && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 0
                         && item.dd === 1 && item.pass_dd === 0 &&
                         <>
                           {/* [Fund Name] entered in dd phase on [Company Name] */}
-                          <span style={{ color: '#00BBF9' }}>{item.LP_pitched}</span> 
+                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
                           <span>{' entered in dd phase on '}</span>
                           <span className={styles['company-manager']}>{item.company_name}</span>
 
                         </>
-                        } 
-                      </li>
-                    )})
-                }
-              </ul>
+                            } 
+                          </li>
+                        )})
+                    }
+                  </ul>
+                </>
+                
+              }
             </div>
           )}
         </ul>

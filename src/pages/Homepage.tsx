@@ -73,7 +73,7 @@ export default function Home() {
   return (
     // <div style={{ width: '100%', minHeight: '90vh' }} >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
-      <p id={styles['welcome']}>Welcome Back to Nodes Epsilon, <span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p>
+      <p id={styles['welcome']}>{'Welcome to Nodes EpsilonAI, '}<span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p>
       {/* <SearchBar /> */}
 
       <h2 className={styles['news-title']}>Today&apos;s Top News</h2>

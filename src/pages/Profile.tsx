@@ -125,7 +125,7 @@ export default function Profile(): JSX.Element {
                     <img src={HeadImg} alt="" className={styles['headImg']} />
                     <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
                       <span className={styles['relationship-inner-text']}>BEN HOrowitz</span>
-                      <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span>
+                      {/* <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span> */}
                     </div>
                     <img src={HeadImg} alt="" className={styles['headImg']} />
                   </>
@@ -260,7 +260,7 @@ export default function Profile(): JSX.Element {
             </p>
           </div>
           <div className={styles['model-layout']}>
-            <h2>Historical Log</h2>
+            <h2 className={styles.description}>Historical Log</h2>
   
             <div>
               <table style={{ textAlign: 'left' }}>

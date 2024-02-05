@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import EpsilonLogo from '../assets/images/epsilon-logo.png'
+import EpsilonLogo from '../assets/svgs/epsilon-logo.svg?react'
 import SearchBarIcon from '../assets/svgs/search-bar-icon.svg?react'
 import styles from '../styles/nav-bar.module.less'
 import { AsyncImage } from 'loadable-image'
@@ -102,10 +102,11 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           onMouseOver={e => (e.target as HTMLImageElement).style.cursor = 'pointer'}
           onClick={() => setOpenLeftNavBar(!openLeftNavBar) }
           alt="" />
-        <img
+        <EpsilonLogo
           onMouseOver={e => (e.target as HTMLImageElement).style.cursor = 'pointer'}
           onClick={() => navigate('/home')}
-          src={EpsilonLogo} style={{ width: '10rem', height: 'auto', marginLeft: '2rem' }} alt="" />
+          // src={EpsilonLogo} 
+          style={{ width: '10rem', height: 'auto', marginLeft: '2rem' }} alt="" />
         <div style={{ position: 'relative', marginLeft: '2rem' }}>
           <SearchBarIcon style={{ width: '1.5rem', position: 'absolute', paddingLeft: '1rem' }} />
           <input 

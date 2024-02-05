@@ -51,10 +51,10 @@ export default function LeftNavBar({style, show}: {style?: React.CSSProperties, 
 
       <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
       <nav>
-        <NavWidget src={KPIDashImg} Svg={KPIDashIcon} width='4.125rem' height='4.44794rem' to='/kpi-dash' text= 'KPI Dash'/>
-        <NavWidget src={FundCardImg} Svg={FundCardIcon} width='4rem' height='4.22225rem' to='/fund-cards' text='Fund Cards' />
-        <NavWidget src={IntelligenceImg} Svg={IntelligenceIcon} width='4rem' height='4.125rem' to='/intelligence' text='Intelligence' />
-        <NavWidget src={DatabaseImg} Svg={IntelligenceIcon} width='4rem' height='4.125rem' to='/database' text='Database Interaction' />
+        <NavWidget src={KPIDashImg} Svg={KPIDashIcon} width='4rem' height='4rem' to='/kpi-dash' text= 'KPI Dash'/>
+        <NavWidget src={FundCardImg} Svg={FundCardIcon} width='4rem' height='4rem' to='/fund-cards' text='Fund Cards' />
+        <NavWidget src={IntelligenceImg} Svg={IntelligenceIcon} width='5rem' height='5rem' to='/intelligence' text='Intelligence' />
+        <NavWidget src={DatabaseImg} Svg={IntelligenceIcon} width='4.5rem' height='4.5rem' to='/database' text='Database Interaction' />
       </nav>
       {/* <GroupButtonIcon id={styles['group-button']} /> */}
     </aside>

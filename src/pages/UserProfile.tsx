@@ -43,7 +43,7 @@ export default function UserProfile() {
   }, [])
 
   return (
-    <section style={{ display: 'flex', justifyContent: 'center', marginTop: '5rem' }}>
+    <section style={{ display: 'flex', justifyContent: 'center', marginTop: '10rem', gap: '20rem', marginLeft: '-35rem' }}>
       {
         loading ? <div>loading...</div> : 
           <>
@@ -193,7 +193,7 @@ export default function UserProfile() {
                 </KPIBlock>
               </div>
               <span style={{ marginTop: '2rem', fontSize: '2rem', fontWeight: 550 }}>User&apos;s Historical Logs</span>
-              <table>
+              {/* <table>
                 <thead>
                   <tr>
                     <th>column 1</th>
@@ -216,7 +216,7 @@ export default function UserProfile() {
                     <td>td 2</td>
                   </tr>
                 </tbody>
-              </table>
+              </table> */}
               <ul>
                 <li>
                   <span 

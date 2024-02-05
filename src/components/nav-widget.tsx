@@ -10,9 +10,10 @@ type INavWidgetProps = {
     height: string;
     text: string;
     src?: string | undefined;
+    style?: React.CSSProperties;
 }
 
-export default function NavWidget({Svg, width, height, to, text, src=undefined}: INavWidgetProps) {
+export default function NavWidget({Svg, width, height, to, text, src=undefined, style}: INavWidgetProps) {
   const navigate = useNavigate()
 
   return (
@@ -20,9 +21,13 @@ export default function NavWidget({Svg, width, height, to, text, src=undefined}:
       {
         src 
           ? 
-          <img src={src} alt='nav-widget-img' onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} /> 
+          to === '/database'
+            ?
+            <img src={src} alt='nav-widget-img-db' onClick={() => navigate(to)} className={styles['nav-widget-img-db']} style={{ ...style, width, height }} /> 
+            :
+            <img src={src} alt='nav-widget-img' onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ ...style, width, height }} /> 
           : 
-          <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ width, height }} />
+          <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ ...style, width, height }} />
       }
       
       <a href={to} className={styles['nav-widget-text']}>{text}</a>
