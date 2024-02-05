@@ -1106,21 +1106,30 @@ export default function KPIDash() {
           stage: "Total Outreach",
           income: aggregatedKPIs.totalOutreach,
           expenses: aggregatedKPIs.totalOutreach,
+          change: 0,
         },
         {
           stage: "Deck Requested",
           income: aggregatedKPIs.deckRequested,
           expenses: aggregatedKPIs.deckRequested,
+          change:
+            (aggregatedKPIs.deckRequested / aggregatedKPIs.totalOutreach) * 100,
         },
         {
           stage: "Meeting Requested",
           income: aggregatedKPIs.meetingRequested,
           expenses: aggregatedKPIs.meetingRequested,
+          change:
+            (aggregatedKPIs.meetingRequested / aggregatedKPIs.deckRequested) *
+            100,
         },
         {
           stage: "DD Requested",
           income: aggregatedKPIs.ddRequested,
           expenses: aggregatedKPIs.ddRequested,
+          change:
+            (aggregatedKPIs.ddRequested / aggregatedKPIs.meetingRequested) *
+            100,
         },
       ];
 
@@ -1134,8 +1143,12 @@ export default function KPIDash() {
         })
       );
       xAxis.data.setAll(data);
-      xAxis.get("renderer").labels.template.set("fill", am5.color("#ffffff")); // Set axis labels to white
-      xAxis.get("renderer").grid.template.set("stroke", am5.color("#ffffff")); // Set grid lines to white
+      xAxis.get("renderer").labels.template.setAll({
+        fill: am5.color("#ffffff"), // White color for axis labels
+      });
+      xAxis.get("renderer").grid.template.setAll({
+        stroke: am5.color("#ffffff"), // White color for grid lines
+      });
 
       var yAxis = chart.yAxes.push(
         am5xy.ValueAxis.new(root, {
@@ -1144,8 +1157,12 @@ export default function KPIDash() {
           renderer: am5xy.AxisRendererY.new(root, {}),
         })
       );
-      yAxis.get("renderer").labels.template.set("fill", am5.color("#ffffff")); // Set axis labels to white
-      yAxis.get("renderer").grid.template.set("stroke", am5.color("#ffffff")); // Set grid lines to white
+      yAxis.get("renderer").labels.template.setAll({
+        fill: am5.color("#ffffff"), // White color for axis labels
+      });
+      yAxis.get("renderer").grid.template.setAll({
+        stroke: am5.color("#ffffff"), // White color for grid lines
+      });
 
       var series1 = chart.series.push(
         am5xy.ColumnSeries.new(root, {
@@ -1153,10 +1170,6 @@ export default function KPIDash() {
           yAxis: yAxis,
           valueYField: "income",
           categoryXField: "stage",
-          tooltip: am5.Tooltip.new(root, {
-            pointerOrientation: "horizontal",
-            labelText: "{valueY} {info}",
-          }),
         })
       );
       series1.data.setAll(data);
@@ -1166,20 +1179,36 @@ export default function KPIDash() {
           xAxis: xAxis,
           yAxis: yAxis,
           valueYField: "expenses",
-          categoryXField: "stage", 
+          categoryXField: "stage",
         })
       );
       series2.data.setAll(data);
-      series2.bullets.push(() =>
-        am5.Bullet.new(root, {
-          sprite: am5.Circle.new(root, {
-            strokeWidth: 3,
-            stroke: series2.get("stroke"),
-            radius: 5,
-            fill: root.interfaceColors.get("background"),
+
+      series2.bullets.push((root, series, dataItem) => {
+        let bullet = am5.Bullet.new(root, {
+          locationX: 0.5,
+          sprite: am5.Label.new(root, {
+            text: "{change}%",
+            fill: am5.color("#ffffff"),
+            centerY: am5.p50,
+            centerX: am5.p50,
+            populateText: true,
           }),
-        })
-      );
+        });
+
+        let value = dataItem.dataContext.change;
+        if (value > 0) {
+          bullet.get("sprite").setAll({
+            fill: am5.color("#ffffff"), // white for positive change
+          });
+        } else {
+          bullet.get("sprite").setAll({
+            fill: am5.color("#ffffff"), // white for negative change
+          });
+        }
+
+        return bullet;
+      });
 
       chart.appear(1000, 100);
       series1.appear();
