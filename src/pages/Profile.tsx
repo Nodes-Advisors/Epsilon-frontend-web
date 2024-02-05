@@ -385,9 +385,9 @@ export default function Profile(): JSX.Element {
               </select>
             </div>
             <div>
-              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Approvers or Assignees</span>
+              <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Assignees</span>
               <select
-                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Approvers or Assignees" id="">
+                style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Assignees" id="">
                 <option value="Tyler Aroner">Tyler Aroner</option>
                 <option value="Eliott Harfouche">Eliott Harfouche</option>
                 <option value="Iman Ghavami">Iman Ghavami</option>
