@@ -1078,16 +1078,157 @@ export default function KPIDash() {
     );
   });
 
+  const chartDivRef = useRef(null);
+  const rootRef = useRef(null); // Add a ref to store the Root instance
+
+  useEffect(() => {
+    if (!chartDivRef.current || rootRef.current) return; // Check if Root is already initialized
+
+    const root = am5.Root.new(chartDivRef.current);
+    rootRef.current = root; // Store the Root instance in the ref
+
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(
+      am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        paddingLeft: 0,
+        layout: root.verticalLayout,
+      })
+    );
+
+    chart.set(
+      "scrollbarX",
+      am5.Scrollbar.new(root, { orientation: "horizontal" })
+    );
+
+    var data = [
+      { year: "2016", income: 23.5, expenses: 23.5 },
+      { year: "2017", income: 26.2, expenses: 26.2 },
+      { year: "2018", income: 30.1, expenses: 30.1 },
+      { year: "2019", income: 29.5, expenses: 29.5 },
+      {
+        year: "2020",
+        income: 30.6,
+        expenses: 30.6,
+        strokeSettings: {
+          stroke: chart.get("colors").getIndex(1),
+          strokeWidth: 3,
+          strokeDasharray: [5, 5],
+        },
+      },
+      {
+        year: "2021",
+        income: 34.1,
+        expenses: 32.9,
+        columnSettings: {
+          strokeWidth: 1,
+          strokeDasharray: [5],
+          fillOpacity: 0.2,
+        },
+        info: "(projection)",
+      },
+    ];
+
+    var xRenderer = am5xy.AxisRendererX.new(root, {
+      minorGridEnabled: true,
+      minGridDistance: 60,
+    });
+    var xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(root, {
+        categoryField: "year",
+        renderer: xRenderer,
+        tooltip: am5.Tooltip.new(root, {}),
+      })
+    );
+    xRenderer.grid.template.setAll({ location: 1 });
+    xAxis.data.setAll(data);
+
+    var yAxis = chart.yAxes.push(
+      am5xy.ValueAxis.new(root, {
+        min: 0,
+        extraMax: 0.1,
+        renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 }),
+      })
+    );
+
+    var series1 = chart.series.push(
+      am5xy.ColumnSeries.new(root, {
+        name: "Income",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "income",
+        categoryXField: "year",
+        tooltip: am5.Tooltip.new(root, {
+          pointerOrientation: "horizontal",
+          labelText: "{name} in {categoryX}: {valueY} {info}",
+        }),
+      })
+    );
+    series1.columns.template.setAll({
+      tooltipY: am5.percent(10),
+      templateField: "columnSettings",
+    });
+    series1.data.setAll(data);
+
+    var series2 = chart.series.push(
+      am5xy.LineSeries.new(root, {
+        name: "Expenses",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "expenses",
+        categoryXField: "year",
+        tooltip: am5.Tooltip.new(root, {
+          pointerOrientation: "horizontal",
+          labelText: "{name} in {categoryX}: {valueY} {info}",
+        }),
+      })
+    );
+    series2.strokes.template.setAll({
+      strokeWidth: 3,
+      templateField: "strokeSettings",
+    });
+    series2.data.setAll(data);
+    series2.bullets.push(() =>
+      am5.Bullet.new(root, {
+        sprite: am5.Circle.new(root, {
+          strokeWidth: 3,
+          stroke: series2.get("stroke"),
+          radius: 5,
+          fill: root.interfaceColors.get("background"),
+        }),
+      })
+    );
+
+    chart.set("cursor", am5xy.XYCursor.new(root, {}));
+    var legend = chart.children.push(
+      am5.Legend.new(root, { centerX: am5.p50, x: am5.p50 })
+    );
+    legend.data.setAll(chart.series.values);
+
+    chart.appear(1000, 100);
+    series1.appear();
+
+    return () => {
+      root.dispose();
+      rootRef.current = null; // Clear the Root instance from the ref
+    };
+  }, []);
+
   const chartRef = useRef(null);
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && !rootRef.current) {
       // Apply the body style
       document.body.style = bodyStyle2;
 
       // Create root element
       // https://www.amcharts.com/docs/v5/getting-started/#Root_element
-      const root = am5.Root.new("chartdiv");
+      const root = am5.Root.new(chartRef.current);
+      rootRef.current = root;
 
       // Set themes
       // https://www.amcharts.com/docs/v5/concepts/themes/
@@ -1277,6 +1418,7 @@ export default function KPIDash() {
 
       return () => {
         root.dispose();
+        rootRef.current = null; // Clear the Root instance from the ref
       };
     }
   }, []);
@@ -1919,7 +2061,10 @@ export default function KPIDash() {
                           <div className="header" style={headerStyle}>
                             {/* Performance */}
                           </div>
-                          <canvas ref={canvasRef}></canvas>{" "}
+                          <div
+                            ref={chartDivRef}
+                            style={{ width: "700px", height: "400px" }}
+                          ></div>
                         </div>
                       </div>
                     ) : (
@@ -1949,8 +2094,11 @@ export default function KPIDash() {
                         data={accountHoldersLineData}
                         options={lineChartOptions}
                       /> 
-                    </div> */}
-                    <div id="chartdiv" ref={chartRef} style={chartStyle2}></div>
+                    </div> */} 
+                    <div
+                      ref={chartRef}
+                      style={{ width: "700px", height: "500px" }}
+                    ></div>
                   </KPIBlock>
                 </div>
               </div>
