@@ -29,17 +29,19 @@ export default function SavedList() {
   const [approvers, setApprovers] = useState<string>('')
   const [details, setDetails] = useState<string>('')
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-  const [filteredData, setFilteredData] = useState<any[]>(savedFunds)
+  const [filteredData, setFilteredData] = useState<any[]>()
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
   const [contactPerson, setContactPerson] = useState<string>('Person A')
   const [priority, setPriority] = useState<string>('High')
-  const [requestStatus, setRequestStatus] = useState<string>('Pending')
+  // const [requestStatus, setRequestStatus] = useState<string>('Pending')
   const user = useUserStore(state => state.user)
   const [deal, setDeal] = useState<string>('Deal I')
   const [pendingList, setPendingList] = useState<string[]>([])
+  const [selectedFundName, setSelectedFundName] = useState<string>('')
+
   const [filteredList, setFilteredList] = useState<{
-    '': string[],
+    '': string[]
     'Investors': string[],
     'Location': string[],
     'Status': string[],
@@ -97,6 +99,7 @@ export default function SavedList() {
         deal,
         contactPerson,
         priority,
+        selectedFundName,
         details,
         email: user?.email,
       }, {
@@ -111,6 +114,26 @@ export default function SavedList() {
       toast.error(error?.response?.data)
     }
   }
+
+  useEffect(() => {
+    async function fetchSavedFunds() {
+      
+      await axios.get(`http://localhost:5001/savedcollections/${window.location.href.split('/')[window.location.href.split('/').length - 1]}`, {
+        params: {
+          email: user?.email,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        console.log(res.data)
+        setFilteredData(res.data)
+      }).catch((error) => {
+        toast.error(error?.response?.data)
+      })
+    }
+    fetchSavedFunds()
+  }, [])
 
   useEffect(() => {
     async function fetchPendingList() {
@@ -405,7 +428,7 @@ export default function SavedList() {
                                   setSelectedFundName(record.Funds as string)
                                   setOpenRequestPanel(true)
                                 }}
-                                style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>
+                                style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem', background: pendingList.includes(record.Funds) ? 'rgb(100, 108, 255)' : 'transparent' }}>
                                 {pendingList.includes(record.Funds) ? 'PENDING' : 'REQUEST'}
                               </button>
                             </div>

@@ -41,6 +41,11 @@ export default function FundCards() {
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
   const [selectedFundName, setSelectedFundName] = useState<string>('')
+  const [showSavedCollections, setShowSavedCollections] = useState<boolean>(false)
+  const [savedCollections, setSavedCollections] = useState<string[]>([])
+  const [changeToInput, setChangeToInput] = useState<boolean>(false)
+  const newCollectionRef = useRef<HTMLInputElement>(null)
+  const [hoveredCollection, setHoveredCollection] = useState<string>('')
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -65,6 +70,24 @@ export default function FundCards() {
     'Clear Filters': [],
   })
   // according to filteredList, filter data
+
+  useEffect(() => {
+    const fetchSavedCollections = async () => {
+      await axios.get('http://localhost:5001/savedcollections',  {
+        params: {
+          email: user?.email,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        setSavedCollections(res.data)
+      }).catch((error) => {
+        toast.error(error?.response?.data)
+      })
+    }
+    fetchSavedCollections()
+  }, [])
 
   useEffect(() => {
     if (filterName === '') {
@@ -278,6 +301,59 @@ export default function FundCards() {
     }
   }
 
+  const handleSavedCollections = async (e) => {
+    e.preventDefault()
+    
+  }
+
+  const handleCreateNewCollection = async () => {
+    try {
+      const res  = await axios.post('http://localhost:5001/savedcollections', {
+        email: user?.email,
+        savedcollection: newCollectionRef.current?.value,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        toast.success('Collection created successfully!')
+        setSavedCollections([...savedCollections, newCollectionRef.current?.value as string])
+        setChangeToInput(false)
+      }
+      
+      else if (res.status === 409) {
+        toast.error('Collection already exists')
+      } 
+      
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
+
+  const handleAddToCollection = async () => {
+    try {
+      console.log(selectedFundName)
+      const res = await axios.post('http://localhost:5001/savedcollections/add', {
+        email: user?.email,
+        collection: hoveredCollection,
+        fund: selectedFundName,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.status === 200) {
+        toast.success('Fund added to collection successfully!')
+        setShowSavedCollections(false)
+      } else if (res.status === 409) {
+        toast.error('Fund already exists in this collection')
+      }
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
+
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
@@ -434,14 +510,18 @@ export default function FundCards() {
                               onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                               style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                             <button 
-                              onClick={() => { 
-                                if (savedFunds.find((fund) => fund._id === record._id)) {
-                                  deleteSavedFund(record)
-                                } else {
-                                  addSavedFund(record)
-                                }
+                              // onClick={() => { 
+                              //   if (savedFunds.find((fund) => fund._id === record._id)) {
+                              //     deleteSavedFund(record)
+                              //   } else {
+                              //     addSavedFund(record)
+                              //   }
+                              // }}
+                              onClick={() => {
+                                setShowSavedCollections(true)
+                                setSelectedFundName(record.Funds as string)
                               }}
-                              style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{inSavedFunds(record) ? 'SAVED' : 'SAVE'}</button>
+                              style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{'SAVE'}</button>
                             <button 
                               onClick={() => {
                                 if (pendingList.includes(record.Funds as string)) {
@@ -488,6 +568,74 @@ export default function FundCards() {
             
         }
       </div>
+      <div className={styles['popover-background']} style={{ visibility: showSavedCollections ? 'visible' : 'hidden' }}>
+        <div className={styles['popover-form']} style={{ width: '20rem', height: '30rem' }}>
+          <div
+          
+          >
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-around',   
+              alignItems: 'center', padding: '1rem' }}>
+                        
+              <span style={{ display: 'block', fontWeight: '700', fontSize: '1.5rem' }}>Save the fund to</span>
+              <CancelButtonIcon className={styles['cancelbutton']} onClick={() => setShowSavedCollections(false)} />
+            </div>
+            
+            <ul style={{ listStyleType: 'none', margin: 0, display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+              {
+                savedCollections.map((collection) => (
+                  <li key={collection} style={{  display: 'flex', gap: '0.2rem' }}>
+                    <span 
+                      onClick={() => { setHoveredCollection(collection) }}
+                      className={styles['collection-li-item']}
+                      style={{ alignItems: 'center', padding: '0.5rem', background: collection === hoveredCollection ? 'orange' : 'lightblue',
+                        fontWeight: '700', fontSize: '1.2rem', width: '60%', borderRadius: '0.5rem' }}>
+                      <span>{collection}</span>
+                    </span>
+                    {
+                      collection === hoveredCollection &&
+                      <button 
+                        onClick={handleAddToCollection}
+                        style={{ padding: '0.3rem', backgroundColor: 'black', color: '#fff', border: 'none', borderRadius: '0.5rem' }}>Confirm</button>
+                    }
+                  </li>
+                ))
+              }
+              <li style={{ fontWeight: '700', fontSize: '1.2rem' }}>
+                {
+                  !changeToInput
+                    ?
+                    <button 
+                      onClick={() => setChangeToInput(true)}
+                      style={{ padding: '0.5rem', backgroundColor: 'black', color: '#fff', border: 'none', borderRadius: '0.5rem' }}>Add a new list</button>
+                    :
+                    <div>
+                      <input type="text" 
+                        style={{ borderRadius: '0.5rem', padding: '0.5rem', fontSize: '1.2rem', width: '60%' }}
+                        onBlur={() => {
+                          if (!newCollectionRef.current?.value || newCollectionRef.current?.value === '') {
+                            setChangeToInput(false)
+                          }
+                        }} autoFocus ref={newCollectionRef} />
+                      <div style={{ marginTop: '1rem' }}>
+                        <button
+                          style={{ padding: '0.5rem', borderRadius: '0.5rem', marginRight: '0.5rem'}}
+                          onClick={handleCreateNewCollection}
+                        >Confirm
+                        </button>
+                        <button
+                          style={{ padding: '0.5rem', borderRadius: '0.5rem' }}
+                          onClick={() => setChangeToInput(false)}
+                        >Cancel
+                        </button>
+                      </div>
+                    </div>
+                }
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
           <form 
@@ -495,12 +643,7 @@ export default function FundCards() {
             style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                {/* <AsyncImage src={isLoading  ? '' : (recordRef.current!.fields['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
-                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: '3px solid #5392d4' }}
-
-                  draggable='false' onContextMenu={e => e.preventDefault()} /> */}
-                <div>
-                  {/* <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current.fields['Investor Name'] as string : 'no name'}</span></span> */}
+                <div>             
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
                 </div>
               </div>

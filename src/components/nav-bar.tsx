@@ -31,6 +31,9 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [option, setOption] = useState<boolean>(false)
   const [numNewMsg, setNumNewMsg] = useState<number>(8)
   const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
+  const [savedCollections, setSavedCollections] = useState<string[]>([])
+  const [openCollectionList, setOpenCollectionList] = useState<boolean>(false)
+
   const logout = async() => {
     try {
       await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
@@ -75,6 +78,33 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   }, [window.location.href])
   
+  useEffect(() => {
+    const fetchSavedCollections = async () => {
+      await axios.get('http://localhost:5001/savedcollections',  {
+        params: {
+          email: user?.email,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((res) => {
+        setSavedCollections(res.data)
+      }).catch((error) => {
+        toast.error(error?.response?.data)
+      })
+    }
+    fetchSavedCollections()
+  }, [])
+
+  const handleSavedSearchClick = () => {
+    if (savedCollections.length === 0) {
+      toast.error('You have not saved any collections, please save some funds first.')
+      return
+    }
+    setOpenCollectionList(!openCollectionList)
+    // navigate('/my-saved-list')
+  }
+
 
   return (
     <>
@@ -111,14 +141,28 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           <SearchBarIcon style={{ width: '1.5rem', position: 'absolute', paddingLeft: '1rem' }} />
           <input 
             className= {styles['nav-search-bar']}
-            type="text" placeholder='Search anything' />
+            type="text" placeholder='Search Everything' />
         </div>
-        <span 
-          onClick={() => navigate('/my-saved-list')}
-          className={styles['nav-saved-fund']}
-          style={{ fontSize: '1.1rem', fontWeight: 550, marginLeft: '3rem'  }} >
+        <div style={{ position: 'relative' }}>
+          <span 
+            onClick={handleSavedSearchClick}
+            className={styles['nav-saved-fund']}
+            style={{ fontSize: '1.1rem', fontWeight: 550, marginLeft: '3rem'  }} >
             My Saved Search
-        </span>
+          </span>
+          <ul style={{ position: 'absolute', top: '1rem', left: '0' }}>
+            {
+              openCollectionList && savedCollections.map((collection, index) => (
+                <li key={index} className={styles['collection-li']} style={{ display: 'block', width: '100%', textAlign: 'start', padding: '0.5rem 1rem', fontSize: '1.2rem', fontWeight: '600', cursor: 'pointer' }}
+                  onClick={() => {
+                    setOpenCollectionList(false)
+                    navigate(`/my-saved-list/${collection}`)
+                  }}
+                >{collection}</li>
+              ))
+            }
+          </ul>
+        </div>
 
         <div 
           className={styles['login']} >

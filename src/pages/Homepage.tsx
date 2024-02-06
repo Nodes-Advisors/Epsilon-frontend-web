@@ -83,7 +83,7 @@ export default function Home() {
         <h2 className={styles['news-title']}>Live update</h2>
         <div className={styles['live-update-icon']} />
       </div>
-      <LiveUpdate />
+      <LiveUpdate user={userInfo}/>
 
     </div> 
       

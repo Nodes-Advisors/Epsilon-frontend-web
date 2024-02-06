@@ -419,6 +419,128 @@ app.get('/fundrisingpipeline', async (req, res) => {
   }
 })
 
+app.get('/savedcollections', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.query.email
+    if (!email) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+    const collections = await collection.find({email: email}).toArray()
+    res.json(collections.map(collection => collection.savedcollection))
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }
+})
+
+app.post('/savedcollections/delete', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.body.email
+    const collectionName = req.body.collection
+    if (!email || !collectionName) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+    const result = await collection.deleteOne({ email, savedcollection: collectionName })
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Collection does not exist' })
+    }
+    res.status(200).json({ message: 'Collection deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting collection:', error)
+    res.status(500).json({ message: 'Something went wrong with backend' })
+  }
+})
+
+app.post('/savedcollections', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.body.email
+    const savedcollection = req.body.savedcollection
+    
+    if (!email || !savedcollection) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+    // Check for duplicates
+    const existingDocument = await collection.findOne({ email, savedcollection })
+    if (existingDocument && existingDocument.savedcollection) {
+      res.status(409).send('Collection already exists!')
+      return
+    }
+    // console.log(email, savedcollection)
+    // Insert the email and savedcollection into the collection
+    await collection.insertOne({ email, savedcollection })
+
+    res.status(200).json({ message: 'You have created a new list successfully' })
+  } catch (error) {
+    console.error('Error inserting data:', error)
+    res.status(500).json({ message: 'Something went wrong with backend' })
+  }
+})
+
+app.get('/savedcollections/:collectionName', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.query.email
+    const collectionName = req.params.collectionName
+    if (!email || !collectionName) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+    const savedcollection = await collection.findOne({ email, savedcollection: collectionName })
+    if (!savedcollection) {
+      return res.status(404).json({ message: 'Collection does not exist' })
+    }
+    // console.log(savedcollection)
+    const funds = savedcollection.funds || []
+    // get funds from FundCard2
+    const fundCollection = database.collection('FundCard2')
+    const fundDetails = await fundCollection.find({Funds: {$in: funds}}).toArray()
+    // console.log(fundDetails)
+    res.json(fundDetails)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }
+})
+
+app.post('/savedcollections/add', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.body.email
+    const collectionName = req.body.collection
+    const fund = req.body.fund
+    // console.log(email, collectionName, fund)
+    if (!email || !collectionName || !fund) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+
+    // Check if the collection exists
+    const existingCollection = await collection.findOne({ email, savedcollection: collectionName })
+    if (!existingCollection) {
+      return res.status(404).json({ message: 'Collection does not exist' })
+    }
+
+    // Check if the fund already exists in the collection
+    if (existingCollection.funds && existingCollection.funds.includes(fund)) {
+      return res.status(409).send('Fund already exists in the collection')
+    }
+
+    // Add the fund to the collection
+    await collection.updateOne({ email, savedcollection: collectionName }, { $push: { funds: fund } })
+
+    res.status(200).json({ message: 'Fund added to collection successfully' })
+  } catch (error) {
+    console.error('Error adding fund to collection:', error)
+    res.status(500).json({ message: 'Something went wrong with backend' })
+  }
+})
+
 app.get('/verifyToken', verifyToken, (req, res) => {
   res.status(200).send('Token is valid and not expired')
 })

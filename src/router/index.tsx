@@ -40,7 +40,7 @@ const router = createBrowserRouter([
   { path: 'kpiexcel', element: <KPIExcel /> },
 
   { path: 'kpi-dash', element: <KPIDash /> },
-  { path: 'my-saved-list', element: <SavedList /> },
+  { path: 'my-saved-list/:collection', element: <SavedList /> },
   { path: 'user-profile', element: <UserProfile /> },
   { path: 'database', element: <Database /> },
 ].map(item => ({ ...item, element: navWrapper(item.element) })),
