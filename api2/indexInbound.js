@@ -409,6 +409,7 @@ app.get('/fundrisingpipeline', async (req, res) => {
       infos = await collection.find({})
         .sort({last_updated_status_date: -1})
         .toArray()
+      // console.log(infos.map(info => info.last_updated_status_date))
     }
 
     res.json(infos)

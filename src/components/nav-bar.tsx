@@ -117,7 +117,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           onClick={() => navigate('/my-saved-list')}
           className={styles['nav-saved-fund']}
           style={{ fontSize: '1.1rem', fontWeight: 550, marginLeft: '3rem'  }} >
-            My Saved Funds
+            My Saved Search
         </span>
 
         <div 

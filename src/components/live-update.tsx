@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import styles from '../styles/home.module.less'
 import Skeleton from 'react-loading-skeleton'
 import GPTdata from './GPTdata'
@@ -17,6 +17,15 @@ function LiveUpdate() {
   const [page, setPage] = useState(1)
   const [hoveredData, setHoveredData] = useState([])
   const [isAccoundHolder, setIsAccountHolder] = useState(false)
+  const messagesEndRef = useRef(null)
+  const [isScolled, setIsScrolled] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!isScolled && messagesEndRef.current && messagesEndRef.current.scrollHeight && messagesEndRef.current.scrollHeight !== 0) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
+      setIsScrolled(true)
+    }
+  }, [data])
 
   useEffect(() => {
     const fetchCompanyData = async() => {
@@ -42,7 +51,7 @@ function LiveUpdate() {
       })
       if (res.status === 200) {
         setLoading(false)
-        setData(data => [...data, ...res.data])
+        setData(data => [...res.data.reverse(), ...data])
       }
     }
     fetchCompanyData()
@@ -88,6 +97,7 @@ function LiveUpdate() {
   }
 
   const getDateDiff = (inputDate: Date): string => {
+    return inputDate
     const today = new Date()
     const input = new Date(inputDate)
     const diffTime = Math.abs(today.getTime() - input.getTime())
@@ -153,12 +163,15 @@ function LiveUpdate() {
           </ul>
         </div>
       ) : focused === 'all' ? (
-        <ul style={{ width: '100%' }} className={styles['news-ul']}>
+        <ul style={{ width: '100%' }} ref={messagesEndRef} className={styles['news-ul']}>
+          <li style={{ alignSelf: 'center' }}>
+            <button onClick={handleNextPage}>Load more...</button>
+          </li>
           {
             data.map((item: any) => {
               return (
                 <>
-                  <li key={item.id}>
+                  <li key={item.id} style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', backgroundColor: '#9993' }}>
                     <span style={{ color: 'violet' }}>{getDateDiff(item.last_updated_status_date)}</span>
                     {' - '}
                         
@@ -287,9 +300,7 @@ function LiveUpdate() {
               )
             })
           }
-          <li style={{ alignSelf: 'center' }}>
-            <button onClick={handleNextPage}>Load more...</button>
-          </li>
+          
           {showPopup && (
             <div 
               onMouseLeave={() => {
@@ -351,8 +362,8 @@ function LiveUpdate() {
                             { item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 0
                         && <>
                           <span
-                            onMouseEnter={handleMouseOver}
-                            onMouseLeave={handleMouseOut}
+                            // onMouseEnter={handleMouseOver}
+                            // onMouseLeave={handleMouseOut}
                             className={styles['account_holder']}>{item.account_holder}</span> 
                           <span>{' contacted '}</span>
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'someone'}</span> 
@@ -416,8 +427,8 @@ function LiveUpdate() {
                           <span className={styles['company-manager']}>{item.company_name}</span>
                           <span>{' meeting - '}</span>
                           <span 
-                            onMouseEnter={handleMouseOver}
-                            onMouseLeave={handleMouseOut}
+                            // onMouseEnter={handleMouseOver}
+                            // onMouseLeave={handleMouseOut}
                             className={styles['account_holder']}>{item.account_holder}</span>
                         </>
                             } 

@@ -18,7 +18,7 @@ import FundStatus from '../components/status'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const [isLoading, setLoading] = useState(true)
@@ -40,7 +40,7 @@ export default function SavedList() {
   const [pendingList, setPendingList] = useState<string[]>([])
   const [filteredList, setFilteredList] = useState<{
     '': string[],
-    'Firm': string[],
+    'Investors': string[],
     'Location': string[],
     'Status': string[],
     'Type': string[],
@@ -50,7 +50,7 @@ export default function SavedList() {
     'Clear Filters': string[],
   }>({
     '': [],
-    'Firm': [],
+    'Investors': [],
     'Location': [],
     'Status': [],
     'Type': [],
@@ -70,7 +70,7 @@ export default function SavedList() {
         setShowFilteredList(false)
         setFilteredList({
           '': [],
-          'Firm': [],
+          'Investors': [],
           'Location': [],
           'Status': [],
           'Type': [],
@@ -189,7 +189,7 @@ export default function SavedList() {
   
         // Apply the filter based on the filterName
         switch (filterName) {
-        case 'Firm':
+        case 'Investors':
           return filteredList[filterName].includes(record['Funds'] as string)
         case 'Location':
           return filteredList[filterName].includes(record['HQ Country'] as string)
@@ -215,7 +215,7 @@ export default function SavedList() {
   }
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
-    case 'Firm':
+    case 'Investors':
       return removeDuplicatesAndNull(savedFunds.map((record) => record['Funds'] as string))
     case 'Location':
       return removeDuplicatesAndNull(savedFunds.map((record) => record['HQ Country'] as string))

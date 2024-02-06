@@ -23,7 +23,7 @@ import FundStatus from '../components/status'
 export default function FundCards() {
 
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Firm', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
   const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
@@ -43,7 +43,8 @@ export default function FundCards() {
   const [selectedFundName, setSelectedFundName] = useState<string>('')
   const [filteredList, setFilteredList] = useState<{
     '': string[],
-    'Firm': string[],
+    'Account Manager': string[],
+    'Investors': string[],
     'Location': string[],
     'Status': string[],
     'Type': string[],
@@ -53,7 +54,8 @@ export default function FundCards() {
     'Clear Filters': string[],
   }>({
     '': [],
-    'Firm': [],
+    'Account Manager': [],
+    'Investors': [],
     'Location': [],
     'Status': [],
     'Type': [],
@@ -79,7 +81,9 @@ export default function FundCards() {
   
         // Apply the filter based on the filterName
         switch (filterName) {
-        case 'Firm':
+        case 'Account Manager':
+          return filteredList[filterName].includes(record['Account Manager'] as string)
+        case 'Investors':
           return filteredList[filterName].includes(record['Funds'] as string)
         case 'Location':
           return filteredList[filterName].includes(record['HQ Country'] as string)
@@ -143,7 +147,9 @@ export default function FundCards() {
   }
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
-    case 'Firm':
+    case 'Account Manager':
+      return removeDuplicatesAndNull(data.map((record) => record['Account Manager'] as string))
+    case 'Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
       return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
@@ -173,7 +179,8 @@ export default function FundCards() {
         setShowFilteredList(false)
         setFilteredList({
           '': [],
-          'Firm': [],
+          'Account Manager': [],
+          'Investors': [],
           'Location': [],
           'Status': [],
           'Type': [],
