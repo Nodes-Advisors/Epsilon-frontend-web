@@ -508,6 +508,39 @@ app.get('/savedcollections/:collectionName', async (req, res) => {
   }
 })
 
+app.post('/savedcollections/deletefund', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const email = req.body.email
+    const collectionName = req.body.collection
+    const fundName = req.body.fundName
+    
+    if (!email || !collectionName || !fundName) {
+      return res.status(400).send('Invalid request')
+    }
+    const collection = database.collection('SavedCollections')
+
+    // Check if the collection exists
+    const existingCollection = await collection.findOne({ email, savedcollection: collectionName })
+    if (!existingCollection) {
+      return res.status(404).json({ message: 'Collection does not exist' })
+    }
+    // console.log(existingCollection)
+    // Check if the fund exists in the collection
+    if (!existingCollection.funds || !existingCollection.funds.includes(fundName)) {
+      return res.status(404).send('Fund does not exist in the collection')
+    }
+    // console.log('Fund exists in collection')
+    // Remove the fund from the collection
+    await collection.updateOne({ email, savedcollection: collectionName }, { $pull: { funds: fundName } })
+    // console.log('Fund deleted from collection successfully')
+    res.status(200).json({ message: 'Fund deleted from collection successfully' })
+  } catch (error) {
+    console.error('Error deleting fund from collection:', error)
+    res.status(500).json({ message: 'Something went wrong with backend' })
+  }
+})
+
 app.post('/savedcollections/add', async (req, res) => {
   try {
     const database = client.db('dev')
