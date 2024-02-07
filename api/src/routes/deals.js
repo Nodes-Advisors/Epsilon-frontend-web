@@ -15,7 +15,7 @@ router.get("/deals", async (req, res) => {
       .aggregate([
         {
           $group: {
-            _id: "$company_name",
+            _id: "$company_acronym",
             totalOutreach: { $sum: 1 },
             newFund: { $sum: "$new_fund" },
             respondOrNot: {
