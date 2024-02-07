@@ -46,7 +46,7 @@ function LiveUpdate({user}: {user: any}) {
 
   useEffect(() => {
     const fetchCompanyData = async() => {
-      const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
+      const res = await axios.get(`http://localhost:5001/fundrisingpipeline?page=${page}`, {
         headers: {
           'Content-Type': 'application/json',
         },

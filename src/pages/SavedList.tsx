@@ -18,7 +18,7 @@ import FundStatus from '../components/status'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const filterNames: FILTER_NAME[] = ['Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Advanced Search', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const [isLoading, setLoading] = useState(true)
@@ -42,23 +42,25 @@ export default function SavedList() {
 
   const [filteredList, setFilteredList] = useState<{
     '': string[]
+    'Account Manager': string[],
     'Investors': string[],
     'Location': string[],
     'Status': string[],
     'Type': string[],
     'Contact': string[],
     'Suitability Score': string[],
-    'Advanced Search': string[],
+    'Co-Investors': string[],
     'Clear Filters': string[],
   }>({
     '': [],
+    'Account Manager': [],
     'Investors': [],
     'Location': [],
     'Status': [],
     'Type': [],
     'Contact': [],
     'Suitability Score': [],
-    'Advanced Search': [],
+    'Co-Investors': [],
     'Clear Filters': [],
   })
 
@@ -77,7 +79,7 @@ export default function SavedList() {
           'Status': [],
           'Type': [],
           'Contact': [],
-          'Advanced Search': [],
+          'Co-Investors': [],
           'Clear Filters': [],
         })
         return
@@ -126,7 +128,7 @@ export default function SavedList() {
           'Content-Type': 'application/json',
         },
       }).then((res) => {
-        console.log(res.data)
+        // console.log(res.data)
         setFilteredData(res.data)
       }).catch((error) => {
         toast.error(error?.response?.data)
@@ -198,46 +200,87 @@ export default function SavedList() {
   , [])
 
   useEffect(() => {
-    if (filterName === '') {
+    // If no filter is applied, show all data
+    if (Object.values(filteredList).every(filter => filter.length === 0)) {
       setFilteredData(savedFunds)
       return
     }
-    
+  
+    // Apply filters cumulatively
     setFilteredData(savedFunds.filter((record) => {
       return Object.keys(filteredList).every((filterName) => {
-        // If no filter is set for this filterName, return true
+        // If no filter is set for this filterName, return false
         if (filteredList[filterName].length === 0) {
           return true
         }
   
         // Apply the filter based on the filterName
         switch (filterName) {
+        case 'Account Manager':
+          return filteredList[filterName].some(filter => 
+            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+          )
         case 'Investors':
           return filteredList[filterName].includes(record['Funds'] as string)
+              || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
         case 'Location':
           return filteredList[filterName].includes(record['HQ Country'] as string)
+              || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
         case 'Status':
           return STATUS_LIST
         case 'Type':
-          return filteredList[filterName].includes(record['Type'] as string)
+          return filteredList[filterName].some(filter => 
+            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+          )
         case 'Contact':
-          return filteredList[filterName].includes(record['Co-Investors'] as string)
-        case 'Advanced Search':
-          return filteredList[filterName].includes(record['Co-Investors'] as string)
+          return filteredList[filterName].some(filter => 
+            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+          )
+        case 'Suitability Score':
+          return [ '>90', '>80', '60-80', '<60']
+        case 'Co-Investors':
+          return filteredList[filterName].some(filter => 
+            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+          )
         default:
-          return true
+          return false
         }
       })
     }))
   }, [filteredList])
 
+  const handleDeleteFundsClick = async () => {
+    try {
+      await axios.post('http://localhost:5001/', {
+        fundName: selectedFundName,
+        email: user?.email,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      // deleteSavedFund(selectedFundName)
+      setFilteredData(filteredData.filter((fund) => fund._id !== record._id))
+      toast.success('Fund deleted successfully')
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
 
   function removeDuplicatesAndNull(arr) {
-    return arr.filter((item,
-      index) => item && arr.indexOf(item) === index)
+    // Split the strings into individual values
+    const splitArr = arr.flatMap(item => item ? item.split(',') : [])
+    const trimmedArr = splitArr.map((item) => item.trim())
+    // Remove duplicates and null or empty strings
+    const uniqueArr = trimmedArr.filter((item, index, self) => 
+      item && item.trim() !== '' && self.indexOf(item) === index,
+    )
+    return uniqueArr
   }
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
+    case 'Account Manager':
+      return removeDuplicatesAndNull(savedFunds.map((record) => record['Account Manager'] as string))
     case 'Investors':
       return removeDuplicatesAndNull(savedFunds.map((record) => record['Funds'] as string))
     case 'Location':
@@ -248,12 +291,26 @@ export default function SavedList() {
       // console.log(data.map((record) => (record['Type'])))
       return removeDuplicatesAndNull(savedFunds.map((record) => record['Type'] as string))
     case 'Contact':
-      return ['Tyler Aroner', 'Eliott Harfouche', 'Iman Ghavami']
-    case 'Advanced Search':
-      return ['Advanced Search']
+      return removeDuplicatesAndNull(savedFunds.map((record) => record['Contact'] as string))
+    case 'Suitability Score':
+      return ['>90', '>80', '60-80', '<60']
+    case 'Co-Investors':
+      console.log(savedFunds.map((record) => record as string))
+      return removeDuplicatesAndNull(savedFunds.map((record) => record['Co-Investors'] as string))
     default:
       return []
     }
+  }
+
+  const generateColorList = (length) => {
+    // console.log(length)
+    const colorList = []
+    for (let i = 0; i < length; i++) {
+      const color = randomColor()
+      colorList.push(color)
+    }
+    // console.log(colorList)
+    return colorList
   }
 
   return (
@@ -313,8 +370,8 @@ export default function SavedList() {
                   }
 
                   <input id="v-input" ref={inputRef}
-                    autoSave='false'
-                    autoComplete='false'
+                    autoSave='off'
+                    autoComplete='off'
                     placeholder='Search'
                     onKeyDown={(e) => {
                       e.stopPropagation()
@@ -411,12 +468,7 @@ export default function SavedList() {
                                 onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                                 style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                               <button 
-                                onClick={() => { 
-                                  if (savedFunds.find((fund) => fund._id === record._id)) {
-                                    deleteSavedFund(record)
-                                    setFilteredData(filteredData.filter((fund) => fund._id !== record._id))
-                                  } 
-                                }}
+                                onClick={handleDeleteFundsClick}
                                 style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{ 'DELETE'}</button>
                               <button 
                                 onClick={() => {
@@ -437,7 +489,7 @@ export default function SavedList() {
                                 onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                                 onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                                 src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid transparent`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
-                              <FundStatus color={randomColor()} />
+                              <FundStatus colorList={record['Contact'] ? generateColorList((record['Contact'].split(',')).length) : []} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                               <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
