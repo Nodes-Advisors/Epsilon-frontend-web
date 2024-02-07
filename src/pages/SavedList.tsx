@@ -135,7 +135,7 @@ export default function SavedList() {
       })
     }
     fetchSavedFunds()
-  }, [])
+  }, [window.location.href])
 
   useEffect(() => {
     async function fetchPendingList() {
@@ -202,12 +202,12 @@ export default function SavedList() {
   useEffect(() => {
     // If no filter is applied, show all data
     if (Object.values(filteredList).every(filter => filter.length === 0)) {
-      setFilteredData(savedFunds)
+      setFilteredData(filteredData)
       return
     }
   
     // Apply filters cumulatively
-    setFilteredData(savedFunds.filter((record) => {
+    setFilteredData(filteredData.filter((record) => {
       return Object.keys(filteredList).every((filterName) => {
         // If no filter is set for this filterName, return false
         if (filteredList[filterName].length === 0) {
@@ -249,19 +249,22 @@ export default function SavedList() {
     }))
   }, [filteredList])
 
-  const handleDeleteFundsClick = async () => {
+  const handleDeleteFundsClick = async (record: any) => {
     try {
-      await axios.post('http://localhost:5001/', {
-        fundName: selectedFundName,
+      const res = await axios.post('http://localhost:5001/savedcollections/deletefund', {
+        collection: window.location.href.split('/')[window.location.href.split('/').length - 1],
+        fundName: record.Funds,
         email: user?.email,
       }, {
         headers: {
           'Content-Type': 'application/json',
         },
       })
-      // deleteSavedFund(selectedFundName)
-      setFilteredData(filteredData.filter((fund) => fund._id !== record._id))
-      toast.success('Fund deleted successfully')
+      if (res.status === 200) {
+
+        setFilteredData(filteredData.filter((fund) => fund._id !== record._id))
+        toast.success('Fund is deleted successfully')
+      }
     } catch (error) {
       toast.error(error?.response?.data)
     }
@@ -280,23 +283,23 @@ export default function SavedList() {
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
     case 'Account Manager':
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['Account Manager'] as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Account Manager'] as string))
     case 'Investors':
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['Funds'] as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Funds'] as string))
     case 'Location':
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['HQ Country'] as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['HQ Country'] as string))
     case 'Status':
       return removeDuplicatesAndNull(STATUS_LIST)
     case 'Type':
       // console.log(data.map((record) => (record['Type'])))
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['Type'] as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Type'] as string))
     case 'Contact':
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['Contact'] as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Contact'] as string))
     case 'Suitability Score':
       return ['>90', '>80', '60-80', '<60']
     case 'Co-Investors':
-      console.log(savedFunds.map((record) => record as string))
-      return removeDuplicatesAndNull(savedFunds.map((record) => record['Co-Investors'] as string))
+      // console.log(savedFunds.map((record) => record as string))
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Co-Investors'] as string))
     default:
       return []
     }
@@ -445,7 +448,7 @@ export default function SavedList() {
               filteredData.length > 0
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                  <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds</span>
+                  <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${window.location.href.split('/')[window.location.href.split('/').length - 1]} list)`}</span></span>
                   <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
                     <span>Deals</span>
@@ -468,7 +471,7 @@ export default function SavedList() {
                                 onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                                 style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                               <button 
-                                onClick={handleDeleteFundsClick}
+                                onClick={async() => await handleDeleteFundsClick(record)}
                                 style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{ 'DELETE'}</button>
                               <button 
                                 onClick={() => {
