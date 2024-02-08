@@ -90,7 +90,7 @@ function LiveUpdate({user}: {user: any}) {
     const width = e.currentTarget.offsetWidth
     const height = e.currentTarget.offsetHeight
     const timeout = setTimeout(() => {
-      console.log(rect.left, rect.top, width, height)
+      // console.log(rect.left, rect.top, width, height)
       setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 + 120})
       setShowPopup(true)
       setHoveredName(name)

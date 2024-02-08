@@ -21,6 +21,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const navigate = useNavigate()
   const [openPanel, setOpenPanel] = useState(false)
   const [openAuthPanel, setOpenAuthPanel] = useState(false)
+  const [notificationCategory, setNotificationCategory] = useState<'all' | 'approval'>('all')
   // const { user: auth0User, 
   //   logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
@@ -179,14 +180,30 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           {
             openNotification &&
             <div ref={notificationRef} className={`${styles['notification-layout']} ${styles['scrollbar']}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1rem 1rem 0.5rem 1rem', width: '90%' }}>
-                <h2 style={{ color: '#000', fontSize: '1.2rem', margin: 0 }}>Notification Center</h2>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span>Approval Request</span>
-                  <Switch width='2rem' height='1rem' option={option} setOption={setOption} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1rem 1rem 0.5rem 1rem' }}>
+                <h2 style={{ color: '#000', fontSize: '1.75rem', margin: 0 }}>Notification Center</h2>
+                <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+                  <button 
+                    onClick={() => setNotificationCategory('all')}
+                    style={{ borderRadius: '3rem', padding: '0.5rem 1rem', 
+                      outline: 'none',
+                      border: notificationCategory === 'all' ? '0.1px solid Highlight' : '0.1px solid #777',
+                      backgroundColor: notificationCategory === 'all' ? 'Highlight' : '#fff',
+                      color: notificationCategory === 'all' ? '#fff' : '#000' }}>All</button>
+                  <button
+                    onClick={() => setNotificationCategory('approval')}
+                    style={{ borderRadius: '3rem', padding: '0.5rem 1rem', 
+                      outline: 'none',  
+                      border: notificationCategory === 'approval' ? '0.1px solid Highlight' : '0.1px solid #777',
+                      backgroundColor: notificationCategory === 'approval' ? 'Highlight' : '#fff',
+                      color: notificationCategory === 'approval' ? '#fff' : '#000' }}
+                  >Approval </button>
+                  {/* <span>Approval Request</span>
+                  <Switch width='2rem' height='1rem' option={option} setOption={setOption} /> */}
                   {/* <span>Approvals</span> */}
                 </div>
                 <CancelButtonIcon 
+                  style={{ float: 'right'}}
                   className={styles['cancel-button']}
                   onClick={() => setOpenNotification(false)}
                 />
