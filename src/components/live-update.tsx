@@ -90,7 +90,8 @@ function LiveUpdate({user}: {user: any}) {
     const width = e.currentTarget.offsetWidth
     const height = e.currentTarget.offsetHeight
     const timeout = setTimeout(() => {
-      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 200})
+      console.log(rect.left, rect.top, width, height)
+      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 + 120})
       setShowPopup(true)
       setHoveredName(name)
     }, 500)
@@ -113,7 +114,7 @@ function LiveUpdate({user}: {user: any}) {
     const width = e.currentTarget.offsetWidth
     const height = e.currentTarget.offsetHeight
     const timeout = setTimeout(() => {
-      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 100})
+      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 + 180})
       setShowPopupAM(true)
       setHoveredName(name)
     }, 500)
