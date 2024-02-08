@@ -76,14 +76,30 @@ export default function Home() {
       <p id={styles['welcome']}>{'Welcome to Nodes EpsilonAI, '}<span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p>
       {/* <SearchBar /> */}
 
-      <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
-      <TodayNews />
-        
-      <div className={styles['live-update-layout']}>
-        <h2 className={styles['news-title']}>Live update</h2>
-        <div className={styles['live-update-icon']} />
+      <div style={{ gridRow: '1', gridColumn: '1', width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+        <div>
+          <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+          <TodayNews />
+        </div>
+  
+        <div style={{  gridRow: '1 / span 2' }}>
+          <h2 className={styles['news-title']}>Follow Ups</h2>
+          <TodayNews />
+          <TodayNews />
+          <TodayNews />
+          <TodayNews />
+          
+        </div>
+
+        <div style={{ gridRow: '2', gridColumn: '1' }}>
+          <div className={styles['live-update-layout']}>
+            <h2 className={styles['news-title']}>Live update</h2>
+            <div className={styles['live-update-icon']} />
+          </div>
+          <LiveUpdate user={userInfo}/>
+        </div>
       </div>
-      <LiveUpdate user={userInfo}/>
+      
 
     </div> 
       

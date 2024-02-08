@@ -109,26 +109,18 @@ section {
         
         filter: brightness(0.8) invert(95%) drop-shadow(0px 0px 0.5px white) drop-shadow(0px 0px 0.5px white);
     }
-    // position: relative;
-    // overflow: hidden;
-    // opacity: 1;
-    // &::after {
-    //     content: "Dashboard";
-    //     position: absolute;
-    //     top: 0;
-    //     left: 0;
-    //     width: 100%;
-    //     height: 100%;
-    //     display: grid;
-    //     place-items: center;
-    //     color: #CCC;
-    //     font-family: Fira Code;
-    //     font-size: 0.875rem;
-    //     font-style: normal;
-    //     font-weight: 400;
-    //     line-height: 100%; /* 0.875rem */
-    //     transition: all 0.5s ease;
-    // }
+
+}
+
+.nav-widget-img-clients {
+    filter: brightness(1) invert(0%) drop-shadow(0px 0px 0.5px black);
+    transition: filter 0.5s ease;
+    &:hover {
+        cursor: pointer;
+        
+        filter: brightness(0.8) invert(95%) drop-shadow(0px 0px 0.5px white);
+    }
+
 }
 
 .nav-widget-text {
@@ -345,33 +337,39 @@ section {
 }
 
 .news-ul {
-    background-color: #8881;
+    // padding: 2rem;
+    border-radius: 0.5rem;
+    background-color: #aaa1;
     display: flex;
     flex-direction: column;
     align-items: start;
     gap: 0.5rem;
-    max-height: 20rem;
+    max-height: 30rem;
     overflow: auto;
     max-width: 135rem;
     width: -moz-fit-content;
     width: fit-content;
+    width: 90%;
     border: none;
-    // box-shadow: 0px 0px 5px 0px rgba(255, 255, 255, 0.90);
+    box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.90);
     list-style-type: none;
     margin: 0;
     // margin-left: 30%;
-    padding: 1rem 1rem 1rem 0;
+    padding: 1rem;
     text-align: left;
     font-size: 0.9375rem;
     font-family: Inter;
+    &:hover {
+        background-color: #7771;
+    }
 }
 
 .news-ul::-webkit-scrollbar { /* For WebKit browsers */
-    width: 6px;
+    width: 4px;
 }
 
 .news-ul::-webkit-scrollbar-track { /* For WebKit browsers */
-    background: #eee;
+    background: #ccc;
 }
 
 .news-ul::-webkit-scrollbar-thumb { /* For WebKit browsers */
@@ -418,7 +416,7 @@ section {
 
 
 .new-ul-skeleton {
-    width: 40%;
+    width: 90%;
     border: none;
     list-style-type: none;
     // text-align: left;

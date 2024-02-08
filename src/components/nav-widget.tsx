@@ -21,11 +21,15 @@ export default function NavWidget({Svg, width, height, to, text, src=undefined, 
       {
         src 
           ? 
-          to === '/database'
+          to === '/clients'
             ?
-            <img src={src} alt='nav-widget-img-db' onClick={() => navigate(to)} className={styles['nav-widget-img-db']} style={{ ...style, width, height }} /> 
+            <img src={src} alt='nav-widget-img-clients' onClick={() => navigate(to)} className={styles['nav-widget-img-clients']} style={{ ...style, width, height }} />
             :
-            <img src={src} alt='nav-widget-img' onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ ...style, width, height }} /> 
+            to === '/database'
+              ?
+              <img src={src} alt='nav-widget-img-db' onClick={() => navigate(to)} className={styles['nav-widget-img-db']} style={{ ...style, width, height }} /> 
+              :
+              <img src={src} alt='nav-widget-img' onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ ...style, width, height }} /> 
           : 
           <Svg onClick={() => navigate(to)} className={styles['nav-widget-img']} style={{ ...style, width, height }} />
       }

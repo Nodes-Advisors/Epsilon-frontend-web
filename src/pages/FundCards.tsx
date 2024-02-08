@@ -10,7 +10,7 @@ import { useSavedFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
-import { STATUS_COLOR_LIST, 
+import { FUND_STATUS_LIST, STATUS_COLOR_LIST, 
   STATUS_LIST,
 } from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
@@ -20,20 +20,21 @@ import toast from 'react-hot-toast'
 import { useUserStore } from '../store/store'
 import FundStatus from '../components/status'
 import { throttle } from 'lodash'
+import { record } from 'zod'
 
 export default function FundCards() {
 
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Account Manager', 'Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<Record<FieldSet>[]>([])
   const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
-  const [requestName, setRequestName] = useState<string>('bypass approval')
-  const [approvers, setApprovers] = useState<string>('Tyler Aroner')
-  const [deal, setDeal] = useState<string>('Deal I')
-  const [contactPerson, setContactPerson] = useState<string>('Person A')
-  const [details, setDetails] = useState<string>('nothing')
-  const [priority, setPriority] = useState<string>('High')
+  const [requestName, setRequestName] = useState<string>('')
+  const [approvers, setApprovers] = useState<string>('')
+  const [deal, setDeal] = useState<string>('')
+  const [contactPerson, setContactPerson] = useState<string>('')
+  const [details, setDetails] = useState<string>('')
+  const [priority, setPriority] = useState<string>('')
   // const [requestStatus, setRequestStatus] = useState<'Pending' | 'Request'>('Request')
   const inputRef = useRef<HTMLInputElement>(null)
   const [pendingList, setPendingList] = useState<string[]>([])
@@ -51,6 +52,7 @@ export default function FundCards() {
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
+    'Deals': string[],
     'Investors': string[],
     'Location': string[],
     'Status': string[],
@@ -62,6 +64,7 @@ export default function FundCards() {
   }>({
     '': [],
     'Account Manager': [],
+    'Deals': [],
     'Investors': [],
     'Location': [],
     'Status': [],
@@ -119,7 +122,13 @@ export default function FundCards() {
           return filteredList[filterName].includes(record['HQ Country'] as string)
               || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
         case 'Status':
-          return STATUS_LIST
+          return FUND_STATUS_LIST.includes(record['Status'] as string)
+                    || (record['Status'] && FUND_STATUS_LIST.includes(record['Status'] as string))
+        case 'Deals':
+          // console.log(filteredList['Past Deals'])
+          return filteredList['Deals'].some(filter => 
+            filter === record['Past Deals'] || (record['Past Deals'] && record['Past Deals'].includes(filter)),
+          )
         case 'Type':
           return filteredList[filterName].some(filter => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
@@ -201,12 +210,14 @@ export default function FundCards() {
     switch (filterName) {
     case 'Account Manager':
       return removeDuplicatesAndNull(data.map((record) => record['Account Manager'] as string))
+    case 'Deals':
+      return removeDuplicatesAndNull(data.map((record) => record['Past Deals'] as string))
     case 'Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
       return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
     case 'Status':
-      return removeDuplicatesAndNull(STATUS_LIST)
+      return removeDuplicatesAndNull(FUND_STATUS_LIST)
     case 'Type':
       // console.log(data.map((record) => (record['Type'])))
       return removeDuplicatesAndNull(data.map((record) => record['Type'] as string))
@@ -232,6 +243,7 @@ export default function FundCards() {
         setFilteredList({
           '': [],
           'Account Manager': [],
+          'Deals': [],
           'Investors': [],
           'Location': [],
           'Status': [],
@@ -306,6 +318,13 @@ export default function FundCards() {
 
   const sendRequest = async (e) => {
     e.preventDefault()
+    
+    // Check if all required fields have been filled
+    if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
     try {
       // console.log('executed')
       await axios.post('http://localhost:5001/sendRequest', {
@@ -388,6 +407,8 @@ export default function FundCards() {
       toast.error(error?.response?.data)
     }
   }
+
+
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
@@ -581,7 +602,7 @@ export default function FundCards() {
                             
                         </div>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Status'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deals'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', whiteSpace: 'preserve-breaks', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
@@ -684,8 +705,10 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
               <select
+                value={requestName}
                 onChange={(e) => setRequestName(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
+                <option value={''} disabled selected>Please select</option>
                 <option value="bypass approval">Bypass the approval</option>
                 <option value="assign the fund request to">Assign the fund request to</option>
               </select>
@@ -693,39 +716,54 @@ export default function FundCards() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Assignees</span>
               <select
+                value={approvers}
                 onChange={(e) => setApprovers(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Assignees" id="">
-                <option value="Tyler Aroner">Tyler Aroner</option>
-                <option value="Eliott Harfouche">Eliott Harfouche</option>
-                <option value="Iman Ghavami">Iman Ghavami</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  getFilteredList('Account Manager').map((assignee) => (
+                    <option key={assignee} value={assignee}>{assignee}</option>
+                  ))
+                }
+                
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
               <select
+                value={deal}
                 onChange={(e) => setDeal(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
-                <option value="Deal I">Deal I</option>
-                <option value="Deal II">Deal II</option>
-                <option value="Deal III">Deal III</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  getFilteredList('Deals').map((deal) => (
+                    <option key={deal} value={deal}>{deal}</option>
+                  ))
+                }
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
               <select
+                value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
-                <option value="Person A">Person A</option>
-                <option value="Person B">Person B</option>
-                <option value="Person C">Person C</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  (data.filter(fund => fund.Funds === selectedFundName)[0]?.Contact || '').split(',').map((contact) => (
+                    <option key={contact} value={contact}>{contact}</option>
+                  ))
+                }
                 <option value="Not Referring Anyone">Not Referring Anyone</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
+                value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
+                <option value={''} disabled selected>Please select</option>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>

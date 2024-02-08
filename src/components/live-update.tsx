@@ -251,7 +251,7 @@ function LiveUpdate({user}: {user: any}) {
         :
         
         (
-          <ul style={{ width: '100%' }} ref={messagesEndRef} className={styles['news-ul']}>
+          <ul ref={messagesEndRef} className={styles['news-ul']}>
             <li style={{ alignSelf: 'center' }}>
               <button onClick={handleNextPage}>Load more...</button>
             </li>

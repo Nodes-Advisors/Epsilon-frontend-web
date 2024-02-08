@@ -10,6 +10,7 @@ import { convertedOutput } from '../lib/utils'
 import CancelButton from '../assets/images/cancel.png'
 import { STATUS_COLOR_LIST, 
   STATUS_LIST,
+  FUND_STATUS_LIST,
   type FILTER_NAME,
 } from '../lib/constants'
 import toast from 'react-hot-toast'
@@ -18,7 +19,7 @@ import FundStatus from '../components/status'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const filterNames: FILTER_NAME[] = ['Account Manager', 'Investors', 'Location', 'Status', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const [isLoading, setLoading] = useState(true)
@@ -43,9 +44,10 @@ export default function SavedList() {
   const [filteredList, setFilteredList] = useState<{
     '': string[]
     'Account Manager': string[],
+    'Deals': string[],
+    'Status': string[],
     'Investors': string[],
     'Location': string[],
-    'Status': string[],
     'Type': string[],
     'Contact': string[],
     'Suitability Score': string[],
@@ -54,9 +56,10 @@ export default function SavedList() {
   }>({
     '': [],
     'Account Manager': [],
+    'Deals': [],
+    'Status': [],
     'Investors': [],
     'Location': [],
-    'Status': [],
     'Type': [],
     'Contact': [],
     'Suitability Score': [],
@@ -74,8 +77,10 @@ export default function SavedList() {
         setShowFilteredList(false)
         setFilteredList({
           '': [],
+          'Account Manager': [],
           'Investors': [],
           'Location': [],
+          'Deals': [],
           'Status': [],
           'Type': [],
           'Contact': [],
@@ -227,7 +232,13 @@ export default function SavedList() {
           return filteredList[filterName].includes(record['HQ Country'] as string)
               || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
         case 'Status':
-          return STATUS_LIST
+          return FUND_STATUS_LIST.includes(record['Status'] as string)
+              || (record['Status'] && FUND_STATUS_LIST.includes(record['Status'] as string))
+        case 'Deals':
+          // console.log(filteredList['Past Deals'])
+          return filteredList['Deals'].some(filter => 
+            filter === record['Past Deals'] || (record['Past Deals'] && record['Past Deals'].includes(filter)),
+          )
         case 'Type':
           return filteredList[filterName].some(filter => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
@@ -284,12 +295,14 @@ export default function SavedList() {
     switch (filterName) {
     case 'Account Manager':
       return removeDuplicatesAndNull(filteredData.map((record) => record['Account Manager'] as string))
+    case 'Deals':
+      return removeDuplicatesAndNull(filteredData.map((record) => record['Past Deals'] as string))
     case 'Investors':
       return removeDuplicatesAndNull(filteredData.map((record) => record['Funds'] as string))
     case 'Location':
       return removeDuplicatesAndNull(filteredData.map((record) => record['HQ Country'] as string))
     case 'Status':
-      return removeDuplicatesAndNull(STATUS_LIST)
+      return removeDuplicatesAndNull(FUND_STATUS_LIST)
     case 'Type':
       // console.log(data.map((record) => (record['Type'])))
       return removeDuplicatesAndNull(filteredData.map((record) => record['Type'] as string))
@@ -500,7 +513,7 @@ export default function SavedList() {
                             </div>
                             
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Deals'] as string[] | string) as string || 'n/a'}</span>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{record['Account Manager'] ? record['Account Manager'] : 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
