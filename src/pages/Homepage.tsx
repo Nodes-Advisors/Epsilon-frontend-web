@@ -79,6 +79,9 @@ export default function Home() {
       <div style={{ gridRow: '1', gridColumn: '1', width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
         <div>
           <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+          <h3 className={styles['news-sub-title']}>Pinned</h3>
+          <TodayNews />
+          <h3 className={styles['news-sub-title']}>Milestones</h3>
           <TodayNews />
         </div>
   
@@ -88,7 +91,10 @@ export default function Home() {
           <TodayNews />
           <TodayNews />
           <TodayNews />
-          
+          <TodayNews />
+          <TodayNews />
+          <TodayNews />
+
         </div>
 
         <div style={{ gridRow: '2', gridColumn: '1' }}>

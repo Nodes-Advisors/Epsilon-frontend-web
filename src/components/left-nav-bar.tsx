@@ -41,13 +41,7 @@ export default function LeftNavBar({style, show}: {style?: React.CSSProperties, 
   
   return (
     <aside className={show ? `${styles['left-nav-bar']} ${styles['show']}`: `${styles['left-nav-bar']} ${styles['hide']}`} style={{...style}}>
-      <div>
-        {/* <EpsilonMiniLogo className={styles['epsilon-mini-logo']}/> */}
-        <img 
-          onMouseOver={(e) => {(e.target as HTMLImageElement).style.cursor = 'pointer'}}
-          onClick={() => {navigate('/home')}}
-          src={EpsilonLogo} alt="epsilon-logo" style={{ width: '2rem', height: '2rem' }} />
-      </div>
+
       <HeadImgWrapper headImg={user?.picture ? user.picture : UserAvatar} status={user && user?.status ? user.status : 'not-login'} />
 
       <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>

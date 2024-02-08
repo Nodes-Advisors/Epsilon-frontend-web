@@ -180,7 +180,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             openNotification &&
             <div ref={notificationRef} className={`${styles['notification-layout']} ${styles['scrollbar']}`}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '1rem 1rem 0.5rem 1rem', width: '90%' }}>
-                <h2 style={{ color: '#000', fontSize: '1.2rem', margin: 0 }}>Recent Notification</h2>
+                <h2 style={{ color: '#000', fontSize: '1.2rem', margin: 0 }}>Notification Center</h2>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <span>Approval Request</span>
                   <Switch width='2rem' height='1rem' option={option} setOption={setOption} />
