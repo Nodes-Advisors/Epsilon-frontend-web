@@ -86,22 +86,17 @@ export default function Home() {
       <p id={styles['welcome']}>{'Welcome to Nodes EpsilonAI, '}<span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p>
       {/* <SearchBar /> */}
 
-      <div style={{ gridRow: '1', gridColumn: '1', width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-        <div>
+      <div style={{ width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr' }}>
+        <div style={{ gridRow: '1', gridColumn: '1' }}>
           <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
           <h3 className={styles['news-sub-title']}>Pinned</h3>
-          <TodayNews />
+          {/* <TodayNews /> */}
           <h3 className={styles['news-sub-title']}>Milestones</h3>
           <TodayNews />
         </div>
   
-        <div style={{  gridRow: '1 / span 2' }}>
+        <div style={{  gridRow: '1 / span 2', gridColumn: '2' }}>
           <h2 className={styles['news-title']}>Follow Ups</h2>
-          <TodayNews />
-          <TodayNews />
-          <TodayNews />
-          <TodayNews />
-          <TodayNews />
           <TodayNews />
           <TodayNews />
 
