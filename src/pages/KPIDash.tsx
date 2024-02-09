@@ -263,7 +263,8 @@ export default function KPIDash() {
           (task) => task.meeting_request === 1,
         )
         const stageIVTasks = allTasks.filter((task) => task.dd === 1)
-        const stageVTasks = allTasks.filter(
+        const stageVTasks = allTasks.filter(task => task.investments === 1)
+        const stageVITasks = allTasks.filter(
           (task) =>
             task.pass_contacted === 1 ||
             task.pass_deck === 1 ||
@@ -278,6 +279,7 @@ export default function KPIDash() {
           III: stageIIITasks,
           IV: stageIVTasks,
           V: stageVTasks,
+          VI: stageVITasks,
         })
       }
     }

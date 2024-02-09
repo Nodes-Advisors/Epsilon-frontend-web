@@ -4,10 +4,31 @@ import cors from 'cors'
 import nodemailer from 'nodemailer'
 import jwt from 'jsonwebtoken'
 import schedule from 'node-schedule'
+import expressWs from 'express-ws'
 
 const app = express()
+expressWs(app)
+
 app.use(cors())
 app.use(express.json())
+
+app.use(function (req, res, next) {
+  // console.log('middleware')
+  req.testing = 'testing'
+  return next()
+})
+
+app.get('/1', function(req, res, next){
+  console.log('get route', req.testing)
+  res.end()
+})
+
+app.ws('/homepage-websocket', function(ws, req) {
+  ws.on('message', function(msg) {
+    console.log(msg)
+  })
+  console.log('socket', req.testing)
+})
 
 const uri = 'mongodb+srv://Admin:NodesAdvisors2024@dev.jq8me.mongodb.net/'
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })

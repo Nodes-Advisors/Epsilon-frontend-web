@@ -3,15 +3,6 @@ import { STAGES } from '../lib/constants'
 import styles from '../styles/kpi-block.module.less'
 
 function DealFunnel({selectedClients, tasks, setTasks}: {selectedClients: string[], tasks: any, setTasks: any}) {
-
-  //   const [tasks, setTasks] = useState({
-  //     I: [],
-  //     II: [],
-  //     III: [],
-  //     IV: [],
-  //     V: [],
-  //     VI: [],
-  //   })
     
   const handleDragStart = (e, task, stage) => {
     // console.log('dragging', task, stage)

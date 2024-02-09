@@ -2,9 +2,9 @@ import styles from '../styles/home.module.less'
 import { useEffect, useState } from 'react'
 import { useUserStore, useTokenStore } from '../store/store'
 import TodayNews from '../components/today-news'
-import LiveUpdateIcon from '../assets/svgs/live-update.svg?react'
 import LiveUpdate from '../components/live-update'
 import axios from 'axios'
+import useWebSocket, { ReadyState } from 'react-use-websocket'
 
 export default function Home() {
   
@@ -18,7 +18,17 @@ export default function Home() {
   const [investorEmails, setInvestorEmails] = useState<string[]>([])
   const [deals, setDeals] = useState<string[]>([])
   const [userInfo, setUserInfo] = useState<any>({})
+  const [socketUrl, setSocketUrl] = useState('ws://localhost:5001/homepage-websocket')
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl)
 
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Open',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Closed',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState]
+  
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(`http://localhost:5001?q=${query}`)
