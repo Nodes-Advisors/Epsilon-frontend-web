@@ -83,6 +83,10 @@ export default function KPIDash() {
   const [isLoading, setLoading] = useState(true);
   const token = useTokenStore((state) => state.token);
   const [dealData, setDealData] = useState<DealData[]>([]);
+  const [timeDealData, setTimeDealData] = useState<DealData[]>([]);
+  const [timeAggregatedDealData, setTimeAggregatedDealData] = useState<
+    DealData[]
+  >([]);
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
   >([]);
@@ -92,6 +96,13 @@ export default function KPIDash() {
   });
   const [selectedDeal, setSelectedDeal] = useState("");
   const [chartData, setChartData] = useState({});
+  const [monthlyTotals, setMonthlyTotals] = useState([]);
+  const [monthlyLineData, setMonthlyLineData] = useState({});
+  const [accountHoldersLineData, setAccountHoldersLineData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [combinedChartData, setCombinedChartData] = useState({});
   const [aggregatedKPIs, setAggregatedKPIs] = useState({
     totalOutreach: 0,
     deckRequested: 0,
@@ -102,6 +113,10 @@ export default function KPIDash() {
   const [timeScale, setTimeScale] = useState<
     "today" | "this week" | "last week" | "month to date" | "year to date"
   >("");
+
+  const tableStyle = {
+    width: "100%",
+  };
 
   useEffect(() => {
     const fetchAggregatedKPIs = async () => {
@@ -288,17 +303,6 @@ export default function KPIDash() {
     fetchClients();
   }, []);
 
-  const [monthlyTotals, setMonthlyTotals] = useState([]);
-  const [monthlyLineData, setMonthlyLineData] = useState({});
-  const [accountHoldersLineData, setAccountHoldersLineData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [combinedChartData, setCombinedChartData] = useState({});
-
-  const tableStyle = {
-    width: "100%",
-  };
   //////////////// Fetch initial data for deals and account holders /////////////////
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -396,11 +400,13 @@ export default function KPIDash() {
 
   useEffect(() => {
     // For Deal KPI Chart
-    const chartLabels = dealData.map((item) => item.dealName);
-    const totalOutreachData = dealData.map((item) => item.totalOutreach);
-    const deckRequestedData = dealData.map((item) => item.deckRequested);
-    const meetingRequestedData = dealData.map((item) => item.meetingRequested);
-    const ddRequestedData = dealData.map((item) => item.ddRequested);
+    const chartLabels = timeDealData.map((item) => item.company_name);
+    const totalOutreachData = timeDealData.map((item) => item.totalOutreach);
+    const deckRequestedData = timeDealData.map((item) => item.deckRequested);
+    const meetingRequestedData = timeDealData.map(
+      (item) => item.meetingRequested
+    );
+    const ddRequestedData = timeDealData.map((item) => item.ddRequested);
 
     setDealChartData({
       labels: chartLabels,
@@ -431,7 +437,7 @@ export default function KPIDash() {
         },
       ],
     });
-  }, [dealData]); // This effect runs when dealData is set
+  }, [timeDealData]); // This effect runs when company_name is set
 
   // Deal Chart Options
   const chartOptions = {
@@ -764,34 +770,34 @@ export default function KPIDash() {
       const data = [
         {
           stage: "Total Outreach",
-          income: aggregatedKPIs.totalOutreach,
-          expenses: aggregatedKPIs.totalOutreach,
+          income: timeAggregatedDealData.totalOutreach,
+          expenses: timeAggregatedDealData.totalOutreach,
           change: 0,
         },
         {
           stage: "Deck Requested",
-          income: aggregatedKPIs.deckRequested,
-          expenses: aggregatedKPIs.deckRequested,
+          income: timeAggregatedDealData.deckRequested,
+          expenses: timeAggregatedDealData.deckRequested,
           change: (
-            (aggregatedKPIs.deckRequested / aggregatedKPIs.totalOutreach) *
+            (timeAggregatedDealData.deckRequested / timeAggregatedDealData.totalOutreach) *
             100
           ).toFixed(2),
         },
         {
           stage: "Meeting Requested",
-          income: aggregatedKPIs.meetingRequested,
-          expenses: aggregatedKPIs.meetingRequested,
+          income: timeAggregatedDealData.meetingRequested,
+          expenses: timeAggregatedDealData.meetingRequested,
           change: (
-            (aggregatedKPIs.meetingRequested / aggregatedKPIs.deckRequested) *
+            (timeAggregatedDealData.meetingRequested / timeAggregatedDealData.deckRequested) *
             100
           ).toFixed(2),
         },
         {
           stage: "DD Requested",
-          income: aggregatedKPIs.ddRequested,
-          expenses: aggregatedKPIs.ddRequested,
+          income: timeAggregatedDealData.ddRequested,
+          expenses: timeAggregatedDealData.ddRequested,
           change: (
-            (aggregatedKPIs.ddRequested / aggregatedKPIs.meetingRequested) *
+            (timeAggregatedDealData.ddRequested / timeAggregatedDealData.meetingRequested) *
             100
           ).toFixed(2),
         },
@@ -882,7 +888,7 @@ export default function KPIDash() {
         rootRef1.current = null;
       };
     }
-  }, [aggregatedKPIs, chartDivRef, rootRef1]);
+  }, [timeAggregatedDealData, chartDivRef, rootRef1]);
 
   useEffect(() => {
     const disposeChart = () => {
@@ -1180,6 +1186,157 @@ export default function KPIDash() {
   // }, []); // Run this effect without dependencies to avoid re-running
 
   //////////////////////////////////////////////////////////////////////////////
+
+  function getDateRangeForTimeScale(timeScale) {
+    const now = new Date();
+    // Subtract one year from the current date
+    const oneYearAgo = new Date(
+      now.getFullYear() - 1,
+      now.getMonth(),
+      now.getDate()
+    );
+
+    // Use `oneYearAgo` to calculate other time scales
+    const today = new Date(
+      oneYearAgo.getFullYear(),
+      oneYearAgo.getMonth(),
+      oneYearAgo.getDate()
+    ); // Reset hours, minutes, seconds, and milliseconds
+
+    const getStartOfWeek = (date) => {
+      const tempDate = new Date(date); // Create a new Date object to avoid modifying the original date
+      const day = tempDate.getDay();
+      const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust to start from Monday
+      return new Date(tempDate.setDate(diff));
+    };
+
+    const startOfWeek = getStartOfWeek(oneYearAgo);
+    const startOfLastWeek = new Date(startOfWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const endOfLastWeek = new Date(startOfLastWeek);
+    endOfLastWeek.setDate(endOfLastWeek.getDate() + 6);
+    const startOfMonth = new Date(
+      oneYearAgo.getFullYear(),
+      oneYearAgo.getMonth(),
+      1
+    );
+    const startOfYear = new Date(oneYearAgo.getFullYear(), 0, 1);
+
+    switch (timeScale) {
+      case "today":
+        return { startDate: formatDate(today), endDate: formatDate(today) };
+      case "this week":
+        return {
+          startDate: formatDate(startOfWeek),
+          endDate: formatDate(today),
+        };
+      case "last week":
+        return {
+          startDate: formatDate(startOfLastWeek),
+          endDate: formatDate(endOfLastWeek),
+        };
+      case "month to date":
+        return {
+          startDate: formatDate(startOfMonth),
+          endDate: formatDate(today),
+        };
+      case "year to date":
+        return {
+          startDate: formatDate(startOfYear),
+          endDate: formatDate(today),
+        };
+      default:
+        return { startDate: null, endDate: null }; // No filter
+    }
+  }
+
+  function formatDate(date) {
+    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+  }
+
+  useEffect(() => {
+    const fetchTimeDealData = async () => {
+      const { startDate, endDate } = getDateRangeForTimeScale(timeScale);
+
+      console.log(`Requesting deals data for timescale: ${timeScale}`);
+      console.log(`Date range: ${startDate} to ${endDate}`);
+
+      try {
+        const response = await axios.get(
+          "http://localhost:5002/deals/last-updated-status-dates",
+          {
+            params: {
+              startDate, // No need to call .toISOString(), startDate and endDate are already strings
+              endDate,
+            },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+
+        console.log(
+          `Received ${response.data.length} deals for timescale: ${timeScale}`
+        );
+        console.log(`Data within the selected timescale:`, response.data);
+        setTimeDealData(response.data);
+      } catch (error) {
+        console.error("Error fetching deal data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (timeScale) {
+      setLoading(true);
+      fetchTimeDealData();
+    }
+  }, [timeScale, token]);
+
+  function formatDate(date) {
+    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+  }
+
+  useEffect(() => {
+    const fetchTimeAggregatedDealData = async () => {
+      const { startDate, endDate } = getDateRangeForTimeScale(timeScale);
+
+      console.log(`Requesting deals data for timescale: ${timeScale}`);
+      console.log(`Date range: ${startDate} to ${endDate}`);
+
+      try {
+        const response = await axios.get(
+          "http://localhost:5002/deals/aggregated",
+          {
+            params: {
+              startDate, // No need to call .toISOString(), startDate and endDate are already strings
+              endDate,
+            },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+
+        console.log(
+          `Received ${response.data.length} deals for timescale: ${timeScale}`
+        );
+        console.log(`Data within the selected timescale:`, response.data);
+        setTimeAggregatedDealData(response.data);
+      } catch (error) {
+        console.error("Error fetching deal data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (timeScale) {
+      setLoading(true);
+      fetchTimeAggregatedDealData();
+    }
+  }, [timeScale, token]);
 
   return (
     <div
@@ -1510,7 +1667,7 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          {aggregatedKPIs.totalOutreach}
+                          {timeAggregatedDealData.totalOutreach}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
@@ -1556,7 +1713,7 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          {aggregatedKPIs.deckRequested}
+                          {timeAggregatedDealData.deckRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
@@ -1602,7 +1759,7 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          {aggregatedKPIs.meetingRequested}
+                          {timeAggregatedDealData.meetingRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
@@ -1648,7 +1805,7 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          {aggregatedKPIs.ddRequested}
+                          {timeAggregatedDealData.ddRequested}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
@@ -1694,7 +1851,7 @@ export default function KPIDash() {
                           fontColor={focused === "all" ? "#fff" : "#817777"}
                           fontSize="1.875rem"
                         >
-                          {aggregatedKPIs.passes}
+                          {timeAggregatedDealData.passes}
                         </KPIText>
                         <KPIText
                           fontColor={focused === "you" ? "#fff" : "#817777"}
@@ -1740,9 +1897,9 @@ export default function KPIDash() {
                         </tr>
                       </thead>
                       <tbody>
-                        {dealData.map((item, index) => (
+                        {timeDealData.map((item, index) => (
                           <tr key={index}>
-                            <td>{item.dealName}</td>
+                            <td>{item.company_name}</td>
                             <td>{item.totalOutreach}</td>
                             <td>{item.newFund}</td>
                             <td>{item.respondOrNot}</td>
@@ -1754,20 +1911,38 @@ export default function KPIDash() {
                         <tr>
                           <td>Grand Total</td>
                           <td>
-                            {dealData.reduce(
+                            {timeDealData.reduce(
                               (acc, item) => acc + item.totalOutreach,
                               0
                             )}
                           </td>
                           <td>
-                            {dealData.reduce(
+                            {timeDealData.reduce(
                               (acc, item) => acc + item.newFund,
                               0
                             )}
                           </td>
                           <td>
-                            {dealData.reduce(
+                            {timeDealData.reduce(
                               (acc, item) => acc + item.respondOrNot,
+                              0
+                            )}
+                          </td>
+                          <td>
+                            {timeDealData.reduce(
+                              (acc, item) => acc + item.deckRequested,
+                              0
+                            )}
+                          </td>
+                          <td>
+                            {timeDealData.reduce(
+                              (acc, item) => acc + item.meetingRequested,
+                              0
+                            )}
+                          </td>
+                          <td>
+                            {timeDealData.reduce(
+                              (acc, item) => acc + item.ddRequested,
                               0
                             )}
                           </td>
