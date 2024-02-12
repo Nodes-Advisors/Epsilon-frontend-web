@@ -222,6 +222,38 @@ app.post('/logout', async (req, res) => {
 // important one
 // app.use(verifyToken);
 
+app.get('/gethislog/:fundName', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('HistoricalLogs')
+    // console.log('fundName', req.params.fundName)
+    const logs = await collection.find({ VC: req.params.fundName }).toArray()
+    const clientCollection = database.collection('Clients')
+    if (logs) {
+      const updatedLogs = await Promise.all(logs.map(async (log) => {
+        const client = await clientCollection.findOne({ acronym: { $regex: new RegExp(`^${log.Client}$`, 'i') } })
+        
+        if (client) {
+          // console.log('client', client)
+          log['current_stage'] = client.current_stage
+          log['round_size'] = client.deal_size
+        }
+        return log
+      }))
+    
+      updatedLogs.reverse()
+      res.json(updatedLogs)
+    } else {
+      res.status(404).send('Logs not found')
+    }
+    // res.json(logs);
+  } catch (error) {
+    console.error(error)
+    res.status(500).send('Server error')
+  }
+})
+
+
 app.get('/', async (req, res) => {
   const { q } = req.query
   const keys = ['subject', 'sender', 'isInvestorEmail', 'isInterested', 'deckRequested', 'meetingRequested', 'proposalAccepted']

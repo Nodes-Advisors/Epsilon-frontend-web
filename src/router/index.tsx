@@ -18,6 +18,7 @@ const SavedList = lazy(() => import('../pages/SavedList'))
 const UserProfile = lazy(() => import('../pages/UserProfile'))
 const NavBar = lazy(() => import('../components/nav-bar'))
 const Database = lazy(() => import('../pages/Database'))
+const Intelligence = lazy(() => import('../pages/Intelligence'))
 
 const navWrapper = (children: React.ReactNode) => 
   <NavBar><div style={{marginTop: '10vh', width: '100%'}}>
@@ -43,6 +44,8 @@ const router = createBrowserRouter([
   { path: 'my-saved-list/:collection', element: <SavedList /> },
   { path: 'user-profile', element: <UserProfile /> },
   { path: 'database', element: <Database /> },
+  { path: 'intelligence', element: <Intelligence /> },
+  
 ].map(item => ({ ...item, element: navWrapper(item.element) })),
 )
 

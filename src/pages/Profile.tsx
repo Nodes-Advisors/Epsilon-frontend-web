@@ -22,6 +22,7 @@ import LeftNavBar from '../components/left-nav-bar'
 import { set, throttle } from 'lodash'
 import { STATUS_COLOR_LIST } from '../lib/constants'
 import FundStatusLarger from '../components/status-larger'
+import BookIcon from '../assets/images/book.png'
 
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
@@ -33,12 +34,28 @@ export default function Profile(): JSX.Element {
   const [requestName, setRequestName] = useState<string | null>(null)
   const [approvers, setApprovers] = useState<string | null>(null)
   const [details, setDetails] = useState<string | null>(null)
-
+  const [hislogs, setHisLogs] = useState<any[]>([])
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
   const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
   
+  function formatDate(timestamp) {
+    const date = new Date(timestamp)
+  
+    let day = date.getDate()
+    day = day < 10 ? '0' + day : day 
+  
+    let month = date.getMonth() + 1 
+    month = month < 10 ? '0' + month : month 
+  
+    const year = date.getFullYear().toString().substr(-2)
+  
+    return `${day}/${month}/${year}`
+  }
+  
+
+
   const funds = useFundsStore(state => state.funds)
   const id = localStorage.getItem('fund-id')
   if (!id) {
@@ -49,14 +66,27 @@ export default function Profile(): JSX.Element {
     // console.log(funds)
     const record = funds.filter((record) => record._id === id)[0]
     console.log(record)
-    // console.log(record._id)
-    // console.log(savedFunds)
+    async function fetchHistoricalLog() {
+      try {
+        const res = await fetch(`http://localhost:5001/gethislog/${record.Funds}`)
+        const data = await res.json()
+        console.log(data)
+        setHisLogs(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetchHistoricalLog()
     setLocation(['HQ Country' ].reduce((acc, cur, curIndex, array) =>
       acc += record[cur] ? curIndex !== array.length - 1 ? record[cur] + ', ' : record[cur] : '', ''))
     setRecord(record)
     setTimeout(() => setLoading(false), 1000)
   }, [])
 
+
+  // useEffect(() => {
+  //   fetchCompanyData()
+  // }, [])
 
   
   const addRequest = () => {
@@ -66,9 +96,9 @@ export default function Profile(): JSX.Element {
 
   return (
     <div 
-      style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'start', minHeight: '80vh' }}>
+      style={{ overflow: 'hidden', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'start', height: '90vh' }}>
 
-      <div style={{ display: 'flex', marginTop: '10vh' }}>
+      <div style={{ display: 'flex', paddingTop: '10vh' }}>
         <div className={styles['left-panel']}>
           {
             isLoading 
@@ -217,10 +247,10 @@ export default function Profile(): JSX.Element {
                   ?
                   <Skeleton className={styles['detail-category-text-2']} width={'20rem'} />
                   : 
-                  record['Deals'] 
+                  record['Past Deals'] 
                     ?          
                     <span className={styles['detail-category-text-2']}>
-                      {record['Deals'] as string}
+                      {record['Past Deals'] as string}
                     </span>
                     : 
                     <span className={styles['detail-category-text-2']}>
@@ -262,7 +292,7 @@ export default function Profile(): JSX.Element {
           <div className={styles['model-layout']}>
             <h2 className={styles.description}>Historical Log</h2>
   
-            <div>
+            <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30rem', overflow: 'auto' }}>
               <table style={{ textAlign: 'left' }}>
                 <thead>
                   <tr>
@@ -271,38 +301,54 @@ export default function Profile(): JSX.Element {
                     <th>Date</th>
                     <th>Round Size</th>
                     <th>Toal Raised</th>
-                    <th>Co-investors</th>
+                    <th>Account Manager</th>
                     <th>VC Contact</th>
+                    <th>Status</th>
+                    <th>Comments</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td >2023</td>
-                    <td >a</td>
-                    <td >c</td>
-                    <td >b</td>
-                    <td >Toal Raised</td>
-                    <td >Co-investors</td>
-                    <td >Contact</td>
-                  </tr>
-                  <tr>
-                    <td>2021</td>
-                    <td>a</td>
-                    <td>c</td>
-                    <td>b</td>
-                    <td>Toal Raised</td>
-                    <td>Co-investors</td>
-                    <td >Contact</td>
-                  </tr>
-                  <tr>
-                    <td>2023</td>
-                    <td>a</td>
-                    <td>c</td>
-                    <td>b</td>
-                    <td>Toal Raised</td>
-                    <td>Co-investors</td>
-                    <td >Contact</td>
-                  </tr>
+                  {
+                    isLoading 
+                      ?
+                      Array(5).fill(0).map((_, i) => (
+                        <tr key={i}>
+                          <td><Skeleton width={'10rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'3rem'} /></td>
+                        </tr>
+                      ))
+                      :
+                      hislogs.map((log, i) => (
+                        <tr key={i}>
+                          <td>{log.Client ? log.Client : 'No client record'}</td>
+                          <td>{log.current_stage ? log.current_stage : 'No stage record'}</td>
+                          <td>{formatDate(log.Date)}</td>
+                          <td>{log.round_size ? log.round_size : 'No round size record'}</td>
+                          <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td>
+                          <td>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
+                          <td>{log.Contact ? log.Contact : 'No contact record'}</td>
+                          <td>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
+                          <td>{log.Coments 
+                            ? 
+                            <div className={styles['book-wapper']}>
+                              {/* <div className={styles['book-tooltip']}>
+                                {log.Coments}
+                              </div> */}
+                              <img className={styles['book-icon']} src={BookIcon} />
+                            </div> 
+                            : 
+                            'No'
+                          }</td>
+                        </tr>
+                      ))
+                  }
                 </tbody>
               </table>
             </div>

@@ -144,14 +144,14 @@
 }
 
 .detail-divider-top {
-    width: 69.95744rem;
+    width: 89rem;
     flex-shrink: 0;
     height: 0.2625rem;
     background-color: #706588;
 }
 
 .detail-divider {
-    width: 69.95744rem;
+    width: 89rem;
     flex-shrink: 0;
     height: 0.0625rem;
     background-color: #706588;
@@ -549,20 +549,19 @@ input {
 }
 
 th, td {
-    color: #706588;
+    color: #9b93af;
     font-family: Inter;
     font-size: 1.5rem;
     font-style: normal;
     font-weight: 700;
     line-height: 100%; /* 1rem */
-    padding: 1rem 3rem;
+    padding: 1rem 0.5rem;
     border-bottom: 0.1rem solid #555;
 }
 
-th {
-    
+th {    
     font-size: 1rem;
-    color: #888;
+    color: #cfcfcf;
 }
 
 td {
@@ -628,3 +627,65 @@ td {
         cursor: pointer;
     }
 }
+
+.historical-log-scrollbar-layout {
+    &::-webkit-scrollbar {
+        width: 0.5rem;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: #807cc5;
+        border-radius: 0.25rem;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: #2A2F3E;
+    }
+
+}
+
+.book-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    filter: invert(100%);
+    &:hover {
+        transform: scale(1.1);
+        filter: contrast(400%) invert(100%);
+        // border-radius: 50%;
+        cursor: pointer;
+    }
+}
+
+.book-wrapper {
+    position: relative;
+    // & .book-tooltip {
+    //     visibility: hidden;
+    //     position: absolute;
+    //     background-color: #888;
+    //     max-width: 30rem;
+    // }
+    // &:hover .book-tooltip {
+    //     visibility: visible;
+    // }
+}
+
+.book-wrapper .book-tooltip {
+    visibility: hidden;
+    position: absolute;
+    background-color: #888;
+    max-width: 30rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: #fff;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    &:hover {
+        visibility: visible;
+    }
+}
+
+
+
+
+
