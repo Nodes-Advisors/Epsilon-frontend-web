@@ -83,6 +83,7 @@ export default function KPIDash() {
   const [isLoading, setLoading] = useState(true);
   const token = useTokenStore((state) => state.token);
   const [dealData, setDealData] = useState<DealData[]>([]);
+  const [timeDealData, setTimeDealData] = useState<DealData[]>([]);
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
   >([]);
@@ -299,24 +300,39 @@ export default function KPIDash() {
   const tableStyle = {
     width: "100%",
   };
-  //////////////// Fetch initial data for deals and account holders /////////////////
+
   useEffect(() => {
-    const fetchInitialData = async () => {
+    // Fetch the Data for Deals
+    const fetchDealData = async () => {
       try {
-        const dealsResponse = await axios.get<DealData[]>(
+        const response = await axios.get<DealData[]>(
           "http://localhost:5002/deals"
         );
-        setDealData(dealsResponse.data);
-        const response = await axios.get<DealData[]>(
+        setDealData(response.data);
+      } catch (error) {
+        console.error("Error fetching deal data:", error);
+      }
+    };
+
+    // Fetch the data for account holders
+    const fetchAccountHolderData = async () => {
+      try {
+        const response = await axios.get<AccountHolderData[]>(
           "http://localhost:5002/account-holders"
         );
         setAccountHolderData(response.data);
       } catch (error) {
-        console.error("Error fetching initial data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching account holder data:", error);
       }
     };
+
+    // Fetch both datasets
+    Promise.all([fetchDealData(), fetchAccountHolderData()]).then(() => {
+      setLoading(false);
+      // You can also set up chart data here if it depends on the fetched data
+    });
+
+    
 
     if (dealData.length > 0) {
       // Set the default selected deal to the one with the most outreach
@@ -325,10 +341,7 @@ export default function KPIDash() {
       );
       setSelectedDeal(sortedDeals[0].dealName);
     }
-
-    fetchInitialData();
-  }, []);
-  //////////////////////////////////////////////////////////////////////////////////
+  }, [dealData]);
 
   const handleSelectChange = (e) => {
     e.preventDefault(); // Prevent the default form behavior
@@ -1180,6 +1193,167 @@ export default function KPIDash() {
   // }, []); // Run this effect without dependencies to avoid re-running
 
   //////////////////////////////////////////////////////////////////////////////
+
+  // function getDateRangeForTimeScale(timeScale) {
+  //   const now = new Date();
+  //   const today = new Date(
+  //     now.getFullYear() ,
+  //     now.getMonth(),
+  //     now.getDate()
+  //   ); // Reset hours, minutes, seconds, and milliseconds
+
+  //   const getStartOfWeek = (date) => {
+  //     const day = date.getDay();
+  //     const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust to start from Monday
+  //     return new Date(date.setDate(diff));
+  //   };
+
+  //   const startOfWeek = getStartOfWeek(new Date()); // Use a new Date object for each calculation
+  //   const startOfLastWeek = new Date(startOfWeek);
+  //   startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+  //   const endOfLastWeek = new Date(startOfLastWeek);
+  //   endOfLastWeek.setDate(endOfLastWeek.getDate() + 6);
+  //   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  //   const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+  //   switch (timeScale) {
+  //     case "today":
+  //       return { startDate: formatDate(today), endDate: formatDate(today) };
+  //     case "this week":
+  //       return {
+  //         startDate: formatDate(startOfWeek),
+  //         endDate: formatDate(today),
+  //       };
+  //     case "last week":
+  //       return {
+  //         startDate: formatDate(startOfLastWeek),
+  //         endDate: formatDate(endOfLastWeek),
+  //       };
+  //     case "month to date":
+  //       return {
+  //         startDate: formatDate(startOfMonth),
+  //         endDate: formatDate(today),
+  //       };
+  //     case "year to date":
+  //       return {
+  //         startDate: formatDate(startOfYear),
+  //         endDate: formatDate(today),
+  //       };
+  //     default:
+  //       return { startDate: null, endDate: null }; // No filter
+  //   }
+  // }
+
+  // function formatDate(date) {
+  //   return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+  // }
+
+  function getDateRangeForTimeScale(timeScale) {
+    const now = new Date();
+    // Subtract one year from the current date
+    const oneYearAgo = new Date(
+      now.getFullYear() - 1,
+      now.getMonth(),
+      now.getDate()
+    );
+
+    // Use `oneYearAgo` to calculate other time scales
+    const today = new Date(
+      oneYearAgo.getFullYear(),
+      oneYearAgo.getMonth(),
+      oneYearAgo.getDate()
+    ); // Reset hours, minutes, seconds, and milliseconds
+
+    const getStartOfWeek = (date) => {
+      const tempDate = new Date(date); // Create a new Date object to avoid modifying the original date
+      const day = tempDate.getDay();
+      const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust to start from Monday
+      return new Date(tempDate.setDate(diff));
+    };
+
+    const startOfWeek = getStartOfWeek(oneYearAgo);
+    const startOfLastWeek = new Date(startOfWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+    const endOfLastWeek = new Date(startOfLastWeek);
+    endOfLastWeek.setDate(endOfLastWeek.getDate() + 6);
+    const startOfMonth = new Date(
+      oneYearAgo.getFullYear(),
+      oneYearAgo.getMonth(),
+      1
+    );
+    const startOfYear = new Date(oneYearAgo.getFullYear(), 0, 1);
+
+    switch (timeScale) {
+      case "today":
+        return { startDate: formatDate(today), endDate: formatDate(today) };
+      case "this week":
+        return {
+          startDate: formatDate(startOfWeek),
+          endDate: formatDate(today),
+        };
+      case "last week":
+        return {
+          startDate: formatDate(startOfLastWeek),
+          endDate: formatDate(endOfLastWeek),
+        };
+      case "month to date":
+        return {
+          startDate: formatDate(startOfMonth),
+          endDate: formatDate(today),
+        };
+      case "year to date":
+        return {
+          startDate: formatDate(startOfYear),
+          endDate: formatDate(today),
+        };
+      default:
+        return { startDate: null, endDate: null }; // No filter
+    }
+  }
+
+  function formatDate(date) {
+    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+  }
+
+  useEffect(() => {
+    const fetchDealsData = async () => {
+      const { startDate, endDate } = getDateRangeForTimeScale(timeScale);
+
+      console.log(`Requesting deals data for timescale: ${timeScale}`);
+      console.log(`Date range: ${startDate} to ${endDate}`);
+
+      try {
+        const response = await axios.get(
+          "http://localhost:5002/deals/last-updated-status-dates",
+          {
+            params: {
+              startDate, // No need to call .toISOString(), startDate and endDate are already strings
+              endDate,
+            },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+          }
+        );
+
+        console.log(
+          `Received ${response.data.length} deals for timescale: ${timeScale}`
+        );
+        console.log(`Data within the selected timescale:`, response.data);
+        setTimeDealData(response.data);
+      } catch (error) {
+        console.error("Error fetching deal data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (timeScale) {
+      setLoading(true);
+      fetchDealsData();
+    }
+  }, [timeScale, token]);
 
   return (
     <div

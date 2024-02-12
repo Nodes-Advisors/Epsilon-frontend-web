@@ -86,28 +86,141 @@ router.get("/deal-names", async (req, res) => {
   }
 });
 
-router.post("/deals/filter", async (req, res) => {
-  const companyNames = req.body.companyNames; // Expect an array of company names
+// router.get("/deals/last-updated-status-dates", async (req, res) => {
+//   try {
+//     const database = client.db(dbName);
+//     const collection = database.collection(collectionName);
+
+//     const dates = await collection
+//       .find(
+//         {},
+//         {
+//           projection: {
+//             _id: 0,
+//             company_acronym: 1,
+//             last_updated_status_date: 1,
+//           },
+//         }
+//       )
+//       .toArray();
+
+//     const formattedDates = dates.map((item) => {
+//       return {
+//         company_acronym: item.company_acronym,
+//         last_updated_status_date: new Date(
+//           item.last_updated_status_date
+//         ).toLocaleDateString("en-US", {
+//           year: "numeric",
+//           month: "long",
+//           day: "numeric",
+//         }),
+//       };
+//     });
+
+//     res.json(formattedDates);
+//   } catch (error) {
+//     console.error("Error fetching last updated status dates:", error);
+//     res.status(500).send("Error fetching last updated status dates");
+//   }
+// });
+
+router.get("/deals/last-updated-status-dates", async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  // Log the received startDate and endDate
+  console.log(
+    `Fetching deals with last updated status dates between ${startDate} and ${endDate}`
+  );
+
   try {
     const database = client.db(dbName);
     const collection = database.collection(collectionName);
 
-    const pipeline = [
-      {
-        $match: {
-          company_name: { $in: companyNames },
+    // Convert startDate and endDate from string to Date objects and then to timestamps
+    const startTimestamp = startDate ? new Date(startDate).getTime() : 0; // Use a default far past date if startDate is not provided
+    const endTimestamp = endDate
+      ? new Date(endDate + "T23:59:59.999Z").getTime()
+      : Date.now(); // Use current date as default for endDate and set time to the end of the day
+
+    console.log(
+      `Querying MongoDB with timestamps: ${startTimestamp} to ${endTimestamp}`
+    );
+
+    const dates = await collection
+      .find(
+        {
+          last_updated_status_date: {
+            $gte: startTimestamp,
+            $lte: endTimestamp,
+          },
         },
-      },
-      // ... rest of the existing aggregation pipeline ...
-    ];
+        {
+          projection: {
+            _id: 0,
+            company_acronym: 1,
+            last_updated_status_date: 1,
+          },
+        }
+      )
+      .toArray();
 
-    const counts = await collection.aggregate(pipeline).toArray();
+    console.log(`Found ${dates.length} deals within the specified date range`);
 
-    res.json(counts);
+    res.json(
+      dates.map(({ company_acronym, last_updated_status_date }) => ({
+        company_acronym,
+        last_updated_status_date: new Date(
+          last_updated_status_date
+        ).toLocaleDateString("en-US"),
+      }))
+    );
   } catch (error) {
-    console.error("Error fetching filtered data:", error);
-    res.status(500).send("Error fetching data");
+    console.error("Error fetching last updated status dates:", error);
+    res.status(500).send("Error fetching last updated status dates");
   }
 });
+
+router.post("/deals/filter", async (req, res) => {
+  const { companyNames } = req.body; // Expect an array of company acronyms
+  try {
+    const database = client.db(dbName);
+    const collection = database.collection(collectionName);
+
+    const deals = await collection
+      .find({
+        company_acronym: { $in: companyNames },
+      })
+      .toArray();
+
+    res.json(deals); // Send the filtered deals back to the client
+  } catch (error) {
+    console.error("Error fetching filtered deals:", error);
+    res.status(500).send("Error fetching filtered deals");
+  }
+});
+
+// router.post("/deals/filter", async (req, res) => {
+//   const companyNames = req.body.companyNames; // Expect an array of company names
+//   try {
+//     const database = client.db(dbName);
+//     const collection = database.collection(collectionName);
+
+//     const pipeline = [
+//       {
+//         $match: {
+//           company_name: { $in: companyNames },
+//         },
+//       },
+//       // ... rest of the existing aggregation pipeline ...
+//     ];
+
+//     const counts = await collection.aggregate(pipeline).toArray();
+
+//     res.json(counts);
+//   } catch (error) {
+//     console.error("Error fetching filtered data:", error);
+//     res.status(500).send("Error fetching data");
+//   }
+// });
 
 export default router;
