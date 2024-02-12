@@ -16,6 +16,7 @@ import { STATUS_COLOR_LIST,
 import toast from 'react-hot-toast'
 import axios from 'axios'
 import FundStatus from '../components/status'
+import ReactPaginate from 'react-paginate'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
@@ -260,6 +261,17 @@ export default function SavedList() {
     }))
   }, [filteredList])
 
+  const [itemOffset, setItemOffset] = useState(0)
+  const itemsPerPage = 20
+  const endOffset = itemOffset + itemsPerPage
+  const currentItems = filteredData ? filteredData.slice(itemOffset, endOffset) : []
+  const pageCount = filteredData ? Math.ceil(filteredData.length / itemsPerPage) : 0
+
+  const handlePageClick = (event) => {
+    const newOffset = (event.selected * itemsPerPage) % filteredData.length
+    setItemOffset(newOffset)
+  }
+
   const handleDeleteFundsClick = async (record: any) => {
     try {
       const res = await axios.post('http://localhost:5001/savedcollections/deletefund', {
@@ -368,6 +380,7 @@ export default function SavedList() {
                       <div 
                         onClick={(e) => {
                           e.stopPropagation()
+                          setItemOffset(0)
                           setFilteredList({
                             ...filteredList,
                             [filterName]: filteredList[filterName].filter((item) => item !== filterItem),
@@ -391,7 +404,7 @@ export default function SavedList() {
                     placeholder='Search'
                     onKeyDown={(e) => {
                       e.stopPropagation()
-
+                      setItemOffset(0)
                       if (e.key === 'Backspace') {
                         if (inputRef.current?.value !== '') return
                         setFilteredList({
@@ -407,6 +420,7 @@ export default function SavedList() {
                 <div id='v-cancelpanel' style={{ backgroundColor: '#2A2F3E', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img 
                     onClick={() => {
+                      setItemOffset(0)
                       setFilteredList({
                         ...filteredList,
                         [filterName]: [],
@@ -421,6 +435,7 @@ export default function SavedList() {
                 <ul 
                   onClick={(e) => {
                     e.stopPropagation()
+                    setItemOffset(0)
                     setFilteredList({
                       ...filteredList,
                       [filterName]: [...filteredList[filterName], (e.target as HTMLElement).textContent as string],
@@ -458,7 +473,7 @@ export default function SavedList() {
             </div>
             :
             (
-              filteredData.length > 0
+              currentItems.length > 0
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${window.location.href.split('/')[window.location.href.split('/').length - 1]} list)`}</span></span>
@@ -475,7 +490,7 @@ export default function SavedList() {
                   </div>
                   <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                   {
-                    filteredData.map((record, index) => (
+                    currentItems.map((record, index) => (
                       <>
                         <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -505,7 +520,7 @@ export default function SavedList() {
                                 onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                                 onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                                 src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid transparent`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
-                              <FundStatus colorList={record['Contact'] ? generateColorList((record['Contact'].split(',')).length) : []} />
+                              <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                               <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
@@ -526,7 +541,7 @@ export default function SavedList() {
                       </>
                     ))
                   }
-                  <span style={{ padding: '2rem', fontSize: '1.4rem', textDecoration: 'underline' }}>load more data<span>...</span></span>
+                  {/* <span style={{ padding: '2rem', fontSize: '1.4rem', textDecoration: 'underline' }}>load more data<span>...</span></span> */}
                 </div>
               
                 :
@@ -536,6 +551,26 @@ export default function SavedList() {
             )
         }
       </div>
+      {
+        currentItems.length > 0
+        &&
+        <ReactPaginate
+          className={styles['fund-card-pagination']}
+          // breakClassName={styles['fund-card-pagination-li']}
+          pageLinkClassName={styles['fund-card-pagination-link']}
+          pageClassName={styles['fund-card-pagination-li']}
+          activeClassName={styles['fund-card-pagination-li-active']}
+          nextClassName={styles['fund-card-pagination-next']}
+          previousClassName={styles['fund-card-pagination-pre']}
+          breakLabel="..."
+          nextLabel="next >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={5}
+          pageCount={pageCount}
+          previousLabel="< pre"
+          renderOnZeroPageCount={null}
+        />  
+      } 
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
           <form 
@@ -543,12 +578,9 @@ export default function SavedList() {
             style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                {/* <AsyncImage src={isLoading  ? '' : (recordRef.current!['Logo'] as ReadonlyArray<{ url: string }>)[0].url} alt='' 
-                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: '3px solid #5392d4' }}
-
-                  draggable='false' onContextMenu={e => e.preventDefault()} /> */}
+              
                 <div>
-                  {/* <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{recordRef.current ? recordRef.current['Investor Name'] as string : 'no name'}</span></span> */}
+                  
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
                 </div>
               </div>

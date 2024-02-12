@@ -21,6 +21,7 @@ import { useUserStore } from '../store/store'
 import FundStatus from '../components/status'
 import { throttle } from 'lodash'
 import { record } from 'zod'
+import ReactPaginate from 'react-paginate'
 
 export default function FundCards() {
 
@@ -49,6 +50,7 @@ export default function FundCards() {
   const newCollectionRef = useRef<HTMLInputElement>(null)
   const [hoveredCollection, setHoveredCollection] = useState<string>('')
   const [inputValue, setInputValue] = useState('')
+  const [totalFundCount, setTotalFundCount] = useState<number>(0)
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -122,8 +124,9 @@ export default function FundCards() {
           return filteredList[filterName].includes(record['HQ Country'] as string)
               || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
         case 'Status':
-          return FUND_STATUS_LIST.includes(record['Status'] as string)
-                    || (record['Status'] && FUND_STATUS_LIST.includes(record['Status'] as string))
+          return filteredList[filterName].includes(record['Status'] as string)
+                    || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
+                    || (record['Status'].startsWith('Review') && filteredList[filterName].includes('Busy'))
         case 'Deals':
           // console.log(filteredList['Past Deals'])
           return filteredList['Deals'].some(filter => 
@@ -158,11 +161,17 @@ export default function FundCards() {
     })
   }, [])
 
-  const savedFunds = useSavedFundsStore(state => state.savedFunds)
-  const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
-  const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
-  const inSavedFunds = (record: any) => savedFunds.find((fund) => fund._id === record._id)
-  
+  const [itemOffset, setItemOffset] = useState(0)
+  const itemsPerPage = 20
+  const endOffset = itemOffset + itemsPerPage
+  const currentItems = filteredData.slice(itemOffset, endOffset)
+  const pageCount = Math.ceil(filteredData.length / itemsPerPage)
+
+  const handlePageClick = (event) => {
+    const newOffset = (event.selected * itemsPerPage) % filteredData.length
+    setItemOffset(newOffset)
+  }
+
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
@@ -185,7 +194,8 @@ export default function FundCards() {
       .then((res) => {
         setData(res.data)
         setFunds(res.data)  
-        setFilteredData(res.data)      
+        setFilteredData(res.data)   
+        setTotalFundCount(res.data.length)   
         // console.log(
         //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
         // )
@@ -414,8 +424,6 @@ export default function FundCards() {
     }
   }
 
-
-
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
@@ -430,9 +438,6 @@ export default function FundCards() {
               <button key={name} style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>
                 {
                   name
-                  //  !== 'Clear Filters' && (filteredList[name] as string[]).length > 0
-                  //   ? <span>{`${name}\u0020\u00B7\u0020${filteredList[name].length}`}</span>
-                  //   : name
                 }
               </button>))
           }
@@ -454,6 +459,7 @@ export default function FundCards() {
                       <div 
                         onClick={(e) => {
                           e.stopPropagation()
+                          setItemOffset(0)
                           setFilteredList({
                             ...filteredList,
                             [filterName]: filteredList[filterName].filter((item) => item !== filterItem),
@@ -478,8 +484,9 @@ export default function FundCards() {
                     placeholder='Search'
                     onKeyDown={(e) => {
                       e.stopPropagation()
-
+                      setItemOffset(0)
                       if (e.key === 'Backspace' && inputRef.current?.value === '') {
+                        
                         setFilteredList({
                           ...filteredList,
                           [filterName]: filteredList[filterName].slice(0, filteredList[filterName].length - 1),
@@ -493,6 +500,7 @@ export default function FundCards() {
                 <div id='v-cancelpanel' style={{ backgroundColor: '#2A2F3E', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img 
                     onClick={() => {
+                      setItemOffset(0)
                       setFilteredList({
                         ...filteredList,
                         [filterName]: [],
@@ -507,9 +515,7 @@ export default function FundCards() {
                 <ul 
                   onClick={(e) => {
                     e.stopPropagation()
-                    // if (inputValue) {
-                    //   setInputValue('')
-                    // }
+                    setItemOffset(0)
                     setFilteredList({
                       ...filteredList,
                       [filterName]: [...filteredList[filterName], (e.target as HTMLElement).textContent as string],
@@ -548,7 +554,7 @@ export default function FundCards() {
             :
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds</span>
+              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalFundCount ? `${totalFundCount} Funds` : `${filteredData.length} Funds (out of ${totalFundCount} Funds)`}</span>
               <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', width: '100%', textAlign: 'left'  }}>
                 <span>Funds</span>
                 <span>Status</span>
@@ -564,9 +570,9 @@ export default function FundCards() {
               <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                               
               {
-                filteredData.length > 0
+                currentItems.length > 0
                   ?
-                  filteredData.map((record, index) => (
+                  currentItems.map((record, index) => (
                     <>
                       <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -695,6 +701,26 @@ export default function FundCards() {
         </div>
 
       </div>
+      {
+        currentItems.length > 0
+        &&
+        <ReactPaginate
+          className={styles['fund-card-pagination']}
+          // breakClassName={styles['fund-card-pagination-li']}
+          pageLinkClassName={styles['fund-card-pagination-link']}
+          pageClassName={styles['fund-card-pagination-li']}
+          activeClassName={styles['fund-card-pagination-li-active']}
+          nextClassName={styles['fund-card-pagination-next']}
+          previousClassName={styles['fund-card-pagination-pre']}
+          breakLabel="..."
+          nextLabel="next >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={5}
+          pageCount={pageCount}
+          previousLabel="< pre"
+          renderOnZeroPageCount={null}
+        />  
+      } 
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
           <form 

@@ -578,3 +578,53 @@ td {
         text-decoration: underline;
     }
 }
+
+.fund-card-pagination {
+    display: flex;
+    gap: 1rem;
+    list-style-type: none;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    padding-bottom: 2rem;
+}
+
+.fund-card-pagination-link {
+    color: #ddd;
+    &:hover {
+        color: #fff;
+    }
+}
+
+.fund-card-pagination-li {
+    border: 1px solid white;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    background-color: #2254FF;
+    &:hover {
+        background-color: #000;
+    }
+
+}
+
+.fund-card-pagination-li-active {
+    background: #eb101093;
+    color:#2254FF;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.fund-card-pagination-next {
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.fund-card-pagination-pre {
+    &:hover {
+        cursor: pointer;
+    }
+}
