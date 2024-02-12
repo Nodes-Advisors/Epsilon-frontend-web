@@ -166,16 +166,18 @@ export default function FundCards() {
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const setFunds = useFundsStore(state => state.setFunds)
   const navigate = useNavigate()
-  const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-  const generateColorList = (length) => {
+  // const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
+  const generateColorList = (length, contact, status) => {
     // console.log(length)
-    const colorList = []
-    for (let i = 0; i < length; i++) {
-      const color = randomColor()
-      colorList.push(color)
-    }
-    // console.log(colorList)
-    return colorList
+    if (status.toUpperCase() === 'AVAILABLE') return ['#009900']
+    // else if (status === 'Busy') return ['#009900']
+    // else if (status === 'New Fund') return ['blue']
+    else if (status === 'Unresponsive') return ['orange']
+    else if (status === 'New Fund') return ['blue']
+
+    if (length !== status.split(',').length) {
+      return ['#990000', '#009900']
+    } else return ['#990000']
   }
   useEffect(() => {
     setLoading(true)
@@ -297,6 +299,10 @@ export default function FundCards() {
       document.removeEventListener('click', handleClickOutside)
     }
   }, [])
+
+  // const highlightName( status: string, contact: string) {
+  //   const contactList = contact.split(',')
+  //   for
 
   useEffect(() => {
     async function fetchPendingList() {
@@ -593,7 +599,7 @@ export default function FundCards() {
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                               onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
                               src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.5)' }} />
-                            <FundStatus colorList={record['Contact'] ? generateColorList((record['Contact'].split(',')).length) : []} />
+                            <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>

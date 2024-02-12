@@ -2,7 +2,7 @@ import { memo, useState } from 'react'
 import { STAGES } from '../lib/constants'
 import styles from '../styles/kpi-block.module.less'
 
-function DealFunnel({selectedClients, tasks, setTasks}: {selectedClients: string[], tasks: any, setTasks: any}) {
+function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: string, selectedClients: string[], tasks: any, setTasks: any}) {
     
   const handleDragStart = (e, task, stage) => {
     // console.log('dragging', task, stage)
@@ -28,17 +28,49 @@ function DealFunnel({selectedClients, tasks, setTasks}: {selectedClients: string
     }
   }
 
+  const isWithinTimeScale = (dealDate) => {
+    // return true
+    const dealTime = new Date(dealDate).getTime()
+    const now = Date.now()
+    // console.log(dealTime, now)
+    switch(timeScale) {
+    case '':
+      return true
+    case 'today':
+      return now - dealTime <= 24 * 60 * 60 * 1000
+    case 'this week':
+      return now - dealTime <= 7 * 24 * 60 * 60 * 1000
+    case 'last week':
+      return (now - dealTime <= 14 * 24 * 60 * 60 * 1000) && (now - dealTime > 7 * 24 * 60 * 60 * 1000)
+    case 'month to date':
+      return now - dealTime <= 30 * 24 * 60 * 60 * 1000
+    case 'year to date':
+      return now - dealTime <= 365 * 24 * 60 * 60 * 1000
+    default:
+      return true
+    }
+  }
+
   return (
     <div className={styles['funnel-layout']}>
       {Object.keys(tasks).map((stage, index) => {
         const filteredTasks = tasks[stage].filter((deal) => {
           if (selectedClients.length === 0) {
-            return true
+            if (timeScale === '') return true
+            else return isWithinTimeScale(deal.last_updated_status_date)
+          } else {
+            if (timeScale === '') return selectedClients
+              .map((client) => client.toUpperCase())
+              .includes(deal.company_acronym.toUpperCase())
+            else return selectedClients
+              .map((client) => client.toUpperCase())
+              .includes(deal.company_acronym.toUpperCase()) && isWithinTimeScale(deal.last_updated_status_date)
           }
-          return selectedClients
-            .map((client) => client.toUpperCase())
-            .includes(deal.company_acronym.toUpperCase())
-          // return selectedClients.includes(deal.company_acronym)
+          
+          // console.log(deal.last_updated_status_date)
+          // return selectedClients
+          //   .map((client) => client.toUpperCase())
+          //   .includes(deal.company_acronym.toUpperCase()) && isWithinTimeScale(deal.date)
         })
         // console.log(STAGES[index])
         return (

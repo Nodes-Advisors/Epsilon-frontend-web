@@ -114,7 +114,7 @@ function LiveUpdate({user}: {user: any}) {
     const width = e.currentTarget.offsetWidth
     const height = e.currentTarget.offsetHeight
     const timeout = setTimeout(() => {
-      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 + 180})
+      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 + 90})
       setShowPopupAM(true)
       setHoveredName(name)
     }, 500)
@@ -205,7 +205,7 @@ function LiveUpdate({user}: {user: any}) {
   }
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', padding: '1rem' }}>
       <div className={styles['live-update-button-layout']}>
         <button
           className={
@@ -256,9 +256,7 @@ function LiveUpdate({user}: {user: any}) {
             <li style={{ alignSelf: 'center' }}>
               <button onClick={handleNextPage}>Load more...</button>
             </li>
-            {/* <div ref={loader}>
-            <h2>Loading...</h2>
-          </div> */}
+
             {
               data.filter(item => getFilter(item)).map((item: any) => {
                 return (
