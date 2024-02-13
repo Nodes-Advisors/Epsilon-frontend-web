@@ -2094,9 +2094,9 @@ export default function KPIDash() {
                               <td>{row.year}</td>{" "}
                               {/* Formatting the 'year' to add space before capital letters */}
                               {selectedClients.map((client) => (
-                                <td key={client}>
-                                  {row[client] !== undefined
-                                    ? row[client]
+                                <td key={client.toLowerCase()}>
+                                  {row[client.toLowerCase()] !== undefined
+                                    ? row[client.toLowerCase()]
                                     : "-"}
                                 </td> // Display data for each client or '-' if no data
                               ))}
