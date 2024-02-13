@@ -305,6 +305,7 @@ export default function FundCards() {
       const rect = button.getBoundingClientRect()
       // console.log(filterName)
       if (button.textContent === 'Clear Filters') {
+        localStorage.removeItem('filter')
         setFilterName('')
         setShowFilteredList(false)
         setFilteredList({
@@ -321,7 +322,7 @@ export default function FundCards() {
         })
         return
       }
-      setFilterName(button.textContent as FILTER_NAME)
+      // setFilterName(button.textContent as FILTER_NAME)
       setFilterWindowPosition({ left: rect.left, top: rect.top - button.clientHeight })
       // console.log(rect.left, button.clientWidth)
       // console.log(`${button.textContent} button - Left: ${rect.left - button.clientHeight}, Top: ${rect.top}`)
@@ -338,6 +339,7 @@ export default function FundCards() {
       
         if (filterNames.includes(button.textContent as FILTER_NAME)) {
           if (button.textContent === 'Clear Filters') {
+            localStorage.removeItem('filter')
             setFilterName('')
             setShowFilteredList(false)
             return
@@ -483,18 +485,26 @@ export default function FundCards() {
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
         <div 
-          onClick={handleClick}
           style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <span>
         Filters:
           </span>
           {
             filterNames.map((name: FILTER_NAME) => (
-              <button key={name} style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>
-                {
-                  name
-                }
-              </button>))
+              <>
+                <button 
+                onClick={(e) => { setFilterName(name); handleClick(e)}}
+                key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
+                  {
+                    filteredList[name] && filteredList[name].length > 0
+                    ?
+                    filteredList[name].join(', ')
+                    :
+                    name
+                  }
+                </button>
+              </>
+            ))
           }
         </div>
         {

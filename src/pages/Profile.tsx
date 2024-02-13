@@ -133,9 +133,14 @@ export default function Profile(): JSX.Element {
   return (
     <div 
       style={{ overflow: 'hidden', position: 'relative', gap: '5vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
-      <img
+      <div 
       onClick={() => navigate(-1)}
-      className={styles['back-icon']} src={BackIcon} alt="" />
+      style={{ display: 'flex', gap: '1rem', alignItems: 'center', alignSelf: 'self-start', paddingTop: '5vh', marginLeft: '8vw' }}>
+        <img
+          
+          className={styles['back-icon']} src={BackIcon} alt="" />
+        <h3 className={styles['back-text']}>Return to Fund Card Page</h3>
+      </div>
       <div>
       <div style={{ display: 'flex'}}>
         <div className={styles['left-panel']}>

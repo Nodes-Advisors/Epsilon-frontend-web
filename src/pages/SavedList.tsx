@@ -34,33 +34,34 @@ export default function SavedList() {
   const [filteredData, setFilteredData] = useState<any[]>()
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
-  const [contactPerson, setContactPerson] = useState<string>('Person A')
-  const [priority, setPriority] = useState<string>('High')
+  const [contactPerson, setContactPerson] = useState<string>('')
+  const [priority, setPriority] = useState<string>('')
   // const [requestStatus, setRequestStatus] = useState<string>('Pending')
   const user = useUserStore(state => state.user)
-  const [deal, setDeal] = useState<string>('Deal I')
+  const [deal, setDeal] = useState<string>('')
   const [pendingList, setPendingList] = useState<string[]>([])
   const [selectedFundName, setSelectedFundName] = useState<string>('')
+  const [data, setData] = useState<Record<FieldSet>[]>([])
 
   const [filteredList, setFilteredList] = useState<{
-    '': string[]
+    '': string[],
     'Account Manager': string[],
     'Deals': string[],
-    'Status': string[],
     'Investors': string[],
     'Location': string[],
+    'Status': string[],
     'Type': string[],
     'Contact': string[],
     'Suitability Score': string[],
     'Co-Investors': string[],
     'Clear Filters': string[],
-  }>({
+  }>(localStorage.getItem('saved-filter') ? JSON.parse(localStorage.getItem('saved-filter') as string) : {
     '': [],
     'Account Manager': [],
     'Deals': [],
-    'Status': [],
     'Investors': [],
     'Location': [],
+    'Status': [],
     'Type': [],
     'Contact': [],
     'Suitability Score': [],
@@ -74,19 +75,22 @@ export default function SavedList() {
       const rect = button.getBoundingClientRect()
       // console.log(filterName)
       if (button.textContent === 'Clear Filters') {
+        localStorage.removeItem('saved-filter')
         setFilterName('')
         setShowFilteredList(false)
         setFilteredList({
           '': [],
           'Account Manager': [],
+          'Deals': [],
           'Investors': [],
           'Location': [],
-          'Deals': [],
           'Status': [],
           'Type': [],
           'Contact': [],
+          'Suitability Score': [],
           'Co-Investors': [],
           'Clear Filters': [],
+          
         })
         return
       }
@@ -99,6 +103,13 @@ export default function SavedList() {
 
   const sendRequest = async (e) => {
     e.preventDefault()
+    
+    // Check if all required fields have been filled
+    if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
     try {
       // console.log('executed')
       await axios.post('http://localhost:5001/sendRequest', {
@@ -107,8 +118,8 @@ export default function SavedList() {
         deal,
         contactPerson,
         priority,
-        selectedFundName,
         details,
+        selectedFundName,
         email: user?.email,
       }, {
         headers: {
@@ -135,7 +146,65 @@ export default function SavedList() {
         },
       }).then((res) => {
         // console.log(res.data)
+        setData(res.data)
         setFilteredData(res.data)
+        if (localStorage.getItem('saved-filter')) {
+          const filteredList = JSON.parse(localStorage.getItem('saved-filter') as string)
+          if (Object.values(filteredList).every(filter => filter.length === 0)) {
+            setFilteredData(filteredData)
+            return
+          }
+        
+          // Apply filters cumulatively
+          setFilteredData(filteredData.filter((record) => {
+            return Object.keys(filteredList).every((filterName) => {
+              // If no filter is set for this filterName, return false
+              if (filteredList[filterName].length === 0) {
+                return true
+              }
+        
+              // Apply the filter based on the filterName
+              switch (filterName) {
+              case 'Account Manager':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Investors':
+                return filteredList[filterName].includes(record['Funds'] as string)
+                    || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
+              case 'Location':
+                return filteredList[filterName].includes(record['HQ Country'] as string)
+                    || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+              case 'Status':
+                // console.log(record['Status'])
+                return filteredList[filterName].includes(record['Status'] as string)
+                          || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
+                          || (record['Status'].startsWith('Review') && filteredList[filterName].includes('Busy'))
+                // console.log(filteredList['Past Deals'])
+              case 'Deals':
+                return filteredList['Deals'].some(filter => 
+                  filter === record['Past Deals'] || (record['Past Deals'] && record['Past Deals'].includes(filter)),
+                )
+              case 'Type':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Contact':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Suitability Score':
+                return [ '>90', '>80', '60-80', '<60']
+              case 'Co-Investors':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              default:
+                return false
+              }
+            })
+          }))
+        }
       }).catch((error) => {
         toast.error(error?.response?.data)
       })
@@ -171,6 +240,7 @@ export default function SavedList() {
       
         if (filterNames.includes(button.textContent as FILTER_NAME)) {
           if (button.textContent === 'Clear Filters') {
+            localStorage.removeItem('saved-filter')
             setFilterName('')
             setShowFilteredList(false)
             return
@@ -207,13 +277,17 @@ export default function SavedList() {
 
   useEffect(() => {
     // If no filter is applied, show all data
+    // if (!filteredData || filteredData?.length === 0) {
+    //   return
+    // }
     if (Object.values(filteredList).every(filter => filter.length === 0)) {
-      setFilteredData(filteredData)
+      setFilteredData(data)
       return
     }
-  
+    console.log(filteredData)
+    console.log(filteredList)
     // Apply filters cumulatively
-    setFilteredData(filteredData.filter((record) => {
+    setFilteredData(data.filter((record) => {
       return Object.keys(filteredList).every((filterName) => {
         // If no filter is set for this filterName, return false
         if (filteredList[filterName].length === 0) {
@@ -233,8 +307,10 @@ export default function SavedList() {
           return filteredList[filterName].includes(record['HQ Country'] as string)
               || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
         case 'Status':
-          return FUND_STATUS_LIST.includes(record['Status'] as string)
-              || (record['Status'] && FUND_STATUS_LIST.includes(record['Status'] as string))
+          console.log(record['Status'])
+          return filteredList[filterName].includes(record['Status'] as string)
+                          || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
+                          || (record['Status'].startsWith('Review') && filteredList[filterName].includes('Busy'))
         case 'Deals':
           // console.log(filteredList['Past Deals'])
           return filteredList['Deals'].some(filter => 
@@ -306,39 +382,41 @@ export default function SavedList() {
   const getFilteredList = (filterName: FILTER_NAME) => {
     switch (filterName) {
     case 'Account Manager':
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Account Manager'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Account Manager'] as string))
     case 'Deals':
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Past Deals'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Past Deals'] as string))
     case 'Investors':
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Funds'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
-      return removeDuplicatesAndNull(filteredData.map((record) => record['HQ Country'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
     case 'Status':
       return removeDuplicatesAndNull(FUND_STATUS_LIST)
     case 'Type':
       // console.log(data.map((record) => (record['Type'])))
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Type'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Type'] as string))
     case 'Contact':
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Contact'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Contact'] as string))
     case 'Suitability Score':
       return ['>90', '>80', '60-80', '<60']
     case 'Co-Investors':
       // console.log(savedFunds.map((record) => record as string))
-      return removeDuplicatesAndNull(filteredData.map((record) => record['Co-Investors'] as string))
+      return removeDuplicatesAndNull(data.map((record) => record['Co-Investors'] as string))
     default:
       return []
     }
   }
 
-  const generateColorList = (length) => {
+  const generateColorList = (length, contact, status) => {
     // console.log(length)
-    const colorList = []
-    for (let i = 0; i < length; i++) {
-      const color = randomColor()
-      colorList.push(color)
-    }
-    // console.log(colorList)
-    return colorList
+    if (status.toUpperCase() === 'AVAILABLE') return ['#009900']
+    // else if (status === 'Busy') return ['#009900']
+    // else if (status === 'New Fund') return ['blue']
+    else if (status === 'Unresponsive') return ['orange']
+    else if (status === 'New Fund') return ['blue']
+
+    if (length !== status.split(',').length) {
+      return ['#990000', '#009900']
+    } else return ['#990000']
   }
 
   return (
@@ -346,21 +424,27 @@ export default function SavedList() {
       alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
         <div 
-          onClick={handleClick}
+          
           style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <span>
         Filters:
           </span>
           {
             filterNames.map((name: FILTER_NAME) => (
-              <button key={name} style={{ backgroundColor: 'transparent', border: '#fff4 0.1rem solid' }}>
+              <>
+              <button 
+                onClick={(e) => { setFilterName(name); handleClick(e)}}
+                key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
                 {
+                  filteredList[name] && filteredList[name].length > 0
+                  ?
+                  filteredList[name].join(', ')
+                  :
                   name
-                  //  !== 'Clear Filters' && (filteredList[name] as string[]).length > 0
-                  //   ? <span>{`${name}\u0020\u00B7\u0020${filteredList[name].length}`}</span>
-                  //   : name
                 }
-              </button>))
+              </button>
+            </>
+            ))
           }
         </div>
         {
@@ -477,8 +561,9 @@ export default function SavedList() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${window.location.href.split('/')[window.location.href.split('/').length - 1]} list)`}</span></span>
-                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
+                    <span>Status</span>
                     <span>Deals</span>
                     <span>Account Manager</span>
                     <span>Sector</span>
@@ -492,13 +577,13 @@ export default function SavedList() {
                   {
                     currentItems.map((record, index) => (
                       <>
-                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
+                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
-                                onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                                onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('saved-filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
                                 style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
-                              <button 
+                              <button  
                                 onClick={async() => await handleDeleteFundsClick(record)}
                                 style={{ outline: '0.1rem #646cff solid', padding: '0.1rem 0.9rem', width: '7rem', borderRadius: '0.2rem' }}>{ 'DELETE'}</button>
                               <button 
@@ -518,16 +603,17 @@ export default function SavedList() {
                             <div style={{ position: 'relative' }}>
                               <AsyncImage
                                 onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                                onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                                onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('saved-filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
                                 src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', width: '5rem', height: '5rem', border: `0.25rem solid transparent`, objectFit: 'contain', background: 'rgba(255, 255, 255, 0.8)' }} />
                               <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                              <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
+                              <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('saved-filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
                               <span style={{  }}>{record['HQ Country'] as string}</span>
                             </div>
                             
                           </div>
+                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Status'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{record['Account Manager'] ? record['Account Manager'] : 'n/a'}</span>
                           <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string[] | string) as string || 'n/a'}</span>
@@ -589,48 +675,65 @@ export default function SavedList() {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
               <select
+                value={requestName}
                 onChange={(e) => setRequestName(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
-                <option value="Letme">Bypass the approval</option>
-                <option value="Assign">Assign the fund request to</option>
+                <option value={''} disabled selected>Please select</option>
+                <option value="bypass approval">Bypass the approval</option>
+                <option value="assign the fund request to">Assign the fund request to</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Assignees</span>
               <select
+                value={approvers}
                 onChange={(e) => setApprovers(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Assignees" id="">
-                <option value="Tyler Aroner">Tyler Aroner</option>
-                <option value="Eliott Harfouche">Eliott Harfouche</option>
-                <option value="Iman Ghavami">Iman Ghavami</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  getFilteredList('Account Manager').map((assignee) => (
+                    <option key={assignee} value={assignee}>{assignee}</option>
+                  ))
+                }
+                
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
               <select
+                value={deal}
                 onChange={(e) => setDeal(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
-                <option value="Deal I">Deal I</option>
-                <option value="Deal II">Deal II</option>
-                <option value="Deal III">Deal III</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  getFilteredList('Deals').map((deal) => (
+                    <option key={deal} value={deal}>{deal}</option>
+                  ))
+                }
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
               <select
+                value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
-                <option value="Person A">Person A</option>
-                <option value="Person B">Person B</option>
-                <option value="Person C">Person C</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  (data.filter(fund => fund.Funds === selectedFundName)[0]?.Contact || '').split(',').map((contact) => (
+                    <option key={contact} value={contact}>{contact}</option>
+                  ))
+                }
                 <option value="Not Referring Anyone">Not Referring Anyone</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
+                value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
+                <option value={''} disabled selected>Please select</option>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
