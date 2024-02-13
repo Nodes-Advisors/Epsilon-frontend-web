@@ -132,10 +132,10 @@ export default function Profile(): JSX.Element {
 
   return (
     <div 
-      style={{ overflow: 'hidden', position: 'relative', gap: '5vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
+      style={{ overflow: 'hidden', position: 'relative', gap: '3vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
       <div 
       onClick={() => navigate(-1)}
-      style={{ display: 'flex', gap: '1rem', alignItems: 'center', alignSelf: 'self-start', paddingTop: '5vh', marginLeft: '8vw' }}>
+      style={{ display: 'flex', gap: '1rem', alignItems: 'center', alignSelf: 'self-start', paddingTop: '3vh', marginLeft: '8vw' }}>
         <img
           
           className={styles['back-icon']} src={BackIcon} alt="" />
@@ -331,7 +331,7 @@ export default function Profile(): JSX.Element {
           <div className={styles['model-layout']}>
             <h2 className={styles.description}>Historical Log</h2>
   
-            <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30rem', overflow: 'auto' }}>
+            <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto' }}>
               <table style={{ textAlign: 'left' }}>
                 <thead>
                   {
@@ -342,7 +342,7 @@ export default function Profile(): JSX.Element {
                         <th><Skeleton width={'5rem'} /></th>
                         <th><Skeleton width={'5rem'} /></th>
                         <th><Skeleton width={'5rem'} /></th>
-                        <th><Skeleton width={'5rem'} /></th>
+                        {/* <th><Skeleton width={'5rem'} /></th> */}
                         <th><Skeleton width={'5rem'} /></th>
                         <th><Skeleton width={'5rem'} /></th>
                         <th><Skeleton width={'5rem'} /></th>
@@ -357,7 +357,7 @@ export default function Profile(): JSX.Element {
                           <th>Stage</th>
                           <th>Date</th>
                           <th>Round Size</th>
-                          <th>Toal Raised</th>
+                          {/* <th>Toal Raised</th> */}
                           <th>Account Manager</th>
                           <th>VC Contact</th>
                           <th>Status</th>
@@ -377,7 +377,7 @@ export default function Profile(): JSX.Element {
                           <td><Skeleton width={'5rem'} /></td>
                           <td><Skeleton width={'5rem'} /></td>
                           <td><Skeleton width={'5rem'} /></td>
-                          <td><Skeleton width={'5rem'} /></td>
+                          {/* <td><Skeleton width={'5rem'} /></td> */}
                           <td><Skeleton width={'5rem'} /></td>
                           <td><Skeleton width={'5rem'} /></td>
                           <td><Skeleton width={'5rem'} /></td>
@@ -391,18 +391,17 @@ export default function Profile(): JSX.Element {
                           <td>{log.current_stage ? log.current_stage : 'No stage record'}</td>
                           <td>{formatDate(log.Date)}</td>
                           <td>{log.round_size ? log.round_size : 'No round size record'}</td>
-                          <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td>
+                          {/* <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td> */}
                           <td>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
                           <td>{log.Contact ? log.Contact : 'No contact record'}</td>
                           <td>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
                           <td>{log.Coments 
                             ? 
-                            <div className={styles['book-wapper']}>
-                              {/* <div className={styles['book-tooltip']}>
-                                {log.Coments}
-                              </div> */}
+                            <div className={styles['book-wrapper']}>
                               <img className={styles['book-icon']} src={BookIcon} />
-                            </div> 
+                              <span className={styles['book-tooltip']}>{log.Coments}</span>
+                              
+                            </div>
                             : 
                             'No'
                           }</td>
