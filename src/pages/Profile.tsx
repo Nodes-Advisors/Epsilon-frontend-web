@@ -1,28 +1,21 @@
 import styles from '../styles/profile.module.less'
-// import { cx } from '../lib/utils'
-import venture_logo from '../assets/images/venture-logo-example.png'
 import ActionButton from '../components/action-button'
 import LocationIcon from '../assets/svgs/location.svg?react'
-import NodesIcon from '../assets/svgs/nodes.svg?react'
-import StatusIcon from '../assets/svgs/status.svg?react'
-import EpsilonLogo from '../assets/svgs/epsilon_logo.svg?react'
 import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
-import HeadImg from '../assets/images/headimg-example.png'
 import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
-import { useLocation } from 'react-router-dom'
-import { useFundsStore, useSavedFundsStore } from '../store/store'
-import { Popover } from '@headlessui/react'
-import { FieldSet, Record } from 'airtable'
+import { useFundsStore, useSavedFundsStore, useUserStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
-import LeftNavBar from '../components/left-nav-bar'
-import { set, throttle } from 'lodash'
 import { STATUS_COLOR_LIST } from '../lib/constants'
 import FundStatusLarger from '../components/status-larger'
 import BookIcon from '../assets/images/book.png'
+import toast from 'react-hot-toast'
+import axios from 'axios'
+import BackIcon from '../assets/images/back.png'
+import { useNavigate } from 'react-router-dom'
 
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
@@ -38,8 +31,13 @@ export default function Profile(): JSX.Element {
   const savedFunds = useSavedFundsStore(state => state.savedFunds)
   const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const addSavedFund = useSavedFundsStore(state => state.addSavedFund)
-  const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
-  
+  const [priority, setPriority] = useState<string>('')
+  const [deal, setDeal] = useState<string>('')
+  const [contactPerson, setContactPerson] = useState<string>('')
+  const [selectedFundName, setSelectedFundName] = useState<string>('')
+  const user = useUserStore(state => state.user)
+  const navigate = useNavigate()
+
   function formatDate(timestamp) {
     const date = new Date(timestamp)
   
@@ -54,8 +52,6 @@ export default function Profile(): JSX.Element {
     return `${day}/${month}/${year}`
   }
   
-
-
   const funds = useFundsStore(state => state.funds)
   const id = localStorage.getItem('fund-id')
   if (!id) {
@@ -63,9 +59,9 @@ export default function Profile(): JSX.Element {
   }
   
   useEffect(() => {
-    // console.log(funds)
     const record = funds.filter((record) => record._id === id)[0]
     console.log(record)
+    setSelectedFundName(record.Funds)
     async function fetchHistoricalLog() {
       try {
         const res = await fetch(`http://localhost:5001/gethislog/${record.Funds}`)
@@ -83,22 +79,65 @@ export default function Profile(): JSX.Element {
     setTimeout(() => setLoading(false), 1000)
   }, [])
 
+  const generateColorList = (length, contact, status) => {
+    // console.log(length)
+    if (status.toUpperCase() === 'AVAILABLE') return ['#009900']
+    // else if (status === 'Busy') return ['#009900']
+    // else if (status === 'New Fund') return ['blue']
+    else if (status === 'Unresponsive') return ['orange']
+    else if (status === 'New Fund') return ['blue']
 
-  // useEffect(() => {
-  //   fetchCompanyData()
-  // }, [])
+    if (length !== status.split(',').length) {
+      return ['#990000', '#009900']
+    } else return ['#990000']
+  }
 
-  
+
   const addRequest = () => {
     setPopoverOpen(true)
   }
 
+  const sendRequest = async (e) => {
+    e.preventDefault()
+    
+    // Check if all required fields have been filled
+    if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    try {
+      // console.log('executed')
+      await axios.post('http://localhost:5001/sendRequest', {
+        requestName,
+        approvers,
+        deal,
+        contactPerson,
+        priority,
+        details,
+        selectedFundName,
+        email: user?.email,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      toast.success('Request sent successfully!')
+      setPopoverOpen(false)
+  
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
 
   return (
     <div 
-      style={{ overflow: 'hidden', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'start', height: '90vh' }}>
-
-      <div style={{ display: 'flex', paddingTop: '10vh' }}>
+      style={{ overflow: 'hidden', position: 'relative', gap: '5vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
+      <img
+      onClick={() => navigate(-1)}
+      className={styles['back-icon']} src={BackIcon} alt="" />
+      <div>
+      <div style={{ display: 'flex'}}>
         <div className={styles['left-panel']}>
           {
             isLoading 
@@ -112,7 +151,7 @@ export default function Profile(): JSX.Element {
                   }}
 
                   draggable='false' onContextMenu={e => e.preventDefault()} />
-                <FundStatusLarger color={randomColor()} />
+                <FundStatusLarger colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
               </div>
           }
           <div className={styles['action-buttons']}>
@@ -152,12 +191,7 @@ export default function Profile(): JSX.Element {
                   </>  
                   :
                   <>
-                    <img src={HeadImg} alt="" className={styles['headImg']} />
-                    <div className={`${styles['vertical-flex-align-flex-start-layout']}` } >
-                      <span className={styles['relationship-inner-text']}>BEN HOrowitz</span>
-                      {/* <span className={styles['relationship-inner-text-action']}>Deck Reviewing</span> */}
-                    </div>
-                    <img src={HeadImg} alt="" className={styles['headImg']} />
+              
                   </>
               }     
             </div>
@@ -295,17 +329,38 @@ export default function Profile(): JSX.Element {
             <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30rem', overflow: 'auto' }}>
               <table style={{ textAlign: 'left' }}>
                 <thead>
-                  <tr>
-                    <th>Company</th>
-                    <th>Stage</th>
-                    <th>Date</th>
-                    <th>Round Size</th>
-                    <th>Toal Raised</th>
-                    <th>Account Manager</th>
-                    <th>VC Contact</th>
-                    <th>Status</th>
-                    <th>Comments</th>
-                  </tr>
+                  {
+                    isLoading 
+                      ? 
+                      <tr>
+                        <th><Skeleton width={'10rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'5rem'} /></th>
+                        <th><Skeleton width={'3rem'} /></th>
+                      </tr>
+                      :
+                      
+                        hislogs.length > 0
+                        ?
+                        <tr>
+                          <th>Company</th>
+                          <th>Stage</th>
+                          <th>Date</th>
+                          <th>Round Size</th>
+                          <th>Toal Raised</th>
+                          <th>Account Manager</th>
+                          <th>VC Contact</th>
+                          <th>Status</th>
+                          <th>Comments</th>
+                        </tr>
+                        :
+                        <h3>No log record</h3>
+                      }
                 </thead>
                 <tbody>
                   {
@@ -407,14 +462,12 @@ export default function Profile(): JSX.Element {
       </div>
       <div className={styles['popover-background']} style={{ visibility: isPopoverOpen ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>
-          <form style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
+          <form 
+          onSubmit={sendRequest}
+          style={{ margin: '2.5rem 2.5rem 0 2.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'  }}>
             <div className={styles['popover-form-title']}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', position: 'relative' }}>
-                <AsyncImage src={isLoading  ? '' : ''} alt='' 
-                  style={{  width: ' 4.57144rem', height: '4.47456rem', objectFit: 'contain', borderRadius: '50%', border: `3px solid transparent` }}
 
-                  draggable='false' onContextMenu={e => e.preventDefault()} />
-               
                 <div>
                   <span style={{ textAlign: 'start', display: 'block' }}>Regarding <span style={{ fontWeight: '700', fontSize: '1.3rem' }}>{record ? record['Funds'] as string : 'no name'}</span></span>
                   <span style={{ textAlign: 'start', display: 'block' }}>Create a new request</span>
@@ -425,43 +478,69 @@ export default function Profile(): JSX.Element {
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Request</span>
               <select
+                value={requestName}
+                onChange={(e) => setRequestName(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem', marginTop: '1rem' }} name="Type of Request" id="">
-                <option value="Letme">Bypass the approval</option>
-                <option value="Assign">Assign the fund request to</option>
+                <option value={''} disabled selected>Please select</option>
+                <option value="bypass approval">Bypass the approval</option>
+                <option value="assign the fund request to">Assign the fund request to</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Assignees</span>
               <select
+                value={approvers}
+                onChange={(e) => setApprovers(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Assignees" id="">
+                <option value={''} disabled selected>Please select</option>
                 <option value="Tyler Aroner">Tyler Aroner</option>
                 <option value="Eliott Harfouche">Eliott Harfouche</option>
                 <option value="Iman Ghavami">Iman Ghavami</option>
+
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Type of Deal</span>
               <select
+                value={deal}
+                onChange={(e) => setDeal(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Type of Deal" id="">
-                <option value="Deal I">Deal I</option>
-                <option value="Deal II">Deal II</option>
-                <option value="Deal III">Deal III</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  record && record['Past Deals'] ? record['Past Deals'].split(',').map((deal) => (
+                    <option key={deal} value={deal}>{deal}</option>
+                  ))
+                  :
+                  <option value="No Deals Found">No Deals Found</option>
+                }
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Contact Person</span>
               <select
+                value={contactPerson}
+                onChange={(e) => setContactPerson(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Contact" id="">
-                <option value="Person A">Person A</option>
-                <option value="Person B">Person B</option>
-                <option value="Person C">Person C</option>
+                <option value={''} disabled selected>Please select</option>
+                {
+                  record && record['Contact'] 
+                  ?
+                    record['Contact'].split(',').map((contact) => (
+                      <option key={contact} value={contact}>{contact}</option>
+                    ))
+                  :
+                    null
+                }
                 <option value="Not Referring Anyone">Not Referring Anyone</option>
               </select>
             </div>
             <div>
               <span style={{ fontSize: '1.1rem', fontWeight: '500' }}>Priority</span>
               <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
                 style={{ fontSize: '1.25rem', display: 'block', width: '101%', background: '#eee', color: '#000', border: 'none', outline: 'none', padding: '0.5rem 0.5rem', marginTop: '1rem' }} name="Priority" id="">
+                <option value={''} disabled selected>Please select</option>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
@@ -475,9 +554,10 @@ export default function Profile(): JSX.Element {
               placeholder='If needed, add some extra info that will help recipients learn more about the request' />
 
             </div>
-            <button onClick={() => setPopoverOpen(false)}>send</button>
+            <button>send</button>
           </form>
         </div>
+      </div>
       </div>
     </div>
   )

@@ -1,18 +1,15 @@
 import { AsyncImage } from 'loadable-image'
 import venture_logo from '../assets/images/venture-logo-example.png'
 import Skeleton from 'react-loading-skeleton'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { getFundCards } from '../lib/airtable'
+import { useEffect, useRef, useState } from 'react'
+
 import { FieldSet, Record } from 'airtable'
 import { useNavigate } from 'react-router-dom'
 import { useFundsStore } from '../store/store'
-import { useSavedFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
-import { FUND_STATUS_LIST, STATUS_COLOR_LIST, 
-  STATUS_LIST,
-} from '../lib/constants'
+import { FUND_STATUS_LIST} from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
 import CancelButton from '../assets/images/cancel.png'
 import axios from 'axios'
@@ -20,7 +17,6 @@ import toast from 'react-hot-toast'
 import { useUserStore } from '../store/store'
 import FundStatus from '../components/status'
 import { throttle } from 'lodash'
-import { record } from 'zod'
 import ReactPaginate from 'react-paginate'
 
 export default function FundCards() {
@@ -63,7 +59,7 @@ export default function FundCards() {
     'Suitability Score': string[],
     'Co-Investors': string[],
     'Clear Filters': string[],
-  }>({
+  }>(localStorage.getItem('filter') ? JSON.parse(localStorage.getItem('filter') as string) : {
     '': [],
     'Account Manager': [],
     'Deals': [],
@@ -97,7 +93,84 @@ export default function FundCards() {
   }, [])
 
   useEffect(() => {
+    setLoading(true)
+    axios.get('http://localhost:5001/getAllFunds')
+      .then((res) => {
+        setData(res.data)
+        setFunds(res.data)  
+        setFilteredData(res.data) 
+        if (localStorage.getItem('filter')) {
+          const filteredList = JSON.parse(localStorage.getItem('filter') as string)
+          if (Object.values(filteredList).every(filter => filter.length === 0)) {
+            setFilteredData(res.data)
+            return
+          }
+        
+          // Apply filters cumulatively
+          setFilteredData(res.data.filter((record) => {
+            return Object.keys(filteredList).every((filterName) => {
+              // If no filter is set for this filterName, return false
+              if (filteredList[filterName].length === 0) {
+                return true
+              }
+        
+              // Apply the filter based on the filterName
+              switch (filterName) {
+              case 'Account Manager':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Investors':
+                return filteredList[filterName].includes(record['Funds'] as string)
+                    || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
+              case 'Location':
+                return filteredList[filterName].includes(record['HQ Country'] as string)
+                    || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+              case 'Status':
+                return filteredList[filterName].includes(record['Status'] as string)
+                          || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
+                          || (record['Status'].startsWith('Review') && filteredList[filterName].includes('Busy'))
+              case 'Deals':
+                // console.log(filteredList['Past Deals'])
+                return filteredList['Deals'].some(filter => 
+                  filter === record['Past Deals'] || (record['Past Deals'] && record['Past Deals'].includes(filter)),
+                )
+              case 'Type':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Contact':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              case 'Suitability Score':
+                return [ '>90', '>80', '60-80', '<60']
+              case 'Co-Investors':
+                return filteredList[filterName].some(filter => 
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
+              default:
+                return false
+              }
+            })
+          }))
+        }  
+        setTotalFundCount(res.data.length)   
+        // console.log(
+        //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
+        // )
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  useEffect(() => {
     // If no filter is applied, show all data
+    // console.log(filteredList, 'filteredList')
     if (Object.values(filteredList).every(filter => filter.length === 0)) {
       setFilteredData(data)
       return
@@ -188,25 +261,7 @@ export default function FundCards() {
       return ['#990000', '#009900']
     } else return ['#990000']
   }
-  useEffect(() => {
-    setLoading(true)
-    axios.get('http://localhost:5001/getAllFunds')
-      .then((res) => {
-        setData(res.data)
-        setFunds(res.data)  
-        setFilteredData(res.data)   
-        setTotalFundCount(res.data.length)   
-        // console.log(
-        //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
-        // )
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
+
 
   function removeDuplicatesAndNull(arr) {
     // Split the strings into individual values
@@ -578,7 +633,7 @@ export default function FundCards() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
-                              onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                              onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
                               style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                             <button 
                               onClick={() => {
@@ -603,12 +658,12 @@ export default function FundCards() {
                           <div style={{ position: 'relative' }}>
                             <AsyncImage
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                              onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }}
+                              onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
                               src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.5)' }} />
                             <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                            <span onClick={() => { localStorage.setItem('fund-id', record._id as string); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
+                            <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
                             <span style={{  }}>{record['HQ Country'] as string}</span>
                           </div>
                             
