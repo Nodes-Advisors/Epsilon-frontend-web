@@ -58,6 +58,37 @@ const bodyStyle2 = {
   fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
 };
 
+// Inline styles for the table container and table elements
+const kpiTableContainerStyle = {
+  overflowX: "auto", // Ensure table is scrollable on small screens
+  marginTop: "1rem",
+};
+
+const kpiTableStyle = {
+  width: "100%",
+  borderCollapse: "separate", // Use 'separate' to apply spacing between cells
+  borderSpacing: "0 1rem", // Horizontal and vertical spacing
+  textAlign: "left", // Align text to the left for readability
+};
+
+const tableHeaderStyle = {
+  padding: "0.75rem", // Add padding inside each cell for space
+  // backgroundColor: "#7B728E", // Slightly darker background for headers
+  // color: "#333", // Dark text for headers for contrast
+  border: "1px solid #aaa", // Light border for cells
+};
+
+const tableCellStyle = {
+  padding: "0.75rem", // Add padding inside each cell for space
+  // backgroundColor: "#474E68", // Light background for cells for contrast
+  border: "1px solid #aaa", // Light border for cells
+};
+
+// Function to apply alternate row coloring
+const getTableRowStyle = (index) => ({
+  // backgroundColor: index % 2 === 0 ? "#000000" : "#000000",
+});
+
 // Define the structure of the data for deals and account holders
 interface DealData {
   dealName: string;
@@ -311,7 +342,12 @@ export default function KPIDash() {
         const dealsResponse = await axios.get<DealData[]>(
           "http://localhost:5002/deals"
         );
-        setDealData(dealsResponse.data);
+        const lowercaseDeals = dealsResponse.data.map((deal) => ({
+          ...deal,
+          dealName: deal.dealName.toLowerCase(), // Convert dealName to lowercase
+        }));
+        console.log("Lowercase deals:", lowercaseDeals); // Log to verify
+        setDealData(lowercaseDeals); // Use the transformed data with lowercase deal names
         const response = await axios.get<DealData[]>(
           "http://localhost:5002/account-holders"
         );
@@ -323,13 +359,13 @@ export default function KPIDash() {
       }
     };
 
-    if (dealData.length > 0) {
-      // Set the default selected deal to the one with the most outreach
-      const sortedDeals = [...dealData].sort(
-        (a, b) => b.totalOutreach - a.totalOutreach
-      );
-      setSelectedDeal(sortedDeals[0].dealName);
-    }
+    // if (dealData.length > 0) {
+    //   // Set the default selected deal to the one with the most outreach
+    //   const sortedDeals = [...dealData].sort(
+    //     (a, b) => b.totalOutreach - a.totalOutreach
+    //   );
+    //   setSelectedDeal(sortedDeals[0].dealName);
+    // }
 
     fetchInitialData();
   }, []);
@@ -948,7 +984,7 @@ export default function KPIDash() {
         let clientNamesForLaterUse = [];
 
         selectedClients.forEach((clientName) => {
-          const saveClientName = clientName;
+          const saveClientName = clientName.toLowerCase();
           clientNamesForLaterUse.push(saveClientName);
 
           const clientNameLower = clientName.toLowerCase();
@@ -2075,30 +2111,31 @@ export default function KPIDash() {
                     height="26.125rem"
                     style={{ overflow: "auto" }}
                   >
-                    <div>
-                      {/* Table Container */}
-                      <table>
-                        {/* Table Header */}
+                    <div style={kpiTableContainerStyle}>
+                      <table style={kpiTableStyle}>
                         <thead>
                           <tr>
-                            <th>Category</th>
+                            <th style={tableHeaderStyle}>Category</th>
                             {selectedClients.map((client) => (
-                              <th key={client}>{client}</th>
+                              <th key={client} style={tableHeaderStyle}>
+                                {client}
+                              </th>
                             ))}
                           </tr>
                         </thead>
-                        {/* Table Body */}
                         <tbody>
                           {selectedClientTableData.map((row, index) => (
-                            <tr key={index}>
-                              <td>{row.year}</td>{" "}
-                              {/* Formatting the 'year' to add space before capital letters */}
+                            <tr key={index} style={getTableRowStyle(index)}>
+                              <td style={tableCellStyle}>{row.year}</td>
                               {selectedClients.map((client) => (
-                                <td key={client.toLowerCase()}>
+                                <td
+                                  key={client.toLowerCase()}
+                                  style={tableCellStyle}
+                                >
                                   {row[client.toLowerCase()] !== undefined
                                     ? row[client.toLowerCase()]
                                     : "-"}
-                                </td> // Display data for each client or '-' if no data
+                                </td>
                               ))}
                             </tr>
                           ))}
