@@ -112,6 +112,8 @@ function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: s
                 >
                   <span
                     style={{
+                      display: 'inline-block',
+                      marginTop: '0.5rem',
                       fontWeight: '600',
                       fontSize: '1.1rem',
                       color: 'violet',
@@ -119,7 +121,7 @@ function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: s
                   >
                     {deal.company_acronym}
                   </span>
-                  ({deal.company_name})
+                 
                 </span>
                 <br />
                 <span

@@ -5,8 +5,6 @@ import styles from '../styles/nav-bar.module.less'
 import { AsyncImage } from 'loadable-image'
 import { useEffect, useRef, useState } from 'react'
 import NotificationBellIcon from '../assets/svgs/notification-bell.svg?react'
-import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
-import Switch from './switch-button'
 import MenuIcon from '../assets/images/menu.png'
 import LeftNavBar from './left-nav-bar'
 import axios from 'axios'
@@ -34,6 +32,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
   const [savedCollections, setSavedCollections] = useState<string[]>([])
   const [openCollectionList, setOpenCollectionList] = useState<boolean>(false)
+  const [requests, setRequests] = useState<any[]>([])
+  const [userInfo, setUserInfo] = useState<any>({})
 
   const logout = async() => {
     try {
@@ -63,9 +63,9 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         setOpenPanel(false)
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setOpenNotification(false)
-      }
+      // if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+      //   setOpenNotification(false)
+      // }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -75,7 +75,27 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   }, [])
 
   useEffect(() => {
-    setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards')))
+    const fetchUser = async () => {
+      const res = await axios.get('http://localhost:5001/getUser', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        params: {
+          email: user?.email,
+        },
+      })
+      // console.log(res)
+      if (res.status === 200) {
+        
+        setUserInfo(res.data)
+      }
+    }
+    fetchUser()
+  }, [])
+
+  useEffect(() => {
+    setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards') || window.location.href.includes('/intelligence') || window.location.href.includes('/database') || window.location.href.includes('/kpi-dash')))
 
   }, [window.location.href])
   
@@ -106,6 +126,25 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     // navigate('/my-saved-list')
   }
 
+  useEffect(() => {
+    const fetchUserRequest = async () => {
+      if (token) {
+        await axios.get('http://localhost:5001/getrequest', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+        }).then((res) => {
+          setRequests(res.data)
+          // console.log(res.data)
+        }).catch((error) => {
+          toast.error(error?.response?.data)
+        })
+      }
+    }
+    fetchUserRequest()
+
+  }, [])
 
   return (
     <>
@@ -150,6 +189,11 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             className={styles['nav-saved-fund']}
             style={{ fontSize: '1.1rem', fontWeight: 550, marginLeft: '3rem'  }} >
             My Saved Search
+          </span>
+          <span >
+            {
+              "Welcome, " + user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'
+            }
           </span>
           <ul style={{ position: 'absolute', top: '1rem', left: '0' }}>
             {
@@ -198,20 +242,19 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                       backgroundColor: notificationCategory === 'approval' ? 'Highlight' : '#fff',
                       color: notificationCategory === 'approval' ? '#fff' : '#000' }}
                   >Approval </button>
-                  {/* <span>Approval Request</span>
-                  <Switch width='2rem' height='1rem' option={option} setOption={setOption} /> */}
-                  {/* <span>Approvals</span> */}
+
                 </div>
-                <CancelButtonIcon 
-                  style={{ float: 'right'}}
-                  className={styles['cancel-button']}
-                  onClick={() => setOpenNotification(false)}
-                />
+  
               </div>
               {
-                [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+                // [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+                //   <div key={index} className={styles['notification-message']} >
+                //     <span>{option ? 'approval request' : 'message'} {item} from someone</span>
+                //   </div>
+                // ))
+                requests.map((request, index) => (
                   <div key={index} className={styles['notification-message']} >
-                    <span>{option ? 'approval request' : 'message'} {item} from someone</span>
+                    <span>{ option ? 'null' : `${request['Fund Name']} created by ${request['Created by']}` }</span>
                   </div>
                 ))
               }

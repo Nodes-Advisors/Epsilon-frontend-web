@@ -253,6 +253,17 @@ app.get('/gethislog/:fundName', async (req, res) => {
   }
 })
 
+app.get('/getrequest', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('UsersFundRequests')
+    const requests = await collection.find({}).toArray()
+    res.json(requests)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }
+})
 
 app.get('/', async (req, res) => {
   const { q } = req.query
