@@ -376,9 +376,6 @@ section {
     text-align: left;
     font-size: 0.9375rem;
     font-family: Inter;
-    &:hover {
-        background-color: #7771;
-    }
 }
 
 .news-ul::-webkit-scrollbar { /* For WebKit browsers */
@@ -398,15 +395,23 @@ section {
     background: #555;
 }
 
-.news-ul > li {
+.news-ul li {
+    border-radius: 0.5rem;
     position: relative;
     z-index: 10;
     text-wrap: wrap;
-    margin-top: 0.5rem;
+    padding: 0.25rem;
+    padding: 0.25rem;
     text-wrap: wrap;
     font-size: 1.3rem;
-    &:first-child {
-        margin-top: 0;
+    // &:first-child {
+    //     margin-top: 0;
+    // }
+    &:hover {
+        background-color: #7774;
+    }
+    &:active {
+        outline: #7778 solid 0.1rem;
     }
 }
 

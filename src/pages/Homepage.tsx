@@ -79,6 +79,55 @@ export default function Home() {
   }, [])
 
 
+  const CustomContextMenu = ({ children }) => {
+    const [visible, setVisible] = useState(false)
+    const [coords, setCoords] = useState({ x: 0, y: 0 })
+  
+    const showMenu = (e) => {
+      e.preventDefault()
+      setVisible(true)
+      setCoords({ x: e.clientX, y: e.clientY })
+    }
+
+    const closeMenu = () => {
+      setVisible(false)
+    }
+  
+    useEffect(() => {
+      document.addEventListener('click', closeMenu)
+      return () => {
+        document.removeEventListener('click', closeMenu)
+      }
+    }, [])
+  
+  
+    return (
+      <div onContextMenu={showMenu} onClick={closeMenu}>
+        {children}
+  
+        {visible && (
+          <div
+            style={{
+              position: 'absolute',
+              top: `${coords.y}px`,
+              left: `${coords.x}px`,
+              backgroundColor: 'white',
+              boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
+              borderRadius: '0.5rem',
+              zIndex: 1000,
+            }}
+          >
+            <ul style={{ color: '#333', listStyleType: 'none', margin: 0, padding: 0 }}>
+              <li style={{ padding: '0.5rem 1rem', margin: 0 }}>Pin this</li>
+              <li style={{ padding: '0.5rem 1rem', margin: 0 }}>Follow up</li>
+              {/* <li style={{ padding: '1rem', margin: 0 }}>Option 3</li> */}
+
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     // <div style={{ width: '100%', minHeight: '90vh' }} >
@@ -108,21 +157,19 @@ export default function Home() {
         <div style={{  gridRow: '1 / span 2', gridColumn: '2' }}>
           <div style={{ width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>
-            <ul style={{maxHeight: '100rem'}} className={styles['news-ul']}>
-              <li>Congratulations, <span>Eliott Harfouche</span>.  <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li>Congratulations, <span>Eliott Harfouche</span>.  <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li>Congratulations, <span>Eliott Harfouche</span>.  <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-              <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
-             
+            <ul style={{ maxHeight: '100rem' }} className={styles['news-ul']}>
+              <CustomContextMenu>
+                <li>Congratulations, <span>Eliott Harfouche</span>.  <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
+              </CustomContextMenu>
+              <CustomContextMenu>
+                <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
+              </CustomContextMenu>
+              <CustomContextMenu>
+                <li><span>6</span> Funds are currently reviewing <span>Avivo</span> Deck this week - 2 whom you sourced this week.</li>
+              </CustomContextMenu>
             </ul>
-          </div>
-          {/* <TodayNews /> */}
 
+          </div>
         </div>
 
         <div style={{ gridRow: '2', gridColumn: '1', backgroundColor: '#aaa1', 
