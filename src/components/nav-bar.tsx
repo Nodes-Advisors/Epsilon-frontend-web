@@ -132,7 +132,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         await axios.get('http://localhost:5001/getrequest', {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
           },
         }).then((res) => {
           setRequests(res.data)
@@ -183,16 +183,16 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             className= {styles['nav-search-bar']}
             type="text" placeholder='Search Everything' />
         </div>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <span 
             onClick={handleSavedSearchClick}
             className={styles['nav-saved-fund']}
             style={{ fontSize: '1.1rem', fontWeight: 550, marginLeft: '3rem'  }} >
             My Saved Search
           </span>
-          <span >
+          <span style={{ marginLeft: '2rem', fontWeight: 600, maxWidth: '10vw', display: 'inline-block', textWrap: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {
-              "Welcome, " + user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'
+              'Welcome, ' + (user ? (userInfo?.name || userInfo?.username || user?.email || 'Guest'): 'Guest')
             }
           </span>
           <ul style={{ position: 'absolute', top: '1rem', left: '0' }}>
