@@ -894,28 +894,28 @@ export default function KPIDash() {
       );
       series2.data.setAll(data);
 
-      series2.bullets.push((root, series, dataItem) => {
+      // Modify this part of your amCharts configuration
+      series2.bullets.push(function (root, series, dataItem) {
         const bullet = am5.Bullet.new(root, {
-          locationX: 0.5,
+          locationY: 1, // ensures that the bullet is at the top of the column
           sprite: am5.Label.new(root, {
-            text: "{change}%",
-            fill: am5.color("#ffffff"),
-            centerY: am5.p50,
+            text: "{valueYWorking.formatNumber('#.0')}%",
+            fill: root.interfaceColors.get("alternativeText"),
+            centerY: am5.p100, // aligns the bullet at the bottom of the column
             centerX: am5.p50,
             populateText: true,
           }),
         });
 
-        const value = dataItem.dataContext.change;
-        if (value > 0) {
-          bullet.get("sprite").setAll({
-            fill: am5.color("#ffffff"), // white for positive change
-          });
-        } else {
-          bullet.get("sprite").setAll({
-            fill: am5.color("#ffffff"), // white for negative change
-          });
-        }
+        // This adjusts the label's y position based on the line series data point y position
+        bullet.get("sprite").on("dataitemchanged", function (ev) {
+          let dataItem = ev.target.dataItem;
+          let value = dataItem.get("valueY");
+          let position = series.yAxis.valueToPosition(value);
+
+          // Adjust the dy value here to position the label above the line plot
+          ev.target.set("dy", -series.yAxis.height * (1 - position) - 20); // The 20 is an offset to position the label above the line
+        });
 
         return bullet;
       });
