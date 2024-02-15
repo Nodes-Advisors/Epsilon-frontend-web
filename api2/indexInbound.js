@@ -426,6 +426,17 @@ app.get('/fundStatus', async (req, res) => {
   }
 })
 
+app.get('/getAllClients', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('Clients')
+    const clients = await collection.find({}).toArray()
+    res.json(clients)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }},
+)
 
 app.get('/getClients', async (req, res) => {
   try {

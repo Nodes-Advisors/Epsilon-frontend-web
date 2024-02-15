@@ -54,7 +54,7 @@ type SavedFundsState = {
   savedFunds: Fund[],
   addSavedFund: (fund: Fund) => void
   deleteSavedFund: (fund: Fund) => void
-  inSavedFunds: (fund: Fund) => boolean
+  // inSavedFunds: (fund: Fund) => boolean
 }
 
 export const useSavedFundsStore = create<SavedFundsState>()(
@@ -91,6 +91,31 @@ export const useTokenStore = create<TokenState>()(
       }),
       {
         name: 'tokenStore',
+      },
+    ),
+  ),
+)
+
+type TClient = {
+  [key: string]: string | number | boolean
+}
+
+type ClientsState = {
+  clients: Client[],
+  setClients: (clients: TClient[]) => void
+  getClients: () => TClient[]
+}
+
+export const useClientsStore = create<ClientsState>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        clients: [],
+        setClients: (clients) => set({ clients }),
+        getClients: () => get().clients,
+      }),
+      {
+        name: 'clientsStore',
       },
     ),
   ),

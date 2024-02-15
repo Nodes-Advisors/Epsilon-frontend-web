@@ -19,6 +19,8 @@ const UserProfile = lazy(() => import('../pages/UserProfile'))
 const NavBar = lazy(() => import('../components/nav-bar'))
 const Database = lazy(() => import('../pages/Database'))
 const Intelligence = lazy(() => import('../pages/Intelligence'))
+const ClientProfile = lazy(() => import('../pages/ClientProfile'))
+const Clients = lazy(() => import('../pages/Clients'))
 
 const navWrapper = (children: React.ReactNode) => 
   <NavBar><div style={{marginTop: '10vh', width: '100%'}}>
@@ -45,6 +47,8 @@ const router = createBrowserRouter([
   { path: 'user-profile', element: <UserProfile /> },
   { path: 'database', element: <Database /> },
   { path: 'intelligence', element: <Intelligence /> },
+  { path: 'client-card', element: <ClientProfile /> },
+  { path: 'clients', element: <Clients /> },
   
 ].map(item => ({ ...item, element: navWrapper(item.element) })),
 )

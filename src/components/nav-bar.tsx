@@ -95,7 +95,9 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   }, [])
 
   useEffect(() => {
-    setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards') || window.location.href.includes('/intelligence') || window.location.href.includes('/database') || window.location.href.includes('/kpi-dash')))
+    setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards') 
+    || window.location.href.includes('/intelligence') || window.location.href.includes('/database') 
+    || window.location.href.includes('/kpi-dash') || window.location.href.includes('/clients')))
 
   }, [window.location.href])
   

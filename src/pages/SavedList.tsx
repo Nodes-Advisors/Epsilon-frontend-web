@@ -23,8 +23,6 @@ import ReactPaginate from 'react-paginate'
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
   const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
-  const savedFunds = useSavedFundsStore(state => state.savedFunds)
-  const deleteSavedFund = useSavedFundsStore(state => state.deleteSavedFund)
   const [isLoading, setLoading] = useState(true)
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const navigate = useNavigate()
@@ -32,7 +30,6 @@ export default function SavedList() {
   const [requestName, setRequestName] = useState<string>('')
   const [approvers, setApprovers] = useState<string>('')
   const [details, setDetails] = useState<string>('')
-  const randomColor = () => STATUS_COLOR_LIST[Math.floor(Math.random() * STATUS_COLOR_LIST.length)]
   const [filteredData, setFilteredData] = useState<any[]>()
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
@@ -43,7 +40,7 @@ export default function SavedList() {
   const [deal, setDeal] = useState<string>('')
   const [pendingList, setPendingList] = useState<string[]>([])
   const [selectedFundName, setSelectedFundName] = useState<string>('')
-  const [data, setData] = useState<Record<FieldSet>[]>([])
+  const [data, setData] = useState<any[]>([])
 
   const [filteredList, setFilteredList] = useState<{
     '': string[],
