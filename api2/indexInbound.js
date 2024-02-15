@@ -241,7 +241,7 @@ app.get('/gethislog/:fundName', async (req, res) => {
         return log
       }))
     
-      updatedLogs.reverse()
+      updatedLogs.sort((a, b) => new Date(b.Date) - new Date(a.Date))
       res.json(updatedLogs)
     } else {
       res.status(404).send('Logs not found')
@@ -578,7 +578,7 @@ app.post('/savedcollections/deletefund', async (req, res) => {
     const email = req.body.email
     const collectionName = req.body.collection
     const fundName = req.body.fundName
-    
+
     if (!email || !collectionName || !fundName) {
       return res.status(400).send('Invalid request')
     }

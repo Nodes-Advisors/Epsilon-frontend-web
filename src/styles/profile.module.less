@@ -263,6 +263,26 @@
     max-width: 11rem;
 }
 
+.investor-name-click {
+    color: #FFF;
+    font-family: Inter;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    max-width: 11rem;
+    &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+        color: #807CC5;
+    }
+}
+
 .stage-info {
     color: #00BBF9;
     font-family: Istok Web;
@@ -274,6 +294,8 @@
 }
 
 .investor-logo {
+    border: white 0.5px solid;
+    background-color: #5e5d5d;
     width: 4.26344rem;
     height: 4.24338rem;
     
@@ -555,7 +577,7 @@ th, td {
     font-style: normal;
     font-weight: 700;
     line-height: 100%; /* 1rem */
-    padding: 1rem 0.5rem;
+    padding: 1rem;
     border-bottom: 0.1rem solid #555;
 }
 
@@ -641,7 +663,6 @@ td {
     }
 
 }
-
 
 
 .book-wrapper {

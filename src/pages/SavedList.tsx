@@ -351,7 +351,7 @@ export default function SavedList() {
   const handleDeleteFundsClick = async (record: any) => {
     try {
       const res = await axios.post('http://localhost:5001/savedcollections/deletefund', {
-        collection: window.location.href.split('/')[window.location.href.split('/').length - 1],
+        collection: decodeURIComponent(window.location.href.split('/')[window.location.href.split('/').length - 1]),
         fundName: record.Funds,
         email: user?.email,
       }, {
@@ -432,18 +432,18 @@ export default function SavedList() {
           {
             filterNames.map((name: FILTER_NAME) => (
               <>
-              <button 
-                onClick={(e) => { setFilterName(name); handleClick(e)}}
-                key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
-                {
-                  filteredList[name] && filteredList[name].length > 0
-                  ?
-                  filteredList[name].join(', ')
-                  :
-                  name
-                }
-              </button>
-            </>
+                <button 
+                  onClick={(e) => { setFilterName(name); handleClick(e)}}
+                  key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
+                  {
+                    filteredList[name] && filteredList[name].length > 0
+                      ?
+                      filteredList[name].join(', ')
+                      :
+                      name
+                  }
+                </button>
+              </>
             ))
           }
         </div>

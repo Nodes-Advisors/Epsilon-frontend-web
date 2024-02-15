@@ -493,14 +493,14 @@ export default function FundCards() {
             filterNames.map((name: FILTER_NAME) => (
               <>
                 <button 
-                onClick={(e) => { setFilterName(name); handleClick(e)}}
-                key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
+                  onClick={(e) => { setFilterName(name); handleClick(e)}}
+                  key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
                   {
                     filteredList[name] && filteredList[name].length > 0
-                    ?
-                    filteredList[name].join(', ')
-                    :
-                    name
+                      ?
+                      filteredList[name].join(', ')
+                      :
+                      name
                   }
                 </button>
               </>
@@ -643,7 +643,13 @@ export default function FundCards() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
-                              onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
+                              onClick={() => { 
+                                localStorage.setItem('fund-id', record._id as string) 
+                                localStorage.setItem('filter', JSON.stringify(filteredList)) 
+                                localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals')))
+                                navigate(`/fund-card/${record._id}`)
+                                
+                              }}
                               style={{  outline: '0.1rem #fff solid', padding: '0.1rem 0.9rem', border: 'none', width: '7rem',  borderRadius: '0.2rem' }}>VIEW</button>
                             <button 
                               onClick={() => {
@@ -668,12 +674,12 @@ export default function FundCards() {
                           <div style={{ position: 'relative' }}>
                             <AsyncImage
                               onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
-                              onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }}
+                              onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals'))); navigate(`/fund-card/${record._id}`)  }}
                               src={record['Logo'] ? (record['Logo']) : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.5)' }} />
                             <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                            <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
+                            <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals'))); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
                             <span style={{  }}>{record['HQ Country'] as string}</span>
                           </div>
                             
