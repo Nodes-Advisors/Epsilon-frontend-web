@@ -47,8 +47,8 @@ const router = createBrowserRouter([
   { path: 'user-profile', element: <UserProfile /> },
   { path: 'database', element: <Database /> },
   { path: 'intelligence', element: <Intelligence /> },
-  { path: 'client-card', element: <ClientProfile /> },
-  { path: 'clients', element: <Clients /> },
+  { path: 'client-card/:id', element: <ClientProfile /> },
+  { path: 'client-cards', element: <Clients /> },
   
 ].map(item => ({ ...item, element: navWrapper(item.element) })),
 )

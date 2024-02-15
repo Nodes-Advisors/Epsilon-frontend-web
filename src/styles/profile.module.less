@@ -120,6 +120,7 @@
 
 .detail-category-text {
     color: #706588;
+    left: 20rem;
     font-family: Inter;
     font-size: 1.5rem;
     font-style: normal;
@@ -674,6 +675,10 @@ td {
     &:hover .book-tooltip {
         visibility: visible;
     }
+    
+    &:hover .book-client-card-tooltip {
+        visibility: visible;
+    }
 
     .book-tooltip {
         visibility: hidden;
@@ -703,7 +708,7 @@ td {
         color: #000;
         z-index: 1000;
         right: 12rem;
-        bottom: 0;
+        top: 0;
         text-align: center;
     }
 
@@ -731,6 +736,34 @@ td {
             cursor: pointer;
         }
     }
+
+    .book-client-card-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        filter: invert(100%);
+        &:hover {
+            transform: scale(1.1);
+            filter: contrast(400%) invert(100%);
+            cursor: pointer;
+        }
+    }
+
+    .book-client-card-tooltip {
+        visibility: hidden;
+        position: absolute;
+        background-color: #fff;
+        border:#2254FF solid 0.1rem;
+        width: 30rem;
+        // max-height: 5rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        color: #000;
+        z-index: 1000;
+        right: -32rem;
+        bottom: 0;
+        text-align: center;
+    }
+
 }
 
 .back-icon {
