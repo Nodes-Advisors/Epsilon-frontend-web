@@ -9,7 +9,7 @@ import { useFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
-import { FUND_STATUS_LIST} from '../lib/constants'
+import { FUND_STATUS_LIST, europeCountries, asiaCountries } from '../lib/constants'
 import type { FILTER_NAME } from '../lib/constants'
 import CancelButton from '../assets/images/cancel.png'
 import axios from 'axios'
@@ -124,8 +124,15 @@ export default function FundCards() {
                 return filteredList[filterName].includes(record['Funds'] as string)
                     || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
               case 'Location':
-                return filteredList[filterName].includes(record['HQ Country'] as string)
-                    || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+                return filteredList[filterName].some(filter => {
+                  if (filter === 'Europe') {
+                    return europeCountries.includes(record['HQ Country'] as string)
+                  }
+                  if (filter === 'Asia') {
+                    return asiaCountries.includes(record['HQ Country'] as string)
+                  }
+                  return filter === record['HQ Country'] || (record['HQ Country'] && record['HQ Country'].includes(filter))
+                })
               case 'Status':
                 return filteredList[filterName].includes(record['Status'] as string)
                           || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
@@ -194,8 +201,15 @@ export default function FundCards() {
           return filteredList[filterName].includes(record['Funds'] as string)
               || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
         case 'Location':
-          return filteredList[filterName].includes(record['HQ Country'] as string)
-              || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+          return filteredList[filterName].some(filter => {
+            if (filter === 'Europe') {
+              return europeCountries.includes(record['HQ Country'] as string)
+            }
+            if (filter === 'Asia') {
+              return asiaCountries.includes(record['HQ Country'] as string)
+            }
+            return filter === record['HQ Country'] || (record['HQ Country'] && record['HQ Country'].includes(filter))
+          })
         case 'Status':
           return filteredList[filterName].includes(record['Status'] as string)
                     || (record['Status'] && filteredList[filterName].includes(record['Status'] as string))
@@ -282,7 +296,7 @@ export default function FundCards() {
     case 'Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
-      return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
+      return ['Europe', 'Asia', ...removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))]
     case 'Status':
       return removeDuplicatesAndNull(FUND_STATUS_LIST)
     case 'Type':
@@ -623,7 +637,7 @@ export default function FundCards() {
               <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', width: '100%', textAlign: 'left'  }}>
                 <span>Funds</span>
                 <span>Status</span>
-                <span>Deals</span>
+                <span>Past Deals</span>
                 <span>Account Manager</span>
                 <span>Sector</span>
                 <span>Type</span>
@@ -781,6 +795,7 @@ export default function FundCards() {
           pageLinkClassName={styles['fund-card-pagination-link']}
           pageClassName={styles['fund-card-pagination-li']}
           activeClassName={styles['fund-card-pagination-li-active']}
+          activeLinkClassName={styles['fund-card-pagination-link-active']}
           nextClassName={styles['fund-card-pagination-next']}
           previousClassName={styles['fund-card-pagination-pre']}
           breakLabel="..."
@@ -790,7 +805,7 @@ export default function FundCards() {
           pageCount={pageCount}
           previousLabel="< pre"
           renderOnZeroPageCount={null}
-        />  
+        /> 
       } 
       <div className={styles['popover-background']} style={{ visibility: openRequestPanel ? 'visible' : 'hidden' }}>
         <div className={styles['popover-form']}>

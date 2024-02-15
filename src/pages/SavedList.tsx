@@ -10,6 +10,8 @@ import { convertedOutput } from '../lib/utils'
 import CancelButton from '../assets/images/cancel.png'
 import { STATUS_COLOR_LIST, 
   STATUS_LIST,
+  europeCountries,
+  asiaCountries,
   FUND_STATUS_LIST,
   type FILTER_NAME,
 } from '../lib/constants'
@@ -173,8 +175,15 @@ export default function SavedList() {
                 return filteredList[filterName].includes(record['Funds'] as string)
                     || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
               case 'Location':
-                return filteredList[filterName].includes(record['HQ Country'] as string)
-                    || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+                return filteredList[filterName].some(filter => {
+                  if (filter === 'Europe') {
+                    return europeCountries.includes(record['HQ Country'] as string)
+                  }
+                  if (filter === 'Asia') {
+                    return asiaCountries.includes(record['HQ Country'] as string)
+                  }
+                  return filter === record['HQ Country'] || (record['HQ Country'] && record['HQ Country'].includes(filter))
+                })
               case 'Status':
                 // console.log(record['Status'])
                 return filteredList[filterName].includes(record['Status'] as string)
@@ -304,8 +313,15 @@ export default function SavedList() {
           return filteredList[filterName].includes(record['Funds'] as string)
               || (record['Funds'] && record['Funds'].includes(filteredList[filterName] as string))
         case 'Location':
-          return filteredList[filterName].includes(record['HQ Country'] as string)
-              || (record['HQ Country'] && record['HQ Country'].includes(filteredList[filterName] as string))
+          return filteredList[filterName].some(filter => {
+            if (filter === 'Europe') {
+              return europeCountries.includes(record['HQ Country'] as string)
+            }
+            if (filter === 'Asia') {
+              return asiaCountries.includes(record['HQ Country'] as string)
+            }
+            return filter === record['HQ Country'] || (record['HQ Country'] && record['HQ Country'].includes(filter))
+          })
         case 'Status':
           console.log(record['Status'])
           return filteredList[filterName].includes(record['Status'] as string)
@@ -388,7 +404,7 @@ export default function SavedList() {
     case 'Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Funds'] as string))
     case 'Location':
-      return removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))
+      return ['Europe', 'Asia', ...removeDuplicatesAndNull(data.map((record) => record['HQ Country'] as string))]
     case 'Status':
       return removeDuplicatesAndNull(FUND_STATUS_LIST)
     case 'Type':
@@ -560,11 +576,11 @@ export default function SavedList() {
               currentItems.length > 0
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                  <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${window.location.href.split('/')[window.location.href.split('/').length - 1]} list)`}</span></span>
+                  <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${decodeURIComponent(window.location.href.split('/')[window.location.href.split('/').length - 1])} list)`}</span></span>
                   <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
                     <span>Status</span>
-                    <span>Deals</span>
+                    <span>Past Deals</span>
                     <span>Account Manager</span>
                     <span>Sector</span>
                     <span>Type</span>
@@ -646,6 +662,7 @@ export default function SavedList() {
           pageLinkClassName={styles['fund-card-pagination-link']}
           pageClassName={styles['fund-card-pagination-li']}
           activeClassName={styles['fund-card-pagination-li-active']}
+          activeLinkClassName={styles['fund-card-pagination-link-active']}
           nextClassName={styles['fund-card-pagination-next']}
           previousClassName={styles['fund-card-pagination-pre']}
           breakLabel="..."
