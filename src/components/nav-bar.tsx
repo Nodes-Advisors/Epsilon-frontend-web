@@ -3,7 +3,7 @@ import EpsilonLogo from '../assets/svgs/epsilon-logo.svg?react'
 import SearchBarIcon from '../assets/svgs/search-bar-icon.svg?react'
 import styles from '../styles/nav-bar.module.less'
 import { AsyncImage } from 'loadable-image'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import NotificationBellIcon from '../assets/svgs/notification-bell.svg?react'
 import MenuIcon from '../assets/images/menu.png'
 import LeftNavBar from './left-nav-bar'
@@ -12,6 +12,9 @@ import toast, { Toaster } from 'react-hot-toast'
 import AuthComponent from './auth-component'
 import { useTokenStore, useUserStore } from '../store/store'
 import UserProfileIcon from '../assets/images/github-mark-white.png'
+import useWebSocket, { ReadyState } from 'react-use-websocket'
+import WebSocketContext from '../websocket/WebsocketContext'
+import CancelIcon from '../assets/svgs/cancel-button.svg?react'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
   const token = useTokenStore(state => state.token)
@@ -28,13 +31,17 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [openNotification, setOpenNotification] = useState<boolean>(false)
   const notificationRef = useRef<HTMLDivElement>(null)
   const [option, setOption] = useState<boolean>(false)
-  const [numNewMsg, setNumNewMsg] = useState<number>(8)
+  const [numNewMsg, setNumNewMsg] = useState<number>(0)
   const [openLeftNavBar, setOpenLeftNavBar] = useState<boolean>(true)
   const [savedCollections, setSavedCollections] = useState<string[]>([])
   const [openCollectionList, setOpenCollectionList] = useState<boolean>(false)
   const [requests, setRequests] = useState<any[]>([])
   const [userInfo, setUserInfo] = useState<any>({})
+  const [message, setMessage] = useState<any>({})
+  const [openDetail, setOpenDetail] = useState<boolean>(false)
 
+  const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
+  
   const logout = async() => {
     try {
       await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
@@ -53,6 +60,27 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     setToken(undefined)
     navigate('/')
   }
+
+  useEffect(() => {
+    if (lastMessage) {
+      const messageData = JSON.parse(lastMessage.data)
+      // get current time and set it to the message, I need format like 2021-09-01 12:00:00
+      const date = new Date()
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const hour = date.getHours()
+      const minute = date.getMinutes()
+      const second = date.getSeconds()
+      const time = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+      messageData.time = time
+      if (messageData.type === 'approval request') {
+        setNumNewMsg(prevNum => prevNum + 1)
+        setRequests(prevRequests => [...prevRequests, messageData])
+      } 
+      
+    }
+  }, [lastMessage])
 
   useEffect(() => {
     // toast.error('Please verify your email address to continue')
@@ -128,25 +156,25 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     // navigate('/my-saved-list')
   }
 
-  useEffect(() => {
-    const fetchUserRequest = async () => {
-      if (token) {
-        await axios.get('http://localhost:5001/getrequest', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        }).then((res) => {
-          setRequests(res.data)
-          // console.log(res.data)
-        }).catch((error) => {
-          toast.error(error?.response?.data)
-        })
-      }
-    }
-    fetchUserRequest()
+  // useEffect(() => {
+  //   const fetchUserRequest = async () => {
+  //     if (token) {
+  //       await axios.get('http://localhost:5001/getrequest', {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${token}`,
+  //         },
+  //       }).then((res) => {
+  //         setRequests(res.data)
+  //         // console.log(res.data)
+  //       }).catch((error) => {
+  //         toast.error(error?.response?.data)
+  //       })
+  //     }
+  //   }
+  //   fetchUserRequest()
 
-  }, [])
+  // }, [])
 
   return (
     <>
@@ -215,12 +243,12 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           className={styles['login']} >
           <div style={{ position: 'relative' }}>
             <NotificationBellIcon 
-              onClick={() => { setOpenNotification(!openNotification); setNumNewMsg(0) }}
+              onClick={() => { setOpenNotification(!openNotification) }}
               className={styles['notification-icon']} />
             <div style={{ backgroundColor: 'red', color: 'white',
               top: '-0.5rem', right: '-0.5rem', 
               display: numNewMsg !== 0 ? '' : 'none',
-              position: 'absolute', borderRadius: '50%', width: '1rem', height: '1rem', fontSize: '0.9rem' }}>7</div>
+              position: 'absolute', borderRadius: '50%', width: '1rem', height: '1rem', fontSize: '0.9rem' }}>{numNewMsg}</div>
           </div>
           
           {
@@ -249,16 +277,56 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   
               </div>
               {
-                // [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
-                //   <div key={index} className={styles['notification-message']} >
-                //     <span>{option ? 'approval request' : 'message'} {item} from someone</span>
-                //   </div>
-                // ))
-                requests.map((request, index) => (
-                  <div key={index} className={styles['notification-message']} >
-                    <span>{ option ? 'null' : `${request['Fund Name']} created by ${request['Created by']}` }</span>
+                openDetail
+                  ?
+                  <div style={{ position: 'absolute', top: '5rem', left: '0', width: '100%', zIndex: 1000, background: '#fff2' }}>
+                    <div style={{ width: '90%', height: '50%', background: '#fff', padding: '1rem', borderRadius: '0.5rem', position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: '0', right: '0', cursor: 'pointer' }} onClick={() => setOpenDetail(false)}>
+                        <CancelIcon style={{ width: '1.5rem', height: 'auto' }} />
+                      </div>
+                      <h2 style={{ margin: 0, textAlign: 'start', fontSize: '1.25rem' }}>{'Fund Name: '}{message.fundName}</h2>
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Type of Request: '}{message.requestName}</p>
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Priority: '}{message.priority}</p>
+                     
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Deal: '}{message.deal}</p>
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Contact Person: '}{message.contactPerson}</p>
+
+                      
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{message.details}</p>
+                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Sender Email: '}{message.sendEmail}</p>
+
+
+                      <div style={{ display: 'flex', marginTop: '1rem', gap: '2rem', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => {
+                            const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
+                            setRequests(newRequests)
+                            setOpenDetail(false)
+                            setNumNewMsg(prevNum => prevNum - 1)
+                            toast.success('You have successfully taken this request')
+                          }}
+                        >Take it</button>
+                        <button
+                          onClick={() => {
+                            // remove this request from the list
+                            const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
+                            setRequests(newRequests)
+                            setOpenDetail(false)
+                            setNumNewMsg(prevNum => prevNum - 1)
+                            toast.success('You have successfully rejected this request')
+                          }}
+                        >Cancel</button>
+                      </div>
+                    </div>
+                    
                   </div>
-                ))
+                  :
+                  requests.map((request, index) => (
+                    <div style={{ position: 'relative', padding: '1rem 0' }} key={index} className={styles['notification-message']} >
+                      <span onClick={() => { setOpenDetail(true); setMessage(request) }}>{ option ? 'null' : `${request.fundName}approval created by ${request.sendEmail}` }</span>
+                      <span style={{ position: 'absolute', right: 0, bottom: 0, fontSize: '0.75rem' }}>{request.time}</span>
+                    </div>
+                  ))
               }
             </div>
           }

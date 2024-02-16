@@ -1,7 +1,7 @@
 import { AsyncImage } from 'loadable-image'
 import venture_logo from '../assets/images/venture-logo-example.png'
 import Skeleton from 'react-loading-skeleton'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
 
 import { FieldSet, Record } from 'airtable'
 import { useNavigate } from 'react-router-dom'
@@ -18,6 +18,7 @@ import { useUserStore } from '../store/store'
 import FundStatus from '../components/status'
 import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
+import WebSocketContext from '../websocket/WebsocketContext'
 
 export default function FundCards() {
 
@@ -72,6 +73,9 @@ export default function FundCards() {
     'Co-Investors': [],
     'Clear Filters': [],
   })
+
+  const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
+
   // according to filteredList, filter data
 
   useEffect(() => {
@@ -405,7 +409,7 @@ export default function FundCards() {
 
   const sendRequest = async (e) => {
     e.preventDefault()
-    
+
     // Check if all required fields have been filled
     if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
       toast.error('Please fill in all required fields')
@@ -431,6 +435,18 @@ export default function FundCards() {
       toast.success('Request sent successfully!')
       setOpenRequestPanel(false)
       setPendingList([...pendingList, selectedFundName])
+      const messageObject = {
+        type: 'approval request',
+        sendEmail: user?.email,
+        receiveName: approvers,
+        fundName: selectedFundName,
+        priority: priority,
+        details: details,
+        contactPerson: contactPerson,
+        deal: deal,
+        requestName: requestName,
+      }
+      sendMessage(JSON.stringify(messageObject))
     } catch (error) {
       toast.error(error?.response?.data)
     }
@@ -843,7 +859,8 @@ export default function FundCards() {
                     <option key={assignee} value={assignee}>{assignee}</option>
                   ))
                 }
-                
+                {/* for test, delete this afterwards */}
+                <option key={'Shaoyan Li'} value={'Shaoyan Li'}>{'Shaoyan Li'}</option>
               </select>
             </div>
             <div>
