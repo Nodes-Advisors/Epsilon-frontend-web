@@ -14,6 +14,7 @@ import { Chart, registerables } from "chart.js";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+// import { Table } from "@nextui-org/react";
 
 import {
   Chart as ChartJS,
@@ -379,7 +380,7 @@ export default function KPIDash() {
   // Function to calculate percentage change
   const calculatePercentageChange = (current, previous) => {
     if (previous === 0) return "N/A"; // Handle division by zero
-    return (((current - previous) / previous) * 100).toFixed(1) + "%";
+    return ((previous / current) * 100).toFixed(2) + "%";
   };
 
   const prepareChartData = (dealName) => {
@@ -809,37 +810,46 @@ export default function KPIDash() {
           stage: "Total Outreach",
           income: timeAggregatedDealData.totalOutreach,
           expenses: timeAggregatedDealData.totalOutreach,
-          change: 0,
+          change: 100,
         },
         {
           stage: "Deck Requested",
           income: timeAggregatedDealData.deckRequested,
           expenses: timeAggregatedDealData.deckRequested,
-          change: (
-            (timeAggregatedDealData.deckRequested /
-              timeAggregatedDealData.totalOutreach) *
-            100
-          ).toFixed(2),
+          change:
+            timeAggregatedDealData.totalOutreach === 0
+              ? "0.00"
+              : (
+                  (timeAggregatedDealData.deckRequested /
+                    timeAggregatedDealData.totalOutreach) *
+                  100
+                ).toFixed(2),
         },
         {
           stage: "Meeting Requested",
           income: timeAggregatedDealData.meetingRequested,
           expenses: timeAggregatedDealData.meetingRequested,
-          change: (
-            (timeAggregatedDealData.meetingRequested /
-              timeAggregatedDealData.deckRequested) *
-            100
-          ).toFixed(2),
+          change:
+            timeAggregatedDealData.deckRequested === 0
+              ? "0.00"
+              : (
+                  (timeAggregatedDealData.meetingRequested /
+                    timeAggregatedDealData.deckRequested) *
+                  100
+                ).toFixed(2),
         },
         {
           stage: "DD Requested",
           income: timeAggregatedDealData.ddRequested,
           expenses: timeAggregatedDealData.ddRequested,
-          change: (
-            (timeAggregatedDealData.ddRequested /
-              timeAggregatedDealData.meetingRequested) *
-            100
-          ).toFixed(2),
+          change:
+            timeAggregatedDealData.meetingRequested === 0
+              ? "0.00"
+              : (
+                  (timeAggregatedDealData.ddRequested /
+                    timeAggregatedDealData.meetingRequested) *
+                  100
+                ).toFixed(2),
         },
       ];
 
@@ -894,19 +904,18 @@ export default function KPIDash() {
       );
       series2.data.setAll(data);
 
-      // Modify this part of your amCharts configuration
-      series2.bullets.push(function (root, series, dataItem) {
+      series2.bullets.push((root, series, dataItem) => {
         const bullet = am5.Bullet.new(root, {
+          locationX: 0.5,
           locationY: 1, // ensures that the bullet is at the top of the column
           sprite: am5.Label.new(root, {
-            text: "{valueYWorking.formatNumber('#.0')}%",
-            fill: root.interfaceColors.get("alternativeText"),
-            centerY: am5.p100, // aligns the bullet at the bottom of the column
+            text: "{change}%",
+            fill: am5.color("#ffffff"),
+            centerY: am5.p100,
             centerX: am5.p50,
             populateText: true,
           }),
         });
-
         // This adjusts the label's y position based on the line series data point y position
         bullet.get("sprite").on("dataitemchanged", function (ev) {
           let dataItem = ev.target.dataItem;
@@ -916,9 +925,34 @@ export default function KPIDash() {
           // Adjust the dy value here to position the label above the line plot
           ev.target.set("dy", -series.yAxis.height * (1 - position) - 20); // The 20 is an offset to position the label above the line
         });
-
         return bullet;
       });
+
+      // // Modify this part of your amCharts configuration
+      // series2.bullets.push(function (root, series, dataItem) {
+      //   const bullet = am5.Bullet.new(root, {
+      //     locationY: 1, // ensures that the bullet is at the top of the column
+      //     sprite: am5.Label.new(root, {
+      //       text: "{valueYWorking.formatNumber('#.0')}%",
+      //       fill: root.interfaceColors.get("alternativeText"),
+      //       centerY: am5.p100, // aligns the bullet at the bottom of the column
+      //       centerX: am5.p50,
+      //       populateText: true,
+      //     }),
+      //   });
+
+      //   // This adjusts the label's y position based on the line series data point y position
+      //   bullet.get("sprite").on("dataitemchanged", function (ev) {
+      //     let dataItem = ev.target.dataItem;
+      //     let value = dataItem.get("valueY");
+      //     let position = series.yAxis.valueToPosition(value);
+
+      //     // Adjust the dy value here to position the label above the line plot
+      //     ev.target.set("dy", -series.yAxis.height * (1 - position) - 20); // The 20 is an offset to position the label above the line
+      //   });
+
+      //   return bullet;
+      // });
 
       chart.appear(1000, 100);
       series1.appear();
@@ -1043,21 +1077,66 @@ export default function KPIDash() {
         .get("renderer")
         .grid.template.setAll({ stroke: am5.color(0xffffff) });
 
+      // selectedClients.forEach((clientName) => {
+      //   const clientNameLower = clientName.toLowerCase();
+      //   const deal = filteredDealData.find(
+      //     (deal) => deal.dealName.toLowerCase() === clientNameLower
+      //   );
+      //   if (deal) {
+      //     const dealKey = deal.dealName; // Use dealName from the deal object
+      //     console.log("Client Name Display:", dealKey); // Log the dealKey used for series
+
+      //     const series = chart.series.push(
+      //       am5xy.ColumnSeries.new(root, {
+      //         name: dealKey, // Use dealKey for the series name
+      //         xAxis: xAxis,
+      //         yAxis: yAxis,
+      //         valueYField: dealKey, // Use dealKey as valueYField
+      //         categoryXField: "year",
+      //       })
+      //     );
+
+      //     series.columns.template.setAll({
+      //       tooltipText: "{name}, {categoryX}:{valueY}",
+      //       width: am5.percent(90),
+      //       tooltipY: 0,
+      //       strokeOpacity: 0,
+      //       tooltipLabel: { fill: am5.color(0xffffff) },
+      //     });
+
+      //     series.data.setAll(data2);
+      //     series.appear();
+      //     series.bullets.push(() => {
+      //       return am5.Bullet.new(root, {
+      //         locationY: 0,
+      //         sprite: am5.Label.new(root, {
+      //           text: "{valueY}",
+      //           fill: root.interfaceColors.get("alternativeText"),
+      //           centerY: 0,
+      //           centerX: am5.p50,
+      //           populateText: true,
+      //         }),
+      //       });
+      //     });
+
+      //     legend.data.push(series);
+      //   }
+      // });
+
       selectedClients.forEach((clientName) => {
         const clientNameLower = clientName.toLowerCase();
         const deal = filteredDealData.find(
           (deal) => deal.dealName.toLowerCase() === clientNameLower
         );
         if (deal) {
-          const dealKey = deal.dealName; // Use dealName from the deal object
-          console.log("Client Name Display:", dealKey); // Log the dealKey used for series
+          const dealKey = deal.dealName; // Use the original case for dealKey
 
           const series = chart.series.push(
             am5xy.ColumnSeries.new(root, {
-              name: dealKey, // Use dealKey for the series name
+              name: dealKey,
               xAxis: xAxis,
               yAxis: yAxis,
-              valueYField: dealKey, // Use dealKey as valueYField
+              valueYField: dealKey,
               categoryXField: "year",
             })
           );
@@ -1067,22 +1146,28 @@ export default function KPIDash() {
             width: am5.percent(90),
             tooltipY: 0,
             strokeOpacity: 0,
-            tooltipLabel: { fill: am5.color(0xffffff) },
           });
 
           series.data.setAll(data2);
           series.appear();
+
+          // Add LabelBullet to display data values above bars
           series.bullets.push(() => {
-            return am5.Bullet.new(root, {
-              locationY: 0,
+            const bullet = am5.Bullet.new(root, {
+              locationY: 1,
               sprite: am5.Label.new(root, {
                 text: "{valueY}",
-                fill: root.interfaceColors.get("alternativeText"),
-                centerY: 0,
+                fill: am5.color("#fff"),
+                centerY: am5.p100,
                 centerX: am5.p50,
                 populateText: true,
               }),
             });
+            bullet.get("sprite").setAll({
+              dy: -5, // Adjust position above the bar
+              fontSize: 14, // Set font size
+            });
+            return bullet;
           });
 
           legend.data.push(series);
@@ -1928,7 +2013,7 @@ export default function KPIDash() {
                   fontSize="0.9375rem"
                   style={{ textAlign: "left" }}
                 >
-                  Deal Statistics
+                  Overall KPI in Timescale
                 </KPIText>
                 <div
                   className={styles["kpi-horizontal-layout"]}
@@ -2021,13 +2106,13 @@ export default function KPIDash() {
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <KPIText
+                {/* <KPIText
                   fontColor="#fff"
                   fontSize="0.9375rem"
                   style={{ textAlign: "left" }}
                 >
-                  Account Holder's KPI
-                </KPIText>
+                  
+                </KPIText> */}
                 <div
                   className={styles["kpi-horizontal-layout"]}
                   style={{ gap: "3rem" }}
@@ -2072,6 +2157,96 @@ export default function KPIDash() {
                       </div>
                     )}
                   </KPIBlock>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <KPIText
+                  fontColor="#fff"
+                  fontSize="0.9375rem"
+                  style={{ textAlign: "left" }}
+                >
+                  KPI of the Selected Clients
+                </KPIText>
+                <div
+                  className={styles["kpi-horizontal-layout"]}
+                  style={{ gap: "3rem" }}
+                >
+                  <KPIBlock
+                    extraClass={styles["kpi-medium-dashboard"]}
+                    width="52.25rem"
+                    height="26.125rem"
+                    style={{ overflow: "auto" }}
+                  >
+                    <div style={kpiTableContainerStyle}>
+                      <table style={kpiTableStyle}>
+                        <thead>
+                          <tr>
+                            <th style={tableHeaderStyle}>Category</th>
+                            {selectedClients.map((client) => (
+                              <th key={client} style={tableHeaderStyle}>
+                                {client}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {selectedClientTableData.map((row, index, array) => (
+                            <>
+                              <tr
+                                key={`data-${index}`}
+                                style={getTableRowStyle(index)}
+                              >
+                                <td style={tableCellStyle}>{row.year}</td>
+                                {selectedClients.map((client) => (
+                                  <td
+                                    key={`${client.toLowerCase()}-${index}`}
+                                    style={tableCellStyle}
+                                  >
+                                    {row[client.toLowerCase()] !== undefined
+                                      ? row[client.toLowerCase()]
+                                      : "-"}
+                                  </td>
+                                ))}
+                              </tr>
+                              {index < array.length - 1 && ( // Don't add for the last row
+                                <tr
+                                  key={`change-${index}`}
+                                  style={getTableRowStyle(index)}
+                                >
+                                  <td style={tableCellStyle}>Change</td>
+                                  {selectedClients.map(
+                                    (client, clientIndex) => {
+                                      const oldValue =
+                                        row[client.toLowerCase()];
+                                      const newValue =
+                                        array[index + 1][client.toLowerCase()];
+                                      return (
+                                        <td
+                                          key={`change-${client.toLowerCase()}-${index}`}
+                                          style={tableCellStyle}
+                                        >
+                                          {oldValue !== undefined &&
+                                          newValue !== undefined
+                                            ? calculatePercentageChange(
+                                                oldValue,
+                                                newValue
+                                              )
+                                            : "-"}
+                                        </td>
+                                      );
+                                    }
+                                  )}
+                                </tr>
+                              )}
+                            </>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </KPIBlock>
+
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="60.25rem"
@@ -2089,59 +2264,6 @@ export default function KPIDash() {
                       ref={chartRef}
                       style={{ width: "900px", height: "400px" }}
                     ></div>
-                  </KPIBlock>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <KPIText
-                  fontColor="#fff"
-                  fontSize="0.9375rem"
-                  style={{ textAlign: "left" }}
-                >
-                  Account Holder's KPI
-                </KPIText>
-                <div
-                  className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
-                >
-                  <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
-                    width="60.25rem"
-                    height="26.125rem"
-                    style={{ overflow: "auto" }}
-                  >
-                    <div style={kpiTableContainerStyle}>
-                      <table style={kpiTableStyle}>
-                        <thead>
-                          <tr>
-                            <th style={tableHeaderStyle}>Category</th>
-                            {selectedClients.map((client) => (
-                              <th key={client} style={tableHeaderStyle}>
-                                {client}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedClientTableData.map((row, index) => (
-                            <tr key={index} style={getTableRowStyle(index)}>
-                              <td style={tableCellStyle}>{row.year}</td>
-                              {selectedClients.map((client) => (
-                                <td
-                                  key={client.toLowerCase()}
-                                  style={tableCellStyle}
-                                >
-                                  {row[client.toLowerCase()] !== undefined
-                                    ? row[client.toLowerCase()]
-                                    : "-"}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
                   </KPIBlock>
                 </div>
               </div>
