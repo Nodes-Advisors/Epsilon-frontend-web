@@ -41,7 +41,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [openDetail, setOpenDetail] = useState<boolean>(false)
 
   const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
-  
+  const [allNotifications, setAllNotifications] = useState<any[]>([])
+
   const logout = async() => {
     try {
       await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
@@ -64,7 +65,6 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   useEffect(() => {
     if (lastMessage) {
       const messageData = JSON.parse(lastMessage.data)
-      // get current time and set it to the message, I need format like 2021-09-01 12:00:00
       const date = new Date()
       const year = date.getFullYear()
       const month = date.getMonth() + 1
@@ -74,17 +74,18 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
       const second = date.getSeconds()
       const time = `${year}-${month}-${day} ${hour}:${minute}:${second}`
       messageData.time = time
+      setNumNewMsg(prevNum => prevNum + 1)
       if (messageData.type === 'approval request') {
-        setNumNewMsg(prevNum => prevNum + 1)
+        // get current time and set it to the message, I need format like 2021-09-01 12:00:00
+        
         setRequests(prevRequests => [...prevRequests, messageData])
-      } 
+        setAllNotifications(prevNotifications => [...prevNotifications, messageData])
+      } else {
+        setAllNotifications(prevNotifications => [...prevNotifications, messageData])
+      }
       
     }
   }, [lastMessage])
-
-  useEffect(() => {
-    // toast.error('Please verify your email address to continue')
-  }, [openAuthPanel])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -301,6 +302,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                           onClick={() => {
                             const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
                             setRequests(newRequests)
+                            const allMessages = allNotifications.filter(notification => notification.fundName !== message.fundName && notification.time !== message.time)
+                            setAllNotifications(allMessages)
                             setOpenDetail(false)
                             setNumNewMsg(prevNum => prevNum - 1)
                             toast.success('You have successfully taken this request')
@@ -311,6 +314,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                             // remove this request from the list
                             const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
                             setRequests(newRequests)
+                            const allMessages = allNotifications.filter(notification => notification.fundName !== message.fundName && notification.time !== message.time)
+                            setAllNotifications(allMessages)
                             setOpenDetail(false)
                             setNumNewMsg(prevNum => prevNum - 1)
                             toast.success('You have successfully rejected this request')

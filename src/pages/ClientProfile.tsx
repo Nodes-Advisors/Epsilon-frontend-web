@@ -215,14 +215,7 @@ export default function ClientProfile(): JSX.Element {
                   {/* <FundStatusLarger colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} /> */}
                 </div>
             }
-            <div className={styles['action-buttons']}>
-              <ActionButton 
-                onClick={() => alert('startup match')} 
-                buttonClass={styles['action-button']} 
-                textClass={styles['action-button-text']} 
-                text='STARTUP MATCH' />
-
-            </div>
+    
             <div>
               <div className={styles['horizontal-flex-layout']} >
                 <VectorLogo className={styles['vector-logo']} />

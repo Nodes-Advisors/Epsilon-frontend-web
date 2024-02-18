@@ -6,7 +6,7 @@ import LiveUpdate from '../components/live-update'
 import axios from 'axios'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from '../websocket/WebsocketContext'
-
+import CancelImgIcon from '../assets/images/cancel.png'
 export default function Home() {
   
   const setUser = useUserStore(state => state.setUser)
@@ -129,7 +129,16 @@ export default function Home() {
     const [coords, setCoords] = useState({ x: 0, y: 0 })
     const [tooltipVisible, setTooltipVisible] = useState(false)
     const [highlighted, setHighlighted] = useState(false)
+    const [followUpVisible, setFollowUpVisible] = useState(false)
+
+    const followUp = () => {
+      setFollowUpVisible(true)
+    }
   
+    const closeFollowUp = () => {
+      setFollowUpVisible(false)
+    }
+
     const showMenu = (e) => {
       e.preventDefault()
       setVisible(true)
@@ -156,6 +165,12 @@ export default function Home() {
         document.removeEventListener('click', closeMenu)
       }
     }, [])
+
+    const submit = async(e) => {
+      e.preventDefault()
+      
+      closeFollowUp()
+    }
   
     return (
       <div 
@@ -187,9 +202,71 @@ export default function Home() {
               <li style={{ padding: '0.5rem 1rem', margin: 0 }} onClick={e => togglePin(e, tooltip)}>
                 {isPinned(tooltip) ? 'Unpin this' : 'Pin this'}
               </li>
-              {!tooltip.type && <li style={{ padding: '0.5rem 1rem', margin: 0 }}>Follow up</li>}
+              {!tooltip.type && <li 
+                onClick={followUp}
+                style={{ padding: '0.5rem 1rem', margin: 0 }}>Follow up</li>}
               {/* <li style={{ padding: '1rem', margin: 0 }}>Option 3</li> */}
             </ul>
+          </div>
+        )}
+
+        {followUpVisible && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            padding: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            // justifyContent: 'center',
+            alignItems: 'start',
+            borderRadius: '0.5rem',
+            boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)',
+            width: '25rem',
+            height: '20rem',
+            zIndex: 1000,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '90%' }}>
+              <h2 style={{ color: '#000' }}>Status Update</h2>
+              <img 
+                onClick={closeFollowUp}
+                src={CancelImgIcon} style={{ width: '0.8rem', height: '0.8rem', cursor: 'pointer'}} alt="" />
+            </div>
+            <form
+              style={{ display: 'grid', width: '80%', gap: '1rem', padding: '1rem', color: '#000', gridTemplateColumns: '1fr 1fr' }}
+              onSubmit={submit}>
+              {/* <div style={{ color: '#000' }}> */}
+              <label htmlFor="accountManager" style={{ color: '#000' }}>Account Manager</label>
+              <span>Tyler</span>
+              {/* </div> */}
+              {/* <div> */}
+              <label htmlFor="client" style={{ color: '#000' }}>Client</label>
+              <span>Avivo</span>
+              {/* </div> */}
+              {/* <div style={{ color: '#000' }}> */}
+              <label htmlFor="vc" >VC</label>
+              <span>VC</span>
+              {/* </div> */}
+              {/* <div> */}
+              <label htmlFor="contact" style={{ color: '#000' }}>Contact</label>
+              <span>Sullivan</span>
+              {/* </div> */}
+              {/* <div> */}
+              <label htmlFor="status" style={{ color: '#000' }}>Status</label>
+              <select name="status" id="status">
+                <option value="">Select a Status</option>
+                <option value="manager1">Status 1</option>
+                <option value="manager2">Status 2</option>
+                <option value="manager3">Status 3</option>
+              </select>
+              {/* </div> */}
+              <button type='submit'>Confirm</button>
+              <button type='button' onClick={closeFollowUp}>Cancel</button>
+            </form>
+            {/* <button onClick={closeFollowUp}>Close</button> */}
+            {/* Add your follow up content here */}
           </div>
         )}
       </div>
@@ -224,14 +301,14 @@ export default function Home() {
     // <div style={{ width: '100%', minHeight: '90vh' }} >
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       {/* <p id={styles['welcome']}>{'Welcome to Nodes EpsilonAI, '}<span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p> */}
-      <h2 className={styles['news-title']}>Today&apos;s Top News</h2>
+      <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
       <div style={{ width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr' }}>
         <div style={{ gridRow: '1', gridColumn: '1' }}>
           
           <div style={{ width: '97.5%',  backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h3  className={styles['news-sub-title']}>Pinned</h3>
             {/* <TodayNews /> */}
-            <ul style={{ height: '9rem' }} className={styles['news-ul']}>
+            <ul style={{ height: '8.75rem' }} className={styles['news-ul']}>
               {
                 pinnedMessages.map((message, index) => 
                 {
@@ -251,7 +328,7 @@ export default function Home() {
           <div style={{ width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h3  className={styles['news-sub-title']}>Milestones</h3>
             {/* <TodayNews /> */}
-            <ul style={{ height: '9rem' }} className={styles['news-ul']}>
+            <ul style={{ height: '8.75rem' }} className={styles['news-ul']}>
               <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
               <li>Avivo has recieved 16 meetings request this month!</li>
               <li>Eliott Harfouche has 3 requests pending, please check your requests</li>

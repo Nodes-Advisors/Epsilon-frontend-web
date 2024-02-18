@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useContext } from 'react'
 
 import { FieldSet, Record } from 'airtable'
 import { useNavigate } from 'react-router-dom'
-import { useFundsStore } from '../store/store'
+import { useClientsStore, useFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
@@ -21,12 +21,14 @@ import ReactPaginate from 'react-paginate'
 import WebSocketContext from '../websocket/WebsocketContext'
 
 export default function FundCards() {
-
+  
+  const clients = useClientsStore(state => state.clients)
+  const setClients = useClientsStore(state => state.setClients)
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Responsiveness Rate', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
-  const [data, setData] = useState<Record<FieldSet>[]>([])
-  const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
+  const [data, setData] = useState<any[]>([])
+  const [filteredData, setFilteredData] = useState<any[]>([])
   const [requestName, setRequestName] = useState<string>('')
   const [approvers, setApprovers] = useState<string>('')
   const [deal, setDeal] = useState<string>('')
@@ -60,6 +62,7 @@ export default function FundCards() {
     'Suitability Score': string[],
     'Co-Investors': string[],
     'Clear Filters': string[],
+    'Responsiveness Rate': string[],
   }>(localStorage.getItem('filter') ? JSON.parse(localStorage.getItem('filter') as string) : {
     '': [],
     'Account Manager': [],
@@ -72,6 +75,7 @@ export default function FundCards() {
     'Suitability Score': [],
     'Co-Investors': [],
     'Clear Filters': [],
+    'Responsiveness Rate': [],
   })
 
   const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
@@ -100,6 +104,7 @@ export default function FundCards() {
     setLoading(true)
     axios.get('http://localhost:5001/getAllFunds')
       .then((res) => {
+        setTotalFundCount(res.data.length)   
         setData(res.data)
         setFunds(res.data)  
         setFilteredData(res.data) 
@@ -160,16 +165,15 @@ export default function FundCards() {
                 return filteredList[filterName].some(filter => 
                   filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                 )
+              case 'Responsiveness Rate':
+                return [ '>90', '>80', '60-80', '<60']
               default:
                 return false
               }
             })
           }))
-        }  
-        setTotalFundCount(res.data.length)   
-        // console.log(
-        //   [...new Set(data.map((fund) => fund.get('Co-investors')).flat())],
-        // )
+        }
+
       })
       .catch((error) => {
         console.error(error)
@@ -237,12 +241,25 @@ export default function FundCards() {
           return filteredList[filterName].some(filter => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
           )
+        case 'Responsiveness Rate':
+          return [ '>90', '>80', '60-80', '<60']
         default:
           return false
         }
       })
     }))
   }, [filteredList])
+
+  useEffect(() => {
+    axios.get('http://localhost:5001/getAllClients')
+      .then((res) => {
+        setClients(res.data)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+  , [])
 
   useEffect(() => {
     axios.get('http://localhost:5001/fundStatus').then((res) => { 
@@ -312,6 +329,8 @@ export default function FundCards() {
       return ['>90', '>80', '60-80', '<60']
     case 'Co-Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Co-Investors'] as string))
+    case 'Responsiveness Rate':
+      return ['>90', '>80', '60-80', '<60']
     default:
       return []
     }
@@ -335,6 +354,8 @@ export default function FundCards() {
           'Status': [],
           'Type': [],
           'Contact': [],
+          'Suitability Score': [],
+          'Responsiveness Rate': [],
           'Co-Investors': [],
           'Clear Filters': [],
         })
@@ -452,11 +473,6 @@ export default function FundCards() {
     }
   }
 
-  const handleSavedCollections = async (e) => {
-    e.preventDefault()
-    
-  }
-
   const handleInputChange = (e) => {
     setInputValue(e.target.value)
   }
@@ -488,9 +504,33 @@ export default function FundCards() {
     }
   }
 
+  const isInClientList = (statusString: string) => {
+
+    for (const client of clients) {
+      const nameIndex = statusString.toUpperCase().indexOf(client.name.toUpperCase())
+      const acronymIndex = statusString.toUpperCase().indexOf(client.acronym.toUpperCase())
+
+      if (nameIndex !== -1 && client.name) {
+        return {
+          match: client.name,
+          prev: statusString.substring(0, nameIndex),
+          next: statusString.substring(nameIndex + client.name.length),
+          id: client._id,
+        }
+      } else if (acronymIndex !== -1 && client.acronym) {
+        return {
+          match: client.acronym,
+          prev: statusString.substring(0, acronymIndex),
+          next: statusString.substring(acronymIndex + client.acronym.length),
+          id: client._id,
+        }
+      }
+    }
+    return null
+  }
+
   const handleAddToCollection = async () => {
     try {
-      console.log(selectedFundName)
       const res = await axios.post('http://localhost:5001/savedcollections/add', {
         email: user?.email,
         collection: hoveredCollection,
@@ -511,6 +551,21 @@ export default function FundCards() {
     }
   }
 
+  const handleFullTextFilter = (e) => {
+    // get data-label of the clicked element
+    const target = e.target as HTMLElement
+    const text = target.textContent as string
+    const label = target.getAttribute('data-label')
+    setFilteredList({
+      ...filteredList,
+      [label]: [text],
+    })
+  }
+
+  const handleAddFilter = (e) => {
+    
+  }
+
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
@@ -523,7 +578,7 @@ export default function FundCards() {
             filterNames.map((name: FILTER_NAME) => (
               <>
                 <button 
-                  onClick={(e) => { setFilterName(name); handleClick(e)}}
+                  onClick={(e) => { setFilterName(name); handleClick(e) }}
                   key={name} style={{ backgroundColor: 'transparent', border: filteredList[name] && filteredList[name].length > 0 ? '#fff 0.1rem solid' :'#fff4 0.1rem solid' }}>
                   {
                     filteredList[name] && filteredList[name].length > 0
@@ -542,7 +597,13 @@ export default function FundCards() {
           <div id="v-layout" style={{ position: 'absolute', left: filterWindowPosition.left, top: filterWindowPosition.top,
             backgroundColor: '#080E1C', border: '2px solid #fffa', borderRadius: '2px', padding: '0.5rem',
             zIndex: 20, width: '26rem', minHeight: '8rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-            <span id="v-span" style={{ fontSize: '1.2rem', alignSelf: 'start', marginLeft: '2rem' }}>{filterName}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-around', gap: '60%', alignItems: 'center', width: '100%' }}>
+              <span id="v-span" style={{ fontSize: '1.2rem', alignSelf: 'start' }}>{filterName}</span>
+              <img
+                onClick={() => setFilterName('')}
+                data-label='v-cancelbutton' src={CancelButton} className={styles['cancel-button']} />
+            </div>
+            
             <div id='v-div' style={{ position: 'relative', width: '90%' }}>
               
               <div style={{ display: 'flex' }}>
@@ -650,7 +711,7 @@ export default function FundCards() {
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalFundCount ? `${totalFundCount} Funds` : `${filteredData.length} Funds (out of ${totalFundCount} Funds)`}</span>
-              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', width: '100%', textAlign: 'left'  }}>
+              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr', width: '100%', textAlign: 'left'  }}>
                 <span>Funds</span>
                 <span>Status</span>
                 <span>Past Deals</span>
@@ -661,6 +722,7 @@ export default function FundCards() {
                 
                 <span>Co-Investors</span>
                 <span>Suitability Score</span>
+                <span>Responsiveness Rate</span>
               </div>
               <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                               
@@ -669,7 +731,7 @@ export default function FundCards() {
                   ?
                   currentItems.map((record, index) => (
                     <>
-                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
+                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
@@ -714,15 +776,59 @@ export default function FundCards() {
                           </div>
                             
                         </div>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Status'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', whiteSpace: 'preserve-breaks', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Contact'] as string[] | string) as string || 'n/a'}</span>
+                        <span className={styles['fund-list-item']}>
+                          {
+                            isInClientList(record['Status'])
+                              ?
+                              <>
+                                <span >{isInClientList(record['Status']).prev}</span>
+                                <span 
+                                  onClick={() => navigate(`/client-card/${isInClientList(record['Status']).id}`)}
+                                  style={{ color: '#23D5F9', fontWeight: '700', cursor: 'pointer' }}>{isInClientList(record['Status']).match}</span>
+                                <span>{isInClientList(record['Status']).next}</span>
+                              </>
+                              :
+                              convertedOutput(record['Status']) as string || 'n/a'
+                          }
+                        </span>
+                        <span className={styles['fund-list-item']}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
+                        <span
+
+                          data-label= 'Account Manager'
+                          onClick={handleFullTextFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
+                        <span 
+                          data-label= 'Sector'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
+                        <span 
+                          data-label= 'Type'
+                          onClick={handleFullTextFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
+                        <span
+                          data-label= 'Contact'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>
+                          {
+                            (record['Contact'] || 'n/a').split(',').map((contact, index) => (
+                              <>
+                                <span className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
+                                {
+                                  index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+                                }
+                              </>
+                            ))
+                          }
+                        </span>
                         
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
+                        <span
+                          data-label= 'Co-Investors'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
+                        <span 
+                          data-label= 'Suitability Score'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
                       </div>
                       <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                     </>

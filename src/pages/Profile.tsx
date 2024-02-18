@@ -433,7 +433,6 @@ export default function Profile(): JSX.Element {
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
-                          <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'3rem'} /></th>
                         </tr>
                         :
@@ -444,7 +443,6 @@ export default function Profile(): JSX.Element {
                             <th>Date</th>
                             <th>Company</th>
                             <th>Account Manager</th>
-                            <th>VC</th>
                             <th>VC Contact</th>
                             <th>Status</th>
                             <th>Comments</th>
@@ -463,7 +461,7 @@ export default function Profile(): JSX.Element {
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
+                      
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'3rem'} /></td>
                           </tr>
@@ -478,7 +476,6 @@ export default function Profile(): JSX.Element {
                             {/* <td>{log.round_size ? log.round_size : 'No round size record'}</td> */}
                             {/* <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td> */}
                             <td>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
-                            <td>{log.VC ? log.VC : 'No VC record'}</td>
                             <td>{log.Contact ? log.Contact : 'No contact record'}</td>
                             <td>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
                             <td>{log.Coments 

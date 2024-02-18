@@ -22,12 +22,12 @@ function LiveUpdate({user}: {user: any}) {
   const [isScolled, setIsScrolled] = useState<boolean>(false)
   const loader = useRef(null)
   const [currentScrollHeight, setCurrentScrollHeight] = useState(0)
-  useEffect(() => {
-    if (!isScolled && messagesEndRef.current && messagesEndRef.current.scrollHeight && messagesEndRef.current.scrollHeight !== 0) {
-      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
-      setIsScrolled(true)
-    }
-  }, [data, focused])
+  // useEffect(() => {
+  //   if (!isScolled && messagesEndRef.current && messagesEndRef.current.scrollHeight && messagesEndRef.current.scrollHeight !== 0) {
+  //     messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
+  //     setIsScrolled(true)
+  //   }
+  // }, [data, focused])
 
   useEffect(() => {
     const fetchCompanyData = async() => {
@@ -53,23 +53,23 @@ function LiveUpdate({user}: {user: any}) {
       })
       if (res.status === 200) {
         setLoading(false)
-        setData(data => [...res.data.reverse(), ...data])
+        setData(data => [ ...data, ...res.data])
       }
     }
     fetchCompanyData()
-    setTimeout(() => {
-      if (messagesEndRef.current) {
-        messagesEndRef.current.scrollTo({
-          top: messagesEndRef.current.scrollHeight - currentScrollHeight,
-          behavior: 'smooth',
-        })
-      }
-    }, 1000)
+    // setTimeout(() => {
+    //   if (messagesEndRef.current) {
+    //     messagesEndRef.current.scrollTo({
+    //       top: messagesEndRef.current.scrollHeight - currentScrollHeight,
+    //       behavior: 'smooth',
+    //     })
+    //   }
+    // }, 1000)
   }, [page])
 
 
   const handleNextPage = () => {
-    setCurrentScrollHeight(messagesEndRef.current.scrollHeight)
+    
     setPage(page + 1)
   }
 
@@ -252,10 +252,8 @@ function LiveUpdate({user}: {user: any}) {
         :
         
         (
-          <ul ref={messagesEndRef} className={styles['news-ul']}>
-            <li style={{ alignSelf: 'center' }}>
-              <button onClick={handleNextPage}>Load more...</button>
-            </li>
+          <ul className={styles['news-ul']}>
+            
 
             {
               data.filter(item => getFilter(item)).map((item: any) => {
@@ -396,11 +394,15 @@ function LiveUpdate({user}: {user: any}) {
                         </div>
                       </div>
                     </li>
+                  
                   </>
                 
                 )
               })
             }
+            <li style={{ alignSelf: 'center' }}>
+              <button onClick={handleNextPage}>Load more...</button>
+            </li>
             {showPopupAM && 
             <div 
               onMouseLeave={() => {
