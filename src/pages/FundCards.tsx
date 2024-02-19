@@ -772,11 +772,11 @@ export default function FundCards() {
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals'))); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
-                            <span style={{  }}>{record['HQ Country'] as string}</span>
+                            <span onClick={handleFullTextFilter} data-label='Location' className={styles['fund-list-multiple-item']}>{record['HQ Country'] as string}</span>
                           </div>
                             
                         </div>
-                        <span className={styles['fund-list-item']}>
+                        <span>
                           {
                             isInClientList(record['Status'])
                               ?
@@ -791,7 +791,13 @@ export default function FundCards() {
                               convertedOutput(record['Status']) as string || 'n/a'
                           }
                         </span>
-                        <span className={styles['fund-list-item']}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
+                        <span>
+                          {
+                            (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
+                              <span onClick={handleFullTextFilter} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
+                            ))
+                          }
+                        </span>
                         <span
 
                           data-label= 'Account Manager'
@@ -799,7 +805,7 @@ export default function FundCards() {
                           className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
                         <span 
                           data-label= 'Sector'
-                          onClick={handleAddFilter}
+                          
                           className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
                         <span 
                           data-label= 'Type'
@@ -807,12 +813,11 @@ export default function FundCards() {
                           className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
                         <span
                           data-label= 'Contact'
-                          onClick={handleAddFilter}
-                          className={styles['fund-list-item']}>
+                        >
                           {
                             (record['Contact'] || 'n/a').split(',').map((contact, index) => (
                               <>
-                                <span className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
+                                <span onClick={handleFullTextFilter} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
                                 {
                                   index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
                                 }
@@ -821,10 +826,18 @@ export default function FundCards() {
                           }
                         </span>
                         
-                        <span
-                          data-label= 'Co-Investors'
-                          onClick={handleAddFilter}
-                          className={styles['fund-list-item']}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
+                        <span>
+                          {
+                            (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
+                              <>
+                                <span onClick={handleFullTextFilter} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
+                                {
+                                  index < ((record['Co-Investors'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+                                }
+                              </>
+                            ))
+                          }
+                        </span>
                         <span 
                           data-label= 'Suitability Score'
                           onClick={handleAddFilter}

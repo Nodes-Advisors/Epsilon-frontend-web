@@ -22,7 +22,7 @@ export default function Clients() {
 
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [isLoading, setLoading] = useState(true)
-  const filterNames: CLIENT_FILTER_NAME[] = ['Client', 'Location', 'Transaction Type', 'Sector', 'Industry', 'Deal Type', 'Deal Size', 'Committed Investors', 'KPIs', 'Success Rate', 'Predictor Score', 'Clear Filters']
+  const filterNames: CLIENT_FILTER_NAME[] = ['Client', 'Location', 'Transaction Type', 'Sector', 'Industry', 'Deal Type', 'Deal Size', 'Committed Investors', 'Active Funds', 'Success Rate', 'Predictor Score', 'Clear Filters']
   const [filterName, setFilterName] = useState<CLIENT_FILTER_NAME>('')
   const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
   const user = useUserStore(state => state.user)
@@ -42,7 +42,7 @@ export default function Clients() {
     'Deal Type': [],
     'Deal Size': [],
     'Committed Investors': [],
-    'KPIs': [],
+    'Active Funds': [],
     'Success Rate': [],
     'Predictor Score': [],
     'Clear Filters': [],
@@ -105,7 +105,7 @@ export default function Clients() {
                 return filteredList[filterName].some((filter) => 
                   filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                 )
-              case 'KPIs':
+              case 'Active Funds':
                 return filteredList[filterName].some((filter) => 
                   filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                 )
@@ -183,7 +183,7 @@ export default function Clients() {
           return filteredList[filterName].some((filter) => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
           )
-        case 'KPIs':
+        case 'Active Funds':
           return filteredList[filterName].some((filter) => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
           )
@@ -255,8 +255,8 @@ export default function Clients() {
       return removeDuplicatesAndNull(clients.map((client) => client['deal_size']))
     case 'Committed Investors':
       return removeDuplicatesAndNull(clients.map((client) => client['Committed Investors']))
-    case 'KPIs':
-      return removeDuplicatesAndNull(clients.map((client) => client['KPIs']))
+    case 'Active Funds':
+      return removeDuplicatesAndNull(clients.map((client) => client['Active Funds']))
     case 'Success Rate':
       return removeDuplicatesAndNull(clients.map((client) => client['Success Rate']))
     case 'Predictor Score':
@@ -285,7 +285,7 @@ export default function Clients() {
           'Deal Type': [],
           'Deal Size': [],
           'Committed Investors': [],
-          'KPIs': [],
+          'Active Funds': [],
           'Success Rate': [],
           'Predictor Score': [],
           'Clear Filters': [],
@@ -483,7 +483,7 @@ export default function Clients() {
                 <span>Deal Type</span>
                 <span>Deal Size</span>
                 <span>Committed Investors</span>
-                <span>KPIs</span>
+                <span>Active Funds</span>
                 <span>Success Rate</span>
                 <span>Predictor Score </span>
               </div>
@@ -527,7 +527,7 @@ export default function Clients() {
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['deal_type'] as string | string[]) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['deal_size'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Committed Investors'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['KPIs'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Active Funds'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Success Rate'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Predictor Score'] as string[] | string) as string || 'n/a'}</span>
                        
