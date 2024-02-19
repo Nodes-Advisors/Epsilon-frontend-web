@@ -14,7 +14,34 @@ import { Chart, registerables } from "chart.js";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-// import { Table } from "@nextui-org/react";
+import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#ADD8E6", // Light creamy blue
+    },
+    secondary: {
+      main: "#E6E6FA", // Light creamy purple
+    },
+    background: {
+      left: "#575eab", // Dark grey for the leftmost column
+      default: "#4d6ea3",
+    },
+  },
+  // ...other theme options
+});
 
 import {
   Chart as ChartJS,
@@ -74,8 +101,8 @@ const kpiTableStyle = {
 
 const tableHeaderStyle = {
   padding: "0.75rem", // Add padding inside each cell for space
-  // backgroundColor: "#7B728E", // Slightly darker background for headers
-  // color: "#333", // Dark text for headers for contrast
+  backgroundColor: "#6958a8", // Slightly darker background for headers
+  // color: "#E6E6FA", // Dark text for headers for contrast
   border: "1px solid #aaa", // Light border for cells
 };
 
@@ -83,6 +110,43 @@ const tableCellStyle = {
   padding: "0.75rem", // Add padding inside each cell for space
   // backgroundColor: "#474E68", // Light background for cells for contrast
   border: "1px solid #aaa", // Light border for cells
+};
+
+// const groupRowStyle = {
+//   marginBottom: "1rem", // Adjust the space between groups
+//   borderCollapse: "collapse",
+// };
+
+// const categoryRowStyle = {
+//   backgroundColor: "#E6E6FA", // Light creamy purple, adjust the color as needed
+// };
+
+// const changeRowStyle = {
+//   backgroundColor: "#4d6ea3", // Light creamy blue, adjust the color as needed
+// };
+
+// const leftmostColumnStyle = {
+//   backgroundColor: "#575eab", // Dark grey, adjust the color as needed
+// };
+
+const categoryHeaderStyle = {
+  backgroundColor: "#6451a6",
+  color: "#ffffff",
+};
+
+const leftmostColumnStyle = {
+  backgroundColor: "#5a60b8",
+  color: "#ffffff",
+};
+
+const otherCellsStyle = {
+  backgroundColor: "#3d414f",
+  color: "#ffffff",
+};
+
+const changeCellsStyle = {
+  backgroundColor: "#466bab",
+  color: "#ffffff",
 };
 
 // Function to apply alternate row coloring
@@ -2179,6 +2243,90 @@ export default function KPIDash() {
                     style={{ overflow: "auto" }}
                   >
                     <div style={kpiTableContainerStyle}>
+                      <ThemeProvider theme={theme}>
+                        <TableContainer component={Paper}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell style={categoryHeaderStyle}>
+                                  Category
+                                </TableCell>
+                                {selectedClients.map((client, index) => (
+                                  <TableCell
+                                    key={index}
+                                    style={categoryHeaderStyle}
+                                  >
+                                    {client.toUpperCase()}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {selectedClientTableData.map(
+                                (row, index, array) => (
+                                  <React.Fragment key={`fragment-${index}`}>
+                                    <TableRow>
+                                      <TableCell style={leftmostColumnStyle}>
+                                        {row.year}
+                                      </TableCell>
+                                      {selectedClients.map((client) => (
+                                        <TableCell
+                                          key={`${client}-${index}`}
+                                          style={otherCellsStyle}
+                                        >
+                                          {row[client.toLowerCase()] !==
+                                          undefined
+                                            ? row[client.toLowerCase()]
+                                            : "-"}
+                                        </TableCell>
+                                      ))}
+                                    </TableRow>
+                                    {index > 0 && (
+                                      <TableRow>
+                                        <TableCell style={leftmostColumnStyle}>
+                                          Change from Previous
+                                        </TableCell>
+                                        {selectedClients.map((client, idx) => {
+                                          const currentValue =
+                                            row[client.toLowerCase()];
+                                          const previousValue =
+                                            array[index - 1][
+                                              client.toLowerCase()
+                                            ];
+                                          return (
+                                            <TableCell
+                                              key={`change-${client}-${index}`}
+                                              style={changeCellsStyle}
+                                            >
+                                              {previousValue !== undefined &&
+                                              currentValue !== undefined
+                                                ? calculatePercentageChange(
+                                                    previousValue,
+                                                    currentValue
+                                                  )
+                                                : "-"}
+                                            </TableCell>
+                                          );
+                                        })}
+                                      </TableRow>
+                                    )}
+                                  </React.Fragment>
+                                )
+                              )}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </ThemeProvider>
+                    </div>
+                  </KPIBlock>
+
+                  {/* <KPIBlock
+                    extraClass={styles["kpi-medium-dashboard"]}
+                    width="52.25rem"
+                    height="26.125rem"
+                    style={{ overflow: "auto" }}
+                  >
+                    <div style={kpiTableContainerStyle}>
                       <table style={kpiTableStyle}>
                         <thead>
                           <tr>
@@ -2245,7 +2393,7 @@ export default function KPIDash() {
                         </tbody>
                       </table>
                     </div>
-                  </KPIBlock>
+                  </KPIBlock> */}
 
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
