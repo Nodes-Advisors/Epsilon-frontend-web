@@ -187,6 +187,7 @@ export default function FundCards() {
   useEffect(() => {
     // If no filter is applied, show all data
     // console.log(filteredList, 'filteredList')
+    setItemOffset(0)
     if (Object.values(filteredList).every(filter => filter.length === 0)) {
       setFilteredData(data)
       return
