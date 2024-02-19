@@ -17,6 +17,7 @@ import { useUserStore } from '../store/store'
 import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
 import BookIcon from '../assets/images/book.png'
+import { handleFullTextFilter } from '../lib/utils'
 
 export default function Clients() {
 
@@ -87,7 +88,7 @@ export default function Clients() {
                 )
               case 'Sector':
                 return filteredList[filterName].some((filter) => 
-                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                  filter === record['sector'] || (record['sector'] && record['sector'].includes(filter)),
                 )
               case 'Industry':
                 return filteredList[filterName].some((filter) => 
@@ -165,7 +166,7 @@ export default function Clients() {
           )
         case 'Sector':
           return filteredList[filterName].some((filter) => 
-            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+            filter === record['sector'] || (record['sector'] && record['sector'].includes(filter)),
           )
         case 'Industry':
           return filteredList[filterName].some((filter) => 
@@ -265,6 +266,12 @@ export default function Clients() {
       return []
     }
   }
+
+  const handleClickToFilter = (e: React.MouseEvent<HTMLSpanElement>) => {
+    handleFullTextFilter(e, setFilteredList)
+    setItemOffset(0)
+  }
+
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).nodeName === 'BUTTON') {
@@ -516,16 +523,53 @@ export default function Clients() {
                               localStorage.setItem('client-id', record._id as string) 
                               navigate(`/client-card/${record._id}`)  }} className={styles['fund-name']}>{record.name ? record.name as string : 'No Name Record'}</span>
                             <span>({record['acronym']})</span>
-                            <span style={{  }}>{record['hq location'] ? record['hq location'] : 'No Location Record'}</span>
+                            <span 
+                              className={styles['fund-list-item']}
+                              data-label='Location'
+                              onClick={handleClickToFilter}
+                              style={{  }}>{record['hq location'] ? record['hq location'] : 'No Location Record'}</span>
                           </div>
                             
                         </div>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['status'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['transaction_type'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['industry'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['sector'] as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['deal_type'] as string | string[]) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['deal_size'] as string[] | string) as string || 'n/a'}</span>
+                        <span
+                          className={styles['fund-list-item']}
+                          data-label='Transaction Type'
+                          onClick={handleClickToFilter}
+                        >
+                          {convertedOutput(record['transaction_type']) as string || 'n/a'}
+                        </span>
+                        <span
+                          className={styles['fund-list-item']}
+                          data-label='Industry'
+                          onClick={handleClickToFilter}
+                        >
+                          {convertedOutput(record['industry']) as string || 'n/a'}
+                        </span>
+                        <span
+                          className={styles['fund-list-item']}
+                          data-label='Sector'
+                          onClick={handleClickToFilter}
+                        >
+                          {convertedOutput(record['sector']) as string || 'n/a'}
+                        </span>
+                        
+                        <span
+                          className={styles['fund-list-item']}
+                          data-label='Deal Type'
+                          onClick={handleClickToFilter}
+                        >
+                          {convertedOutput(record['deal_type']) as string || 'n/a'}
+                        </span>
+
+                        <span
+                          className={styles['fund-list-item']}
+                          data-label='Deal Size'
+                          onClick={handleClickToFilter}
+                        >
+                          {convertedOutput(record['deal_size']) as string || 'n/a'}
+                        </span>
+                       
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Committed Investors'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Active Funds'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Success Rate'] as string[] | string) as string || 'n/a'}</span>

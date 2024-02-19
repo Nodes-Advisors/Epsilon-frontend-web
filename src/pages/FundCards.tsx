@@ -19,6 +19,7 @@ import FundStatus from '../components/status'
 import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
 import WebSocketContext from '../websocket/WebsocketContext'
+import { handleFullTextFilter } from '../lib/utils'
 
 export default function FundCards() {
   
@@ -551,16 +552,6 @@ export default function FundCards() {
     }
   }
 
-  const handleFullTextFilter = (e) => {
-    // get data-label of the clicked element
-    const target = e.target as HTMLElement
-    const text = target.textContent as string
-    const label = target.getAttribute('data-label')
-    setFilteredList({
-      ...filteredList,
-      [label]: [text],
-    })
-  }
 
   const handleAddFilter = (e) => {
     
@@ -772,7 +763,7 @@ export default function FundCards() {
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals'))); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
-                            <span onClick={handleFullTextFilter} data-label='Location' className={styles['fund-list-multiple-item']}>{record['HQ Country'] as string}</span>
+                            <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Location' className={styles['fund-list-multiple-item']}>{record['HQ Country'] as string}</span>
                           </div>
                             
                         </div>
@@ -794,14 +785,14 @@ export default function FundCards() {
                         <span>
                           {
                             (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
-                              <span onClick={handleFullTextFilter} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
+                              <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
                             ))
                           }
                         </span>
                         <span
 
                           data-label= 'Account Manager'
-                          onClick={handleFullTextFilter}
+                          onClick={e => handleFullTextFilter(e, setFilteredList)}
                           className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
                         <span 
                           data-label= 'Sector'
@@ -809,7 +800,7 @@ export default function FundCards() {
                           className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
                         <span 
                           data-label= 'Type'
-                          onClick={handleFullTextFilter}
+                          onClick={e => handleFullTextFilter(e, setFilteredList)}
                           className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
                         <span
                           data-label= 'Contact'
@@ -817,7 +808,7 @@ export default function FundCards() {
                           {
                             (record['Contact'] || 'n/a').split(',').map((contact, index) => (
                               <>
-                                <span onClick={handleFullTextFilter} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
+                                <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
                                 {
                                   index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
                                 }
@@ -830,7 +821,7 @@ export default function FundCards() {
                           {
                             (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
                               <>
-                                <span onClick={handleFullTextFilter} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
+                                <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
                                 {
                                   index < ((record['Co-Investors'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
                                 }

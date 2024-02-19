@@ -12,3 +12,14 @@ export const convertedOutput = (input: string[] | string) => {
     return input
   }
 }
+
+export  const handleFullTextFilter = (e, dispatch) => {
+  // get data-label of the clicked element
+  const target = e.target as HTMLElement
+  const text = target.textContent as string
+  const label = target.getAttribute('data-label')
+  dispatch(prev => ({
+    ...prev,
+    [label]: [text],
+  }))
+}
