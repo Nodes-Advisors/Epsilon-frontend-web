@@ -4,6 +4,7 @@ import Skeleton from 'react-loading-skeleton'
 import GPTdata from './GPTdata'
 import axios from 'axios'
 import { AsyncImage } from 'loadable-image'
+import { useNavigate } from 'react-router-dom'
 
 function LiveUpdate({user}: {user: any}) {
   const [isLoading, setLoading] = useState(true)
@@ -23,12 +24,7 @@ function LiveUpdate({user}: {user: any}) {
   const [isScolled, setIsScrolled] = useState<boolean>(false)
   const loader = useRef(null)
   const [currentScrollHeight, setCurrentScrollHeight] = useState(0)
-  // useEffect(() => {
-  //   if (!isScolled && messagesEndRef.current && messagesEndRef.current.scrollHeight && messagesEndRef.current.scrollHeight !== 0) {
-  //     messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
-  //     setIsScrolled(true)
-  //   }
-  // }, [data, focused])
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchCompanyData = async() => {
@@ -230,13 +226,25 @@ function LiveUpdate({user}: {user: any}) {
 
   const getImage = (name: string | undefined | null) => {
     if (name) {
-      console.log(name)
+      // console.log(name)
       // console.log(nodesTeam)
       const found = nodesTeam.find(item => item.name.includes(name))
-      console.log(found)
+      // console.log(found)
       if (found) {
-        console.log(found.profile_image)
+        // console.log(found.profile_image)
         return found.profile_image
+      } else {
+        return ''
+      }
+    }
+    return ''
+  }
+
+  const getFullName = (name: string | undefined | null) => {
+    if (name) {
+      const found = nodesTeam.find(item => item.name.includes(name))
+      if (found) {
+        return found.name
       } else {
         return ''
       }
@@ -303,12 +311,16 @@ function LiveUpdate({user}: {user: any}) {
                     <li key={item.id} style={{ display: 'flex', alignItems: 'center' }}>
 
                       <AsyncImage
+                        onClick={() => navigate(`/user-profile/${getFullName(item.account_holder).split(' ').join('-')}`)}
                         src={getImage(item.account_holder)}
-                        style={{ width: '3rem', height: '3rem', borderRadius: '50%', marginRight: '1rem' }}
+                        style={{ width: '3rem', cursor: 'pointer',
+                          height: '3rem', borderRadius: '50%', marginRight: '1rem' }}
                       /> 
                       <div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}> 
-                          <span style={{ fontSize: '1rem', color: '#aaa' }}>{item.account_holder}</span>
+                          <span
+                            onClick={() => navigate(`/user-profile/${getFullName(item.account_holder).split(' ').join('-')}`)}
+                            style={{ fontSize: '1rem', color: '#aaa' }}>{item.account_holder}</span>
                           <span style={{ fontSize: '1rem', color: '#aaa' }}>{formatDate(item.last_updated_status_date)}</span>
                         </div>
                         <div style={{ padding: '0.5rem 1rem', borderRadius: '0.75rem', backgroundColor: '#9993' }}>

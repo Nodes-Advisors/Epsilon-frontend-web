@@ -42,6 +42,7 @@ export default function Profile(): JSX.Element {
   const [hoveredCollection, setHoveredCollection] = useState<string>('')
   const [changeToInput, setChangeToInput] = useState<boolean>(false)
   const newCollectionRef = useRef<HTMLInputElement>(null)
+  const [nodesTeam, setNodesTeam] = useState<any[]>([])
 
   function formatDate(timestamp) {
     const date = new Date(timestamp)
@@ -66,13 +67,13 @@ export default function Profile(): JSX.Element {
   
   useEffect(() => {
     const record = funds.filter((record) => record._id === id)[0]
-    console.log(record)
+    // console.log(record)
     setSelectedFundName(record.Funds)
     async function fetchHistoricalLog() {
       try {
         const res = await fetch(`http://localhost:5001/gethislog/${record.Funds}`)
         const data = await res.json()
-        console.log(data)
+        // console.log(data)
         setHisLogs(data)
       } catch (error) {
         console.error(error)
@@ -201,6 +202,45 @@ export default function Profile(): JSX.Element {
     fetchSavedCollections()
   }, [])
 
+  useEffect(() => {
+    const fetchNodesTeam = async () => {
+      setLoading(true)
+      try {
+        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        if (res.status === 200) {
+          setLoading(false)
+          setNodesTeam(res.data)
+          // console.log(res.data)
+        }
+      } catch (error) {
+        setLoading(false)
+        console.error(error)
+      }
+    }
+    fetchNodesTeam()
+    
+  }, [])
+
+  const getImage = (name: string | undefined | null) => {
+    if (name) {
+      // console.log(name)
+      // console.log(nodesTeam)
+      const found = nodesTeam.find(item => item.name.includes(name))
+      // console.log(found)
+      if (found) {
+        // console.log(found.profile_image)
+        return found.profile_image
+      } else {
+        return ''
+      }
+    }
+    return ''
+  }
+
   return (
     <div 
       style={{ overflow: 'hidden', position: 'relative', gap: '3vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
@@ -274,25 +314,30 @@ export default function Profile(): JSX.Element {
                         hislogs.length > 0
                           ?
                           <ul
+                            className={styles['relationship-list']}
                             style={{ listStyleType: 'none', color: '#9b93af', fontSize: '1.25rem',
-                              maxHeight: '30vh', overflowY: 'auto', overflowX: 'hidden',
+                              height: '20vh', overflowY: 'auto', overflowX: 'hidden',
                               paddingRight: '4rem', margin: '0', display: 'flex', flexDirection: 'column', gap: '4rem' }}
                           >
                             {
-                              hislogs.map((log, i) => (
-                                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
-                                    <img src={''} alt="" className={styles['headImg']} />
-                                    <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Nodes ? log.Nodes : 'Someone'}</span>
-                                  </div>
+                              hislogs
+                                .filter((log, index, self) =>
+                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact)
+                                )
+                                .map((log, i) => (
+                                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                      <AsyncImage src={getImage(log.Nodes)} alt="" className={styles['headImg']} />
+                                      <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Nodes ? log.Nodes : 'Someone@Nodes'}</span>
+                                    </div>
                                   
-                                  <div style={{ width: '5rem', height: '0.1px', backgroundColor: '#fff' }}></div>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
-                                    <img src={''} alt="" className={styles['headImg']} />
-                                    <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Contact}</span>
-                                  </div>
-                                </li>
-                              ))
+                                    <div style={{ width: '5rem', height: '0.1px', backgroundColor: '#fff' }}></div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                      <AsyncImage src={getImage(log.Contact)} alt="" className={styles['headImg']} />
+                                      <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Contact ? log.Contact : 'Someone@This Fund'}</span>
+                                    </div>
+                                  </li>
+                                ))
     
                             }
                           </ul>

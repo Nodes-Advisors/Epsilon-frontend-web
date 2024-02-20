@@ -299,6 +299,33 @@ app.get('/gethislog/:fundName', async (req, res) => {
   }
 })
 
+app.get('/getclienthislog/:clientAcronym', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('HistoricalLogs')
+    // console.log('fundName', req.params.fundName)
+    const logs = await collection.find({ Client: { $regex: new RegExp(`^${req.params.clientAcronym}$`, 'i') } }).toArray()
+    const clientCollection = database.collection('FundCard2')
+    if (logs) {
+      const updatedLogs = await Promise.all(logs.map(async (log) => {
+        const fund = await clientCollection.findOne({ Funds: { $regex: new RegExp(`^${log.VC}$`, 'i') } })
+        
+    
+        return log
+      }))
+    
+      updatedLogs.sort((a, b) => new Date(b.Date) - new Date(a.Date))
+      res.json(updatedLogs)
+    } else {
+      res.status(404).send('Logs not found')
+    }
+    // res.json(logs);
+  } catch (error) {
+    console.error(error)
+    res.status(500).send('Server error')
+  }
+})
+
 app.get('/getrequest', async (req, res) => {
   try {
     const database = client.db('dev')

@@ -1,6 +1,6 @@
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
-import { useSavedFundsStore, useUserStore } from '../store/store'
+import { useClientsStore, useSavedFundsStore, useUserStore } from '../store/store'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import venture_logo from '../assets/images/venture-logo-example.png'
@@ -19,10 +19,11 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import FundStatus from '../components/status'
 import ReactPaginate from 'react-paginate'
+import { handleFullTextFilter } from '../lib/utils'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
-  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Responsiveness Rate', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [openRequestPanel, setOpenRequestPanel] = useState(false)
   const navigate = useNavigate()
@@ -41,7 +42,8 @@ export default function SavedList() {
   const [pendingList, setPendingList] = useState<string[]>([])
   const [selectedFundName, setSelectedFundName] = useState<string>('')
   const [data, setData] = useState<any[]>([])
-
+  const clients = useClientsStore(state => state.clients)
+  
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -54,6 +56,7 @@ export default function SavedList() {
     'Suitability Score': string[],
     'Co-Investors': string[],
     'Clear Filters': string[],
+    'Responsiveness Rate': string[],
   }>(localStorage.getItem('saved-filter') ? JSON.parse(localStorage.getItem('saved-filter') as string) : {
     '': [],
     'Account Manager': [],
@@ -66,6 +69,7 @@ export default function SavedList() {
     'Suitability Score': [],
     'Co-Investors': [],
     'Clear Filters': [],
+    'Responsiveness Rate': [],
   })
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -89,6 +93,7 @@ export default function SavedList() {
           'Suitability Score': [],
           'Co-Investors': [],
           'Clear Filters': [],
+          'Responsiveness Rate': [],
           
         })
         return
@@ -200,6 +205,8 @@ export default function SavedList() {
                   filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                 )
               case 'Suitability Score':
+                return [ '>90', '>80', '60-80', '<60']
+              case 'Responsiveness Rate':
                 return [ '>90', '>80', '60-80', '<60']
               case 'Co-Investors':
                 return filteredList[filterName].some(filter => 
@@ -339,6 +346,8 @@ export default function SavedList() {
           )
         case 'Suitability Score':
           return [ '>90', '>80', '60-80', '<60']
+        case 'Responsiveness Rate':
+          return [ '>90', '>80', '60-80', '<60']
         case 'Co-Investors':
           return filteredList[filterName].some(filter => 
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
@@ -411,12 +420,43 @@ export default function SavedList() {
       return removeDuplicatesAndNull(data.map((record) => record['Contact'] as string))
     case 'Suitability Score':
       return ['>90', '>80', '60-80', '<60']
+    case 'Responsiveness Rate':
+      return ['>90', '>80', '60-80', '<60']
     case 'Co-Investors':
       // console.log(savedFunds.map((record) => record as string))
       return removeDuplicatesAndNull(data.map((record) => record['Co-Investors'] as string))
     default:
       return []
     }
+  }
+
+  const handleAddFilter = (e) => {
+  
+  }
+
+  const isInClientList = (statusString: string) => {
+
+    for (const client of clients) {
+      const nameIndex = statusString.toUpperCase().indexOf(client.name.toUpperCase())
+      const acronymIndex = statusString.toUpperCase().indexOf(client.acronym.toUpperCase())
+
+      if (nameIndex !== -1 && client.name) {
+        return {
+          match: client.name,
+          prev: statusString.substring(0, nameIndex),
+          next: statusString.substring(nameIndex + client.name.length),
+          id: client._id,
+        }
+      } else if (acronymIndex !== -1 && client.acronym) {
+        return {
+          match: client.acronym,
+          prev: statusString.substring(0, acronymIndex),
+          next: statusString.substring(acronymIndex + client.acronym.length),
+          id: client._id,
+        }
+      }
+    }
+    return null
   }
 
   const generateColorList = (length, contact, status) => {
@@ -574,7 +614,7 @@ export default function SavedList() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${decodeURIComponent(window.location.href.split('/')[window.location.href.split('/').length - 1])} list)`}</span></span>
-                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)', gap: '2rem', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
                     <span>Status</span>
                     <span>Past Deals</span>
@@ -585,12 +625,13 @@ export default function SavedList() {
                     
                     <span>Co-Investors</span>
                     <span>Suitability Score</span>
+                    <span>Responsiveness Rate</span>
                   </div>
                   <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                   {
                     currentItems.map((record, index) => (
                       <>
-                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr repeat(4, 1.5fr)' }}> 
+                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
@@ -621,20 +662,77 @@ export default function SavedList() {
                               <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
-                              <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('saved-filter', JSON.stringify(filteredList)); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
-                              <span style={{  }}>{record['HQ Country'] as string}</span>
+                              <span onClick={() => { localStorage.setItem('fund-id', record._id as string); localStorage.setItem('filter', JSON.stringify(filteredList)); localStorage.setItem('deals', JSON.stringify(getFilteredList('Deals'))); navigate(`/fund-card/${record._id}`)  }} className={styles['fund-name']}>{record['Funds'] as string}</span>
+                              <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Location' className={styles['fund-list-multiple-item']}>{record['HQ Country'] as string}</span>
                             </div>
                             
                           </div>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Status'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Past Deals'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{record['Account Manager'] ? record['Account Manager'] : 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left', maxHeight: '5rem' }}>{convertedOutput(record['Sector'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Contact'] as string[] | string) || 'n/a'}</span>
-                          
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Co-Investors'] as string[] | string) as string || 'n/a'}</span>
-                          <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
+                          <span>
+                          {
+                            isInClientList(record['Status'])
+                              ?
+                              <>
+                                <span >{isInClientList(record['Status']).prev}</span>
+                                <span 
+                                  onClick={() => navigate(`/client-card/${isInClientList(record['Status']).id}`)}
+                                  style={{ color: '#23D5F9', fontWeight: '700', cursor: 'pointer' }}>{isInClientList(record['Status']).match}</span>
+                                <span>{isInClientList(record['Status']).next}</span>
+                              </>
+                              :
+                              convertedOutput(record['Status']) as string || 'n/a'
+                          }
+                        </span>
+                        <span>
+                          {
+                            (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
+                              <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
+                            ))
+                          }
+                        </span>
+                        <span
+
+data-label= 'Account Manager'
+onClick={e => handleFullTextFilter(e, setFilteredList)}
+className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
+<span 
+data-label= 'Sector'
+
+className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
+<span 
+data-label= 'Type'
+onClick={e => handleFullTextFilter(e, setFilteredList)}
+className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
+<span
+data-label= 'Contact'
+>
+{
+  (record['Contact'] || 'n/a').split(',').map((contact, index) => (
+    <>
+      <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
+      {
+        index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+      }
+    </>
+  ))
+}
+</span>
+
+<span>
+{
+  (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
+    <>
+      <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
+      {
+        index < ((record['Co-Investors'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+      }
+    </>
+  ))
+}
+</span>
+<span 
+                          data-label= 'Suitability Score'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
                         </div>
                         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem'}}></div>
                       </>

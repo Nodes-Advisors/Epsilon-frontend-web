@@ -4,6 +4,12 @@ import styles from '../styles/kpi-block.module.less'
 
 function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: string, selectedClients: string[], tasks: any, setTasks: any}) {
     
+  const [itemsToShow, setItemsToShow] = useState(5) // Initial number of items to show
+
+  const loadMore = () => {
+    setItemsToShow(itemsToShow + 10) // Load 5 more items
+  }
+
   const handleDragStart = (e, task, stage) => {
     // console.log('dragging', task, stage)
 
@@ -67,12 +73,10 @@ function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: s
               .includes(deal.company_acronym.toUpperCase()) && isWithinTimeScale(deal.last_updated_status_date)
           }
           
-          // console.log(deal.last_updated_status_date)
-          // return selectedClients
-          //   .map((client) => client.toUpperCase())
-          //   .includes(deal.company_acronym.toUpperCase()) && isWithinTimeScale(deal.date)
         })
-        // console.log(STAGES[index])
+        
+        const tasksToShow = filteredTasks.slice(0, itemsToShow);
+
         return (
           <div
             className={styles['stage-task-layout']}
@@ -91,7 +95,7 @@ function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: s
             >
               {STAGES[index]} <span style={{ color: 'palegreen' }}>{filteredTasks.length}</span>
             </div>
-            {filteredTasks.map((deal, index) => (
+            {tasksToShow.map((deal, index) => (
               <div
                 // onMouseOver={() => console.log(deal.company_acronym)}
                 className={styles['task']}
@@ -143,6 +147,15 @@ function DealFunnel({timeScale, selectedClients, tasks, setTasks}: {timeScale: s
           </div>
         )
       })}
+      {itemsToShow >= tasks.length ? (
+        <p>All data loaded</p>
+      ) : 
+        <button
+          style={{ position: 'absolute', bottom: '0rem', width: '10rem', height: '3rem', padding: '0.5rem', left: '50%' }}
+          onClick={loadMore}>
+            Load More
+        </button>
+      }
     </div>
   )
            

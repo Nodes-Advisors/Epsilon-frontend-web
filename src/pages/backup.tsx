@@ -1,19 +1,19 @@
 // @ts-nocheck
-import { KPIBlock, KPIText } from "../components/kpi-component";
-import styles from "../styles/kpi-block.module.less";
-import TICKIcon from "../assets/svgs/tick.svg?react";
-import EpsilonLogo from "../assets/images/epsilon-logo.png";
-import { useEffect, useState, useRef } from "react";
-import Skeleton from "react-loading-skeleton";
-import { Bar, Line } from "react-chartjs-2";
-import axios from "axios";
-import cancelButton from "../assets/images/cancel.png";
-import { useTokenStore } from "../store/store";
-import { STAGES } from "../lib/constants";
-import { Chart, registerables } from "chart.js";
-import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import { KPIBlock, KPIText } from '../components/kpi-component';
+import styles from '../styles/kpi-block.module.less';
+import TICKIcon from '../assets/svgs/tick.svg?react';
+import EpsilonLogo from '../assets/images/epsilon-logo.png';
+import { useEffect, useState, useRef } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import { Bar, Line } from 'react-chartjs-2';
+import axios from 'axios';
+import cancelButton from '../assets/images/cancel.png';
+import { useTokenStore } from '../store/store';
+import { STAGES } from '../lib/constants';
+import { Chart, registerables } from 'chart.js';
+import * as am5 from '@amcharts/amcharts5';
+import * as am5xy from '@amcharts/amcharts5/xy';
+import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 
 import {
   Chart as ChartJS,
@@ -26,8 +26,8 @@ import {
   Tooltip,
   Legend,
   Filler,
-} from "chart.js";
-import MemoizedDealFunnel from "../components/deal-funnel";
+} from 'chart.js';
+import MemoizedDealFunnel from '../components/deal-funnel';
 
 ChartJS.register(
   CategoryScale,
@@ -43,15 +43,15 @@ ChartJS.register(
 
 const chartStyle = {
   // background: "#eff2f7",
-  borderRadius: "8px",
-  width: "fit-content",
-  height: "fit-content",
+  borderRadius: '8px',
+  width: 'fit-content',
+  height: 'fit-content',
 };
 
 const headerStyle = {
-  padding: "10px",
-  borderBottom: "1px solid #cdcdcd",
-  fontFamily: "sans-serif",
+  padding: '10px',
+  borderBottom: '1px solid #cdcdcd',
+  fontFamily: 'sans-serif',
 };
 
 const bodyStyle2 = {
@@ -79,7 +79,7 @@ export default function KPIDash() {
   const [clients, setClients] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [showAllFilters, setShowAllFilters] = useState<boolean>(false);
-  const [focused, setFocused] = useState<"all" | "you">("all");
+  const [focused, setFocused] = useState<'all' | 'you'>('all');
   const [isLoading, setLoading] = useState(true);
   const token = useTokenStore((state) => state.token);
   const [dealData, setDealData] = useState<DealData[]>([]);
@@ -91,7 +91,7 @@ export default function KPIDash() {
     labels: [],
     datasets: [],
   });
-  const [selectedDeal, setSelectedDeal] = useState("");
+  const [selectedDeal, setSelectedDeal] = useState('');
   const [chartData, setChartData] = useState({});
   const [aggregatedKPIs, setAggregatedKPIs] = useState({
     totalOutreach: 0,
@@ -101,24 +101,24 @@ export default function KPIDash() {
     passes: 0,
   });
   const [timeScale, setTimeScale] = useState<
-    "today" | "this week" | "last week" | "month to date" | "year to date"
-  >("");
+    'today' | 'this week' | 'last week' | 'month to date' | 'year to date'
+  >('');
 
   useEffect(() => {
     const fetchAggregatedKPIs = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5002/total-outreach",
+          'http://localhost:5002/total-outreach',
           {
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
               Authorization: token, // if you're using authentication
             },
           }
         );
         setAggregatedKPIs(response.data);
       } catch (error) {
-        console.error("Error fetching aggregated KPIs:", error);
+        console.error('Error fetching aggregated KPIs:', error);
       }
     };
 
@@ -149,21 +149,21 @@ export default function KPIDash() {
   });
 
   useEffect(() => {
-    if (focused === "you") {
+    if (focused === 'you') {
       const fetchTylerKPIs = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5002/account-holder-kpis/Tyler",
+            'http://localhost:5002/account-holder-kpis/Tyler',
             {
               headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 Authorization: token, // Include this if you're using token-based auth
               },
             }
           );
           setTylerKPIs(response.data);
         } catch (error) {
-          console.error("Error fetching KPIs for Tyler:", error);
+          console.error('Error fetching KPIs for Tyler:', error);
         }
       };
 
@@ -176,14 +176,14 @@ export default function KPIDash() {
   function createChartDataFromKPIs(kpis) {
     return {
       labels: [
-        "Total Outreach",
-        "Deck Requested",
-        "Meeting Requested",
-        "DD Requested",
+        'Total Outreach',
+        'Deck Requested',
+        'Meeting Requested',
+        'DD Requested',
       ],
       datasets: [
         {
-          label: "KPIs for Tyler",
+          label: 'KPIs for Tyler',
           data: [
             kpis.totalOutreach,
             kpis.deckRequested,
@@ -191,16 +191,16 @@ export default function KPIDash() {
             kpis.ddRequested,
           ],
           backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(255, 206, 86, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
           ],
           borderColor: [
-            "rgba(255,99,132,1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
+            'rgba(255,99,132,1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
           ],
           borderWidth: 1,
         },
@@ -224,9 +224,9 @@ export default function KPIDash() {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -235,24 +235,24 @@ export default function KPIDash() {
     const fetchClients = async () => {
       try {
         const response = await axios.get<string[]>(
-          "http://localhost:5001/getClients",
+          'http://localhost:5001/getClients',
           {
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
               Authorization: token,
             },
           }
         );
         setClients(response.data);
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        console.error('Error fetching clients:', error);
       }
     };
 
     const fetchCompanyData = async () => {
-      const res = await axios.get("http://localhost:5001/fundrisingpipeline", {
+      const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
       if (res.status === 200) {
@@ -298,7 +298,7 @@ export default function KPIDash() {
   const [combinedChartData, setCombinedChartData] = useState({});
 
   const tableStyle = {
-    width: "100%",
+    width: '100%',
   };
 
   useEffect(() => {
@@ -306,11 +306,11 @@ export default function KPIDash() {
     const fetchDealData = async () => {
       try {
         const response = await axios.get<DealData[]>(
-          "http://localhost:5002/deals"
+          'http://localhost:5002/deals'
         );
         setDealData(response.data);
       } catch (error) {
-        console.error("Error fetching deal data:", error);
+        console.error('Error fetching deal data:', error);
       }
     };
 
@@ -318,11 +318,11 @@ export default function KPIDash() {
     const fetchAccountHolderData = async () => {
       try {
         const response = await axios.get<AccountHolderData[]>(
-          "http://localhost:5002/account-holders"
+          'http://localhost:5002/account-holders'
         );
         setAccountHolderData(response.data);
       } catch (error) {
-        console.error("Error fetching account holder data:", error);
+        console.error('Error fetching account holder data:', error);
       }
     };
 
@@ -350,8 +350,8 @@ export default function KPIDash() {
 
   // Function to calculate percentage change
   const calculatePercentageChange = (current, previous) => {
-    if (previous === 0) return "N/A"; // Handle division by zero
-    return (((current - previous) / previous) * 100).toFixed(1) + "%";
+    if (previous === 0) return 'N/A'; // Handle division by zero
+    return (((current - previous) / previous) * 100).toFixed(1) + '%';
   };
 
   const prepareChartData = (dealName) => {
@@ -373,26 +373,26 @@ export default function KPIDash() {
 
     setChartData({
       labels: [
-        "Total Outreach",
-        "Requested Deck",
-        "Requested Meeting",
-        "Requested DD",
+        'Total Outreach',
+        'Requested Deck',
+        'Requested Meeting',
+        'Requested DD',
       ],
       datasets: [
         {
           label: dealName,
           data: dataPoints,
           backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(255, 206, 86, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
           ],
           borderColor: [
-            "rgba(255,99,132,1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
+            'rgba(255,99,132,1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
           ],
           borderWidth: 1,
         },
@@ -419,28 +419,28 @@ export default function KPIDash() {
       labels: chartLabels,
       datasets: [
         {
-          label: "Total Outreach",
+          label: 'Total Outreach',
           data: totalOutreachData,
-          backgroundColor: "rgba(255, 99, 132, 1)", // Brighter color
-          barThickness: "flex", // Adjust bar thickness
+          backgroundColor: 'rgba(255, 99, 132, 1)', // Brighter color
+          barThickness: 'flex', // Adjust bar thickness
         },
         {
-          label: "Requested Deck",
+          label: 'Requested Deck',
           data: deckRequestedData,
-          backgroundColor: "rgba(54, 162, 235, 1)", // Brighter color
-          barThickness: "flex", // Adjust bar thickness
+          backgroundColor: 'rgba(54, 162, 235, 1)', // Brighter color
+          barThickness: 'flex', // Adjust bar thickness
         },
         {
-          label: "Requested Meeting",
+          label: 'Requested Meeting',
           data: meetingRequestedData,
-          backgroundColor: "rgba(255, 206, 86, 1)", // Brighter color
-          barThickness: "flex", // Adjust bar thickness
+          backgroundColor: 'rgba(255, 206, 86, 1)', // Brighter color
+          barThickness: 'flex', // Adjust bar thickness
         },
         {
-          label: "Requested DD",
+          label: 'Requested DD',
           data: ddRequestedData,
-          backgroundColor: "rgba(0, 222, 55, 1)", // Brighter color
-          barThickness: "flex", // Adjust bar thickness
+          backgroundColor: 'rgba(0, 222, 55, 1)', // Brighter color
+          barThickness: 'flex', // Adjust bar thickness
         },
       ],
     });
@@ -448,7 +448,7 @@ export default function KPIDash() {
 
   // Deal Chart Options
   const chartOptions = {
-    indexAxis: "y", // For horizontal bar chart
+    indexAxis: 'y', // For horizontal bar chart
     elements: {
       bar: {
         borderWidth: 1.5,
@@ -460,21 +460,21 @@ export default function KPIDash() {
     maintainAspectRatio: false, // Add this to maintain aspect ratio
     plugins: {
       legend: {
-        position: "right",
+        position: 'right',
         labels: {
-          color: "white", // Adjust to white color for visibility on black background
+          color: 'white', // Adjust to white color for visibility on black background
         },
       },
     },
     scales: {
       x: {
         ticks: {
-          color: "white", // Adjust to white color for visibility on black background
+          color: 'white', // Adjust to white color for visibility on black background
         },
       },
       y: {
         ticks: {
-          color: "white", // Adjust to white color for visibility on black background
+          color: 'white', // Adjust to white color for visibility on black background
           autoSkip: false, // Ensure all labels are shown
           maxRotation: 0, // Prevent rotation of labels
           minRotation: 0,
@@ -630,8 +630,8 @@ export default function KPIDash() {
   // };
   //////////////////////////////////////////////////////////////////////////////
 
-  const [category, setCategory] = useState<"dashboard" | "deal-funnel">(
-    "dashboard"
+  const [category, setCategory] = useState<'dashboard' | 'deal-funnel'>(
+    'dashboard'
   );
 
   useEffect(() => {
@@ -767,8 +767,8 @@ export default function KPIDash() {
         am5xy.XYChart.new(root, {
           panX: false,
           panY: false,
-          wheelX: "panX",
-          wheelY: "zoomX",
+          wheelX: 'panX',
+          wheelY: 'zoomX',
           paddingLeft: 0,
           layout: root.verticalLayout,
         })
@@ -776,13 +776,13 @@ export default function KPIDash() {
 
       const data = [
         {
-          stage: "Total Outreach",
+          stage: 'Total Outreach',
           income: aggregatedKPIs.totalOutreach,
           expenses: aggregatedKPIs.totalOutreach,
           change: 0,
         },
         {
-          stage: "Deck Requested",
+          stage: 'Deck Requested',
           income: aggregatedKPIs.deckRequested,
           expenses: aggregatedKPIs.deckRequested,
           change: (
@@ -791,7 +791,7 @@ export default function KPIDash() {
           ).toFixed(2),
         },
         {
-          stage: "Meeting Requested",
+          stage: 'Meeting Requested',
           income: aggregatedKPIs.meetingRequested,
           expenses: aggregatedKPIs.meetingRequested,
           change: (
@@ -800,7 +800,7 @@ export default function KPIDash() {
           ).toFixed(2),
         },
         {
-          stage: "DD Requested",
+          stage: 'DD Requested',
           income: aggregatedKPIs.ddRequested,
           expenses: aggregatedKPIs.ddRequested,
           change: (
@@ -812,7 +812,7 @@ export default function KPIDash() {
 
       const xAxis = chart.xAxes.push(
         am5xy.CategoryAxis.new(root, {
-          categoryField: "stage",
+          categoryField: 'stage',
           renderer: am5xy.AxisRendererX.new(root, {
             minorGridEnabled: true,
             minGridDistance: 60,
@@ -820,11 +820,11 @@ export default function KPIDash() {
         })
       );
       xAxis.data.setAll(data);
-      xAxis.get("renderer").labels.template.setAll({
-        fill: am5.color("#ffffff"), // White color for axis labels
+      xAxis.get('renderer').labels.template.setAll({
+        fill: am5.color('#ffffff'), // White color for axis labels
       });
-      xAxis.get("renderer").grid.template.setAll({
-        stroke: am5.color("#ffffff"), // White color for grid lines
+      xAxis.get('renderer').grid.template.setAll({
+        stroke: am5.color('#ffffff'), // White color for grid lines
       });
 
       const yAxis = chart.yAxes.push(
@@ -834,19 +834,19 @@ export default function KPIDash() {
           renderer: am5xy.AxisRendererY.new(root, {}),
         })
       );
-      yAxis.get("renderer").labels.template.setAll({
-        fill: am5.color("#ffffff"), // White color for axis labels
+      yAxis.get('renderer').labels.template.setAll({
+        fill: am5.color('#ffffff'), // White color for axis labels
       });
-      yAxis.get("renderer").grid.template.setAll({
-        stroke: am5.color("#ffffff"), // White color for grid lines
+      yAxis.get('renderer').grid.template.setAll({
+        stroke: am5.color('#ffffff'), // White color for grid lines
       });
 
       const series1 = chart.series.push(
         am5xy.ColumnSeries.new(root, {
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: "income",
-          categoryXField: "stage",
+          valueYField: 'income',
+          categoryXField: 'stage',
         })
       );
       series1.data.setAll(data);
@@ -855,8 +855,8 @@ export default function KPIDash() {
         am5xy.LineSeries.new(root, {
           xAxis: xAxis,
           yAxis: yAxis,
-          valueYField: "expenses",
-          categoryXField: "stage",
+          valueYField: 'expenses',
+          categoryXField: 'stage',
         })
       );
       series2.data.setAll(data);
@@ -865,8 +865,8 @@ export default function KPIDash() {
         const bullet = am5.Bullet.new(root, {
           locationX: 0.5,
           sprite: am5.Label.new(root, {
-            text: "{change}%",
-            fill: am5.color("#ffffff"),
+            text: '{change}%',
+            fill: am5.color('#ffffff'),
             centerY: am5.p50,
             centerX: am5.p50,
             populateText: true,
@@ -875,12 +875,12 @@ export default function KPIDash() {
 
         const value = dataItem.dataContext.change;
         if (value > 0) {
-          bullet.get("sprite").setAll({
-            fill: am5.color("#ffffff"), // white for positive change
+          bullet.get('sprite').setAll({
+            fill: am5.color('#ffffff'), // white for positive change
           });
         } else {
-          bullet.get("sprite").setAll({
-            fill: am5.color("#ffffff"), // white for negative change
+          bullet.get('sprite').setAll({
+            fill: am5.color('#ffffff'), // white for negative change
           });
         }
 
@@ -917,13 +917,13 @@ export default function KPIDash() {
           panX: false,
           panY: false,
           paddingLeft: 0,
-          wheelX: "panX",
-          wheelY: "zoomX",
+          wheelX: 'panX',
+          wheelY: 'zoomX',
           layout: root.verticalLayout,
         })
       );
 
-      chart.set("fontFamily", "Arial");
+      chart.set('fontFamily', 'Arial');
       chart.setAll({ fill: am5.color(0xffffff) });
 
       const legend = chart.children.push(
@@ -934,24 +934,24 @@ export default function KPIDash() {
         })
       );
 
-      console.log("Selected Clients:", selectedClients); // Log selected clients
+      console.log('Selected Clients:', selectedClients); // Log selected clients
 
       const categories = [
-        "totalOutreach",
-        "deckRequested",
-        "meetingRequested",
-        "ddRequested",
+        'totalOutreach',
+        'deckRequested',
+        'meetingRequested',
+        'ddRequested',
       ];
 
       const data2 = categories.map((category) => {
         const entry = { year: category };
         selectedClients.forEach((clientName) => {
           const clientNameLower = clientName.toLowerCase();
-          console.log("Client Name Lower:", clientNameLower); // Log lowercase client name
+          console.log('Client Name Lower:', clientNameLower); // Log lowercase client name
           const deal = filteredDealData.find(
             (deal) => deal.dealName.toLowerCase() === clientNameLower
           );
-          console.log("Deal:", deal); // Log deal object
+          console.log('Deal:', deal); // Log deal object
           if (deal) {
             const dealKey = deal.dealName; // Use the original case for dealKey
             // Directly use the category names without conversion, assuming they match the deal object properties
@@ -962,7 +962,7 @@ export default function KPIDash() {
         return entry;
       });
 
-      console.log("Data for Chart:", data2); // Log the structured data for the chart
+      console.log('Data for Chart:', data2); // Log the structured data for the chart
 
       const xRenderer = am5xy.AxisRendererX.new(root, {
         cellStartLocation: 0.1,
@@ -970,7 +970,7 @@ export default function KPIDash() {
       });
       const xAxis = chart.xAxes.push(
         am5xy.CategoryAxis.new(root, {
-          categoryField: "year",
+          categoryField: 'year',
           renderer: xRenderer,
           tooltip: am5.Tooltip.new(root, {}),
           fill: am5.color(0xffffff),
@@ -978,10 +978,10 @@ export default function KPIDash() {
       );
 
       xAxis
-        .get("renderer")
+        .get('renderer')
         .labels.template.setAll({ fill: am5.color(0xffffff) });
       xAxis
-        .get("renderer")
+        .get('renderer')
         .grid.template.setAll({ stroke: am5.color(0xffffff) });
       xAxis.data.setAll(data2);
 
@@ -992,10 +992,10 @@ export default function KPIDash() {
       );
 
       yAxis
-        .get("renderer")
+        .get('renderer')
         .labels.template.setAll({ fill: am5.color(0xffffff) });
       yAxis
-        .get("renderer")
+        .get('renderer')
         .grid.template.setAll({ stroke: am5.color(0xffffff) });
 
       selectedClients.forEach((clientName) => {
@@ -1005,7 +1005,7 @@ export default function KPIDash() {
         );
         if (deal) {
           const dealKey = deal.dealName; // Use dealName from the deal object
-          console.log("Client Name Display:", dealKey); // Log the dealKey used for series
+          console.log('Client Name Display:', dealKey); // Log the dealKey used for series
 
           const series = chart.series.push(
             am5xy.ColumnSeries.new(root, {
@@ -1013,12 +1013,12 @@ export default function KPIDash() {
               xAxis: xAxis,
               yAxis: yAxis,
               valueYField: dealKey, // Use dealKey as valueYField
-              categoryXField: "year",
+              categoryXField: 'year',
             })
           );
 
           series.columns.template.setAll({
-            tooltipText: "{name}, {categoryX}:{valueY}",
+            tooltipText: '{name}, {categoryX}:{valueY}',
             width: am5.percent(90),
             tooltipY: 0,
             strokeOpacity: 0,
@@ -1031,8 +1031,8 @@ export default function KPIDash() {
             return am5.Bullet.new(root, {
               locationY: 0,
               sprite: am5.Label.new(root, {
-                text: "{valueY}",
-                fill: root.interfaceColors.get("alternativeText"),
+                text: '{valueY}',
+                fill: root.interfaceColors.get('alternativeText'),
                 centerY: 0,
                 centerX: am5.p50,
                 populateText: true,
@@ -1284,35 +1284,35 @@ export default function KPIDash() {
     const startOfYear = new Date(oneYearAgo.getFullYear(), 0, 1);
 
     switch (timeScale) {
-      case "today":
-        return { startDate: formatDate(today), endDate: formatDate(today) };
-      case "this week":
-        return {
-          startDate: formatDate(startOfWeek),
-          endDate: formatDate(today),
-        };
-      case "last week":
-        return {
-          startDate: formatDate(startOfLastWeek),
-          endDate: formatDate(endOfLastWeek),
-        };
-      case "month to date":
-        return {
-          startDate: formatDate(startOfMonth),
-          endDate: formatDate(today),
-        };
-      case "year to date":
-        return {
-          startDate: formatDate(startOfYear),
-          endDate: formatDate(today),
-        };
-      default:
-        return { startDate: null, endDate: null }; // No filter
+    case 'today':
+      return { startDate: formatDate(today), endDate: formatDate(today) };
+    case 'this week':
+      return {
+        startDate: formatDate(startOfWeek),
+        endDate: formatDate(today),
+      };
+    case 'last week':
+      return {
+        startDate: formatDate(startOfLastWeek),
+        endDate: formatDate(endOfLastWeek),
+      };
+    case 'month to date':
+      return {
+        startDate: formatDate(startOfMonth),
+        endDate: formatDate(today),
+      };
+    case 'year to date':
+      return {
+        startDate: formatDate(startOfYear),
+        endDate: formatDate(today),
+      };
+    default:
+      return { startDate: null, endDate: null }; // No filter
     }
   }
 
   function formatDate(date) {
-    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    return date.toISOString().split('T')[0]; // Convert to YYYY-MM-DD format
   }
 
   useEffect(() => {
@@ -1324,14 +1324,14 @@ export default function KPIDash() {
 
       try {
         const response = await axios.get(
-          "http://localhost:5002/deals/last-updated-status-dates",
+          'http://localhost:5002/deals/last-updated-status-dates',
           {
             params: {
               startDate, // No need to call .toISOString(), startDate and endDate are already strings
               endDate,
             },
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
               Authorization: token,
             },
           }
@@ -1343,7 +1343,7 @@ export default function KPIDash() {
         console.log(`Data within the selected timescale:`, response.data);
         setTimeDealData(response.data);
       } catch (error) {
-        console.error("Error fetching deal data:", error);
+        console.error('Error fetching deal data:', error);
       } finally {
         setLoading(false);
       }
@@ -1357,91 +1357,91 @@ export default function KPIDash() {
 
   return (
     <div
-      className={styles["kpi-main"]}
+      className={styles['kpi-main']}
       style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        margin: "calc(10vh + 5rem) 0",
-        gap: "3rem",
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginTop: '10vh',
+        gap: '3rem',
       }}
     >
       <div>
-        <div className={styles["kpi-head"]} style={{}}>
+        <div className={styles['kpi-head']} style={{}}>
           {/* <img src={EpsilonLogo} className={styles["epsilon-logo"]} alt="" /> */}
-          <span className={styles["kpi-dashboard-text"]}>KPI Dashboard</span>
+          <span className={styles['kpi-dashboard-text']}>KPI Dashboard</span>
         </div>
 
-        <div style={{ display: "flex", gap: "2rem" }}>
+        <div style={{ display: 'flex', gap: '2rem' }}>
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
           >
             <KPIBlock
-              extraClass={styles["kpi-category"]}
-              width={"21.625rem"}
-              height={"13.625rem"}
+              extraClass={styles['kpi-category']}
+              width={'21.625rem'}
+              height={'13.625rem'}
             >
               <div
                 className="kpi-category"
-                onClick={() => setCategory("dashboard")}
-                style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+                onClick={() => setCategory('dashboard')}
+                style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
               >
                 <TICKIcon
-                  className={styles["tick-icon"]}
+                  className={styles['tick-icon']}
                   style={{
-                    fill: category === "dashboard" ? "#2254ff" : "#fff",
+                    fill: category === 'dashboard' ? '#2254ff' : '#fff',
                   }}
                 />
-                <KPIText fontSize={"1.25rem"} fontColor={"#fff"}>
+                <KPIText fontSize={'1.25rem'} fontColor={'#fff'}>
                   Dashboard
                 </KPIText>
               </div>
               <div
                 className="kpi-category"
-                onClick={() => setCategory("deal-funnel")}
+                onClick={() => setCategory('deal-funnel')}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  justifyContent: "start",
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  justifyContent: 'start',
                 }}
               >
                 <TICKIcon
-                  className={styles["tick-icon"]}
+                  className={styles['tick-icon']}
                   style={{
-                    fill: category === "deal-funnel" ? "#2254ff" : "#fff",
+                    fill: category === 'deal-funnel' ? '#2254ff' : '#fff',
                   }}
                 />
-                <KPIText fontSize={"1.25rem"} fontColor={"#fff"}>
+                <KPIText fontSize={'1.25rem'} fontColor={'#fff'}>
                   Deal Funnel
                 </KPIText>
               </div>
             </KPIBlock>
             <KPIBlock
-              extraClass={styles["kpi-filter"]}
+              extraClass={styles['kpi-filter']}
               width="21.75rem"
               height="42.75rem"
             >
               <KPIText
-                extraClass={styles["kpi-filter-text"]}
+                extraClass={styles['kpi-filter-text']}
                 fontColor="#fff"
                 fontSize="1.8125rem"
               >
                 Filters
               </KPIText>
-              <KPIText extraClass={styles["kpi-filter-text-restore"]}>
+              <KPIText extraClass={styles['kpi-filter-text-restore']}>
                 <span
                   onClick={(e) => {
                     e.stopPropagation();
-                    setTimeScale("");
+                    setTimeScale('');
                   }}
                 >
                   Restore default
                 </span>
               </KPIText>
               <KPIText
-                extraClass={styles["kpi-filter-text-sub"]}
+                extraClass={styles['kpi-filter-text-sub']}
                 fontColor="#fff"
                 fontSize="1.5rem"
               >
@@ -1452,12 +1452,12 @@ export default function KPIDash() {
                   e.stopPropagation();
                   setTimeScale(e.target.innerText);
                 }}
-                className={styles["kpi-ul"]}
+                className={styles['kpi-ul']}
               >
                 <li
                   key="today"
                   style={
-                    timeScale === "today"
+                    timeScale === 'today'
                       ? { fontWeight: 600 }
                       : { fontWeight: 400 }
                   }
@@ -1467,7 +1467,7 @@ export default function KPIDash() {
                 <li
                   key="this week"
                   style={
-                    timeScale === "this week"
+                    timeScale === 'this week'
                       ? { fontWeight: 600 }
                       : { fontWeight: 400 }
                   }
@@ -1477,7 +1477,7 @@ export default function KPIDash() {
                 <li
                   key="last week"
                   style={
-                    timeScale === "last week"
+                    timeScale === 'last week'
                       ? { fontWeight: 600 }
                       : { fontWeight: 400 }
                   }
@@ -1487,7 +1487,7 @@ export default function KPIDash() {
                 <li
                   key="month to date"
                   style={
-                    timeScale === "month to date"
+                    timeScale === 'month to date'
                       ? { fontWeight: 600 }
                       : { fontWeight: 400 }
                   }
@@ -1497,7 +1497,7 @@ export default function KPIDash() {
                 <li
                   key="year to date"
                   style={
-                    timeScale === "year to date"
+                    timeScale === 'year to date'
                       ? { fontWeight: 600 }
                       : { fontWeight: 400 }
                   }
@@ -1506,7 +1506,7 @@ export default function KPIDash() {
                 </li>
               </ul>
               <KPIText
-                extraClass={styles["kpi-filter-text-sub"]}
+                extraClass={styles['kpi-filter-text-sub']}
                 fontColor="#fff"
                 fontSize="1.5rem"
               >
@@ -1515,32 +1515,32 @@ export default function KPIDash() {
               <div
                 ref={filterRef}
                 onClick={() => setShowAllFilters(true)}
-                style={{ position: "relative", width: "100%" }}
+                style={{ position: 'relative', width: '100%' }}
               >
                 <div
                   style={{
-                    width: "85%",
-                    maxHeight: "18rem",
-                    overflowY: "auto",
-                    background: "#12183499",
-                    marginLeft: "1.5rem",
-                    marginTop: "1.5rem",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "center",
+                    width: '85%',
+                    maxHeight: '18rem',
+                    overflowY: 'auto',
+                    background: '#12183499',
+                    marginLeft: '1.5rem',
+                    marginTop: '1.5rem',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
                   }}
                 >
                   {selectedClients.map((selectedClient, index) => (
                     <div
                       key={index}
                       style={{
-                        background: "#fff5",
-                        borderRadius: "0.125rem",
-                        padding: "0.25rem",
-                        margin: "0.25rem",
+                        background: '#fff5',
+                        borderRadius: '0.125rem',
+                        padding: '0.25rem',
+                        margin: '0.25rem',
                       }}
                     >
-                      <span style={{ textTransform: "uppercase" }}>
+                      <span style={{ textTransform: 'uppercase' }}>
                         {selectedClient}
                       </span>
                       <img
@@ -1552,29 +1552,29 @@ export default function KPIDash() {
                           )
                         }
                         src={cancelButton}
-                        className={styles["client-cancel-button"]}
+                        className={styles['client-cancel-button']}
                         alt=""
                       />
                     </div>
                   ))}
-                  <span style={{ fontSize: "1rem", padding: "0.5rem" }}>
+                  <span style={{ fontSize: '1rem', padding: '0.5rem' }}>
                     Choose one or more client(s)
                   </span>
                 </div>
                 {showAllFilters && (
                   <ul
                     style={{
-                      maxHeight: "20rem",
-                      overflowY: "auto",
-                      position: "absolute",
-                      top: "100%",
+                      maxHeight: '20rem',
+                      overflowY: 'auto',
+                      position: 'absolute',
+                      top: '100%',
                       left: 0,
-                      background: "#12183499",
-                      listStyleType: "none",
-                      margin: "0 0 0 1.5rem",
+                      background: '#12183499',
+                      listStyleType: 'none',
+                      margin: '0 0 0 1.5rem',
                       padding: 0,
-                      textAlign: "left",
-                      width: "85%",
+                      textAlign: 'left',
+                      width: '85%',
                     }}
                   >
                     {clients
@@ -1586,11 +1586,11 @@ export default function KPIDash() {
                           }
                           key={index}
                           style={{
-                            border: "0.5px #fff5 solid",
-                            padding: "0.5rem",
+                            border: '0.5px #fff5 solid',
+                            padding: '0.5rem',
                           }}
                         >
-                          <span style={{ textTransform: "uppercase" }}>
+                          <span style={{ textTransform: 'uppercase' }}>
                             {client}
                           </span>
                         </li>
@@ -1600,35 +1600,35 @@ export default function KPIDash() {
               </div>
             </KPIBlock>
           </div>
-          {category === "dashboard" ? (
+          {category === 'dashboard' ? (
             // <div>
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "3rem",
-                position: "relative",
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '3rem',
+                position: 'relative',
                 zIndex: 1,
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  gap: "1rem",
-                  position: "absolute",
-                  left: "2rem",
-                  top: "-3rem",
+                  display: 'flex',
+                  gap: '1rem',
+                  position: 'absolute',
+                  left: '2rem',
+                  top: '-3rem',
                   zIndex: 255,
                 }}
               >
                 <button
                   className={
-                    focused === "all"
-                      ? styles["kpi-option-highlighted"]
-                      : styles["kpi-option"]
+                    focused === 'all'
+                      ? styles['kpi-option-highlighted']
+                      : styles['kpi-option']
                   }
                   onClick={() => {
-                    setFocused("all");
+                    setFocused('all');
                     setLoading(true);
                   }}
                 >
@@ -1636,58 +1636,58 @@ export default function KPIDash() {
                 </button>
                 <button
                   className={
-                    focused === "you"
-                      ? styles["kpi-option-highlighted"]
-                      : styles["kpi-option"]
+                    focused === 'you'
+                      ? styles['kpi-option-highlighted']
+                      : styles['kpi-option']
                   }
                   onClick={() => {
-                    setFocused("you");
+                    setFocused('you');
                     setLoading(true);
                   }}
                 >
                   You
                 </button>
               </div>
-              <div className={styles["kpi-horizontal-layout"]}>
+              <div className={styles['kpi-horizontal-layout']}>
                 <KPIBlock
-                  extraClass={styles["kpi-mini-dashboard"]}
+                  extraClass={styles['kpi-mini-dashboard']}
                   width="17.5625rem"
                   height="8.25rem"
                 >
                   <KPIText
-                    extraClass={styles["kpi-align-center-text"]}
+                    extraClass={styles['kpi-align-center-text']}
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
                     Total Outreach
                   </KPIText>
 
-                  <div className={styles["kpi-miniboard-horizontal-layout"]}>
+                  <div className={styles['kpi-miniboard-horizontal-layout']}>
                     {isLoading ? (
                       <>
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                       </>
                     ) : (
                       <>
                         <KPIText
-                          fontColor={focused === "all" ? "#fff" : "#817777"}
+                          fontColor={focused === 'all' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           {aggregatedKPIs.totalOutreach}
                         </KPIText>
                         <KPIText
-                          fontColor={focused === "you" ? "#fff" : "#817777"}
+                          fontColor={focused === 'you' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           0
@@ -1697,43 +1697,43 @@ export default function KPIDash() {
                   </div>
                 </KPIBlock>
                 <KPIBlock
-                  extraClass={styles["kpi-mini-dashboard"]}
+                  extraClass={styles['kpi-mini-dashboard']}
                   width="17.5625rem"
                   height="8.25rem"
                 >
                   <KPIText
-                    extraClass={styles["kpi-align-center-text"]}
+                    extraClass={styles['kpi-align-center-text']}
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
                     Total Deck requests
                   </KPIText>
-                  <div className={styles["kpi-miniboard-horizontal-layout"]}>
+                  <div className={styles['kpi-miniboard-horizontal-layout']}>
                     {isLoading ? (
                       <>
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                       </>
                     ) : (
                       <>
                         <KPIText
-                          fontColor={focused === "all" ? "#fff" : "#817777"}
+                          fontColor={focused === 'all' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           {aggregatedKPIs.deckRequested}
                         </KPIText>
                         <KPIText
-                          fontColor={focused === "you" ? "#fff" : "#817777"}
+                          fontColor={focused === 'you' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           0
@@ -1743,43 +1743,43 @@ export default function KPIDash() {
                   </div>
                 </KPIBlock>
                 <KPIBlock
-                  extraClass={styles["kpi-mini-dashboard"]}
+                  extraClass={styles['kpi-mini-dashboard']}
                   width="17.5625rem"
                   height="8.25rem"
                 >
                   <KPIText
-                    extraClass={styles["kpi-align-center-text"]}
+                    extraClass={styles['kpi-align-center-text']}
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
                     Total meeting Requested
                   </KPIText>
-                  <div className={styles["kpi-miniboard-horizontal-layout"]}>
+                  <div className={styles['kpi-miniboard-horizontal-layout']}>
                     {isLoading ? (
                       <>
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                       </>
                     ) : (
                       <>
                         <KPIText
-                          fontColor={focused === "all" ? "#fff" : "#817777"}
+                          fontColor={focused === 'all' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           {aggregatedKPIs.meetingRequested}
                         </KPIText>
                         <KPIText
-                          fontColor={focused === "you" ? "#fff" : "#817777"}
+                          fontColor={focused === 'you' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           0
@@ -1789,43 +1789,43 @@ export default function KPIDash() {
                   </div>
                 </KPIBlock>
                 <KPIBlock
-                  extraClass={styles["kpi-mini-dashboard"]}
+                  extraClass={styles['kpi-mini-dashboard']}
                   width="17.5625rem"
                   height="8.25rem"
                 >
                   <KPIText
-                    extraClass={styles["kpi-align-center-text"]}
+                    extraClass={styles['kpi-align-center-text']}
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
                     Total Due Dilligence
                   </KPIText>
-                  <div className={styles["kpi-miniboard-horizontal-layout"]}>
+                  <div className={styles['kpi-miniboard-horizontal-layout']}>
                     {isLoading ? (
                       <>
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                       </>
                     ) : (
                       <>
                         <KPIText
-                          fontColor={focused === "all" ? "#fff" : "#817777"}
+                          fontColor={focused === 'all' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           {aggregatedKPIs.ddRequested}
                         </KPIText>
                         <KPIText
-                          fontColor={focused === "you" ? "#fff" : "#817777"}
+                          fontColor={focused === 'you' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           0
@@ -1835,43 +1835,43 @@ export default function KPIDash() {
                   </div>
                 </KPIBlock>
                 <KPIBlock
-                  extraClass={styles["kpi-mini-dashboard"]}
+                  extraClass={styles['kpi-mini-dashboard']}
                   width="17.5625rem"
                   height="8.25rem"
                 >
                   <KPIText
-                    extraClass={styles["kpi-align-center-text"]}
+                    extraClass={styles['kpi-align-center-text']}
                     fontColor="#fff"
                     fontSize="0.9375rem"
                   >
                     Number of passes
                   </KPIText>
-                  <div className={styles["kpi-miniboard-horizontal-layout"]}>
+                  <div className={styles['kpi-miniboard-horizontal-layout']}>
                     {isLoading ? (
                       <>
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                         <Skeleton
-                          className={styles["kpi-text"]}
+                          className={styles['kpi-text']}
                           duration={2.0}
-                          width={"4.5rem"}
-                          height={"1.7rem"}
+                          width={'4.5rem'}
+                          height={'1.7rem'}
                         />
                       </>
                     ) : (
                       <>
                         <KPIText
-                          fontColor={focused === "all" ? "#fff" : "#817777"}
+                          fontColor={focused === 'all' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           {aggregatedKPIs.passes}
                         </KPIText>
                         <KPIText
-                          fontColor={focused === "you" ? "#fff" : "#817777"}
+                          fontColor={focused === 'you' ? '#fff' : '#817777'}
                           fontSize="1.875rem"
                         >
                           0
@@ -1882,23 +1882,23 @@ export default function KPIDash() {
                 </KPIBlock>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <KPIText
                   fontColor="#fff"
                   fontSize="0.9375rem"
-                  style={{ textAlign: "left" }}
+                  style={{ textAlign: 'left' }}
                 >
                   Deal Statistics
                 </KPIText>
                 <div
-                  className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
+                  className={styles['kpi-horizontal-layout']}
+                  style={{ gap: '3rem' }}
                 >
                   <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
+                    extraClass={styles['kpi-medium-dashboard']}
                     width="52.25rem"
                     height="24.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: 'auto' }}
                   >
                     {/* Deal Data Table */}
                     <table style={tableStyle}>
@@ -1950,42 +1950,42 @@ export default function KPIDash() {
                     </table>
                   </KPIBlock>
                   <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
+                    extraClass={styles['kpi-medium-dashboard']}
                     width="60.25rem"
                     height="24.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: 'auto' }}
                   >
                     {/* Horizontal Bar Plot for Each Deal's KPI */}
-                    <div style={{ height: "57rem", width: "55rem" }}>
+                    <div style={{ height: '57rem', width: '55rem' }}>
                       <Bar data={dealChartData} options={chartOptions} />
                     </div>
                   </KPIBlock>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <KPIText
                   fontColor="#fff"
                   fontSize="0.9375rem"
-                  style={{ textAlign: "left" }}
+                  style={{ textAlign: 'left' }}
                 >
                   Account Holder's KPI
                 </KPIText>
                 <div
-                  className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
+                  className={styles['kpi-horizontal-layout']}
+                  style={{ gap: '3rem' }}
                 >
                   <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
+                    extraClass={styles['kpi-medium-dashboard']}
                     width="52.25rem"
                     height="26.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: 'auto' }}
                   >
-                    {focused === "all" ? (
+                    {focused === 'all' ? (
                       <div
                         style={{
-                          width: "550px",
-                          height: "600px",
-                          padding: "20px",
+                          width: '550px',
+                          height: '600px',
+                          padding: '20px',
                         }}
                       >
                         {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
@@ -1995,16 +1995,16 @@ export default function KPIDash() {
                           </div>
                           <div
                             ref={chartDivRef}
-                            style={{ width: "700px", height: "350px" }}
+                            style={{ width: '700px', height: '350px' }}
                           ></div>
                         </div>
                       </div>
                     ) : (
                       <div
                         style={{
-                          width: "550px",
-                          height: "600px",
-                          padding: "20px",
+                          width: '550px',
+                          height: '600px',
+                          padding: '20px',
                         }}
                       >
                         <Bar
@@ -2015,10 +2015,10 @@ export default function KPIDash() {
                     )}
                   </KPIBlock>
                   <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
+                    extraClass={styles['kpi-medium-dashboard']}
                     width="60.25rem"
                     height="26.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: 'auto' }}
                   >
                     {/* Line Plot for Each Account Holder */}
                     {/* <div style={{ height: "21rem", width: "57rem" }}>
@@ -2029,7 +2029,7 @@ export default function KPIDash() {
                     </div> */}
                     <div
                       ref={chartRef}
-                      style={{ width: "900px", height: "400px" }}
+                      style={{ width: '900px', height: '400px' }}
                     ></div>
                   </KPIBlock>
                 </div>

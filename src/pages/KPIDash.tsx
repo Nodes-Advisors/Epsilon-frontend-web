@@ -1551,7 +1551,7 @@ export default function KPIDash() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        margin: "calc(10vh + 5rem) 0",
+        marginTop: "15vh",
         gap: "3rem",
       }}
     >

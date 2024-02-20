@@ -173,7 +173,7 @@ export default function UserProfile() {
               <span style={{ fontSize: '1.6rem', opacity: '0.6' }}><span style={{ textTransform: 'capitalize' }}>{data?.department}</span> at {'Nodes Advisors AG' }</span>
               <div >
                 <a style={{ textDecoration: 'none', color: 'white', opacity: '0.6', marginRight: '2rem', fontSize: '1.6rem' }} href='www.google.com'>{data?.email || 'www.personal_web.com'}</a>
-                <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Zurich, Switzerland'}</span>
+                <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location ? data?.location.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Zurich, Switzerland'}</span>
               </div>
               <span style={{ marginTop: '2rem', fontSize: '2rem', fontWeight: 550 }}>User&apos;s KPI Dashboard</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', marginTop: '2rem' }}>

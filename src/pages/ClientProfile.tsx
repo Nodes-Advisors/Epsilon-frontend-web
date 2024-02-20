@@ -38,6 +38,7 @@ export default function ClientProfile(): JSX.Element {
   const [hoveredCollection, setHoveredCollection] = useState<string>('')
   const [changeToInput, setChangeToInput] = useState<boolean>(false)
   const newCollectionRef = useRef<HTMLInputElement>(null)
+  const [nodesTeam, setNodesTeam] = useState<any[]>([])
 
   function formatDate(timestamp) {
     const date = new Date(timestamp)
@@ -63,15 +64,14 @@ export default function ClientProfile(): JSX.Element {
   useEffect(() => {
     const record = clients.filter((record) => record._id === id)[0]
     console.log(record)
-    setSelectedFundName(record.Funds)
     async function fetchHistoricalLog() {
       try {
-        const res = await fetch(`http://localhost:5001/gethislog/${record.Funds}`)
+        const res = await fetch(`http://localhost:5001/getclienthislog/${record.acronym}`)
         const data = await res.json()
         console.log(data)
         setHisLogs(data)
       } catch (error) {
-        console.error(error)
+        console.log(error)
       }
     }
     fetchHistoricalLog()
@@ -81,92 +81,6 @@ export default function ClientProfile(): JSX.Element {
     setTimeout(() => setLoading(false), 1000)
   }, [id])
   
-  
-
-  const handleAddToCollection = async () => {
-    try {
-      console.log(selectedFundName)
-      const res = await axios.post('http://localhost:5001/savedcollections/add', {
-        email: user?.email,
-        collection: hoveredCollection,
-        fund: selectedFundName,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      if (res.status === 200) {
-        toast.success('Fund added to collection successfully!')
-        setShowSavedCollections(false)
-      } else if (res.status === 409) {
-        toast.error('Fund already exists in this collection')
-      }
-    } catch (error) {
-      toast.error(error?.response?.data)
-    }
-  }
-
-  const handleCreateNewCollection = async () => {
-    try {
-      const res  = await axios.post('http://localhost:5001/savedcollections', {
-        email: user?.email,
-        savedcollection: newCollectionRef.current?.value as string,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      if (res.status === 200) {
-        toast.success('Collection created successfully!')
-        setSavedCollections([...savedCollections, newCollectionRef.current?.value as string])
-        setChangeToInput(false)
-      }
-      
-      else if (res.status === 409) {
-        toast.error('Collection already exists')
-      } 
-      
-    } catch (error) {
-      toast.error(error?.response?.data)
-    }
-  }
-
-  const addRequest = () => {
-    setPopoverOpen(true)
-  }
-
-  const sendRequest = async (e) => {
-    e.preventDefault()
-    
-    // Check if all required fields have been filled
-    if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-
-    try {
-      // console.log('executed')
-      await axios.post('http://localhost:5001/sendRequest', {
-        requestName,
-        approvers,
-        deal,
-        contactPerson,
-        priority,
-        details,
-        selectedFundName,
-        email: user?.email,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      toast.success('Request sent successfully!')
-      setPopoverOpen(false)
-  
-    } catch (error) {
-      toast.error(error?.response?.data)
-    }
-  }
 
   useEffect(() => {
     const fetchSavedCollections = async () => {
@@ -185,6 +99,46 @@ export default function ClientProfile(): JSX.Element {
     }
     fetchSavedCollections()
   }, [])
+
+
+  useEffect(() => {
+    const fetchNodesTeam = async () => {
+      setLoading(true)
+      try {
+        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        if (res.status === 200) {
+          setLoading(false)
+          setNodesTeam(res.data)
+          // console.log(res.data)
+        }
+      } catch (error) {
+        setLoading(false)
+        console.error(error)
+      }
+    }
+    fetchNodesTeam()
+    
+  }, [])
+
+  const getImage = (name: string | undefined | null) => {
+    if (name) {
+      // console.log(name)
+      // console.log(nodesTeam)
+      const found = nodesTeam.find(item => item.name.includes(name))
+      // console.log(found)
+      if (found) {
+        // console.log(found.profile_image)
+        return found.profile_image
+      } else {
+        return ''
+      }
+    }
+    return ''
+  }
 
   return (
     <div 
@@ -240,16 +194,38 @@ export default function ClientProfile(): JSX.Element {
                         hislogs.length > 0
                           ?
                           <ul
+                            className={styles['relationship-list']}
                             style={{ listStyleType: 'none', color: '#9b93af', fontSize: '1.25rem',
-                              padding: '0', margin: '0', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                              height: '30vh', overflowY: 'auto', overflowX: 'hidden',
+                              paddingRight: '4rem', margin: '0', display: 'flex', flexDirection: 'column', gap: '4rem' }}
                           >
                             {
-                              hislogs.map((log, i) => (
-                                <li key={i}>
-                                  <span>{log.Nodes ? log.Nodes : 'Someone'}</span>
-                                  <span>{log.Contact}</span>
-                                </li>
-                              ))
+                              hislogs
+                                .filter((log, index, self) =>
+                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact)
+                                )
+                                .map((log, i) => (
+                                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                      <AsyncImage 
+                                       onClick={() => {
+                                        if (log.Nodes) {
+                                          navigate(`/user-profile/${log.Nodes.split(' ').join('-')}`)
+                                        
+                                        }
+                                       }}
+                                        src={getImage(log.Nodes)} alt="" className={styles['headImg']} />
+
+                                      <span style={{  cursor: 'pointer', position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Nodes ? log.Nodes : 'Someone@Nodes'}</span>
+                                    </div>
+                                  
+                                    <div style={{ width: '5rem', height: '0.1px', backgroundColor: '#fff' }}></div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                      <AsyncImage src={getImage(log.Contact)} alt="" className={styles['headImg']} />
+                                      <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Contact ? log.Contact : 'Someone@This Fund'}</span>
+                                    </div>
+                                  </li>
+                                ))
     
                             }
                           </ul>
@@ -418,7 +394,6 @@ export default function ClientProfile(): JSX.Element {
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
-                          <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'3rem'} /></th>
                         </tr>
                         :
@@ -427,7 +402,6 @@ export default function ClientProfile(): JSX.Element {
                           ?
                           <tr>
                             <th>Date</th>
-                            <th>Company</th>
                             <th>Account Manager</th>
                             <th>VC</th>
                             <th>VC Contact</th>
@@ -449,7 +423,6 @@ export default function ClientProfile(): JSX.Element {
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'3rem'} /></td>
                           </tr>
                         ))
@@ -457,7 +430,7 @@ export default function ClientProfile(): JSX.Element {
                         hislogs.map((log, i) => (
                           <tr key={i}>
                             <td>{formatDate(log.Date)}</td>
-                            <td>{log.Client ? log.Client : 'No client record'}</td>
+                            {/* <td>{log.Client ? log.Client : 'No client record'}</td> */}
                             {/* <td>{log.current_stage ? log.current_stage : 'No stage record'}</td> */}
                             
                             {/* <td>{log.round_size ? log.round_size : 'No round size record'}</td> */}
@@ -485,7 +458,62 @@ export default function ClientProfile(): JSX.Element {
 
             </div>
           </div>
-          <div className={styles['right-panel']}>      
+          <div className={styles['right-panel']}>
+        
+            <div className={styles['investor-title-layout']}>
+              <DotCircleIcon className={styles['dot-circle-investor-icon']} />
+              <span className={styles['investor-title-text']}>COMMON PASSES</span>
+            </div>
+            {
+              isLoading 
+                ? 
+                (
+                  Array(5).fill(0).map((_, i) => (
+                    <div key={i} className={styles['investor-layout']}>
+      
+              
+                      <Skeleton className={styles['investor-logo']} />
+                      <div className={styles['investor-text']}>
+                        <Skeleton className={styles['investor-name']} width={'7rem'} height={'1rem'} />
+
+                        <Skeleton className={styles['stage-info']} width={'5rem'} height={'1rem'} />
+                      </div>
+                    </div>
+                  ))
+                )
+
+                :
+
+                record['Co-Investors'] && (record['Co-Investors'] as string).length > 0
+                  ? (
+                record['Co-Investors'] as string).split(',').map((investor: string) => {
+                    const relatedFund = funds.filter((fund) => fund['Funds'] === investor)
+                    let imgUrl = undefined
+                    let redirectedId = undefined
+                    if (relatedFund.length > 0) {
+                      imgUrl = relatedFund[0]['Logo']
+                      redirectedId = relatedFund[0]['_id']
+                    }
+                    return (
+                      <div key={investor} className={styles['investor-layout']}>
+
+                        <img src={imgUrl ? imgUrl : YCLogo} alt='' className={styles['investor-logo']} />
+                        <div 
+          
+                          className={styles['investor-text']}>
+                          <span className={redirectedId ? styles['investor-name-click'] : styles['investor-name']}>
+                            {investor}
+                          </span>
+                        </div>
+
+                      </div>
+                    )}
+                   
+                    ,
+                  )
+                  : 'no common passes'
+            }
+          
 
           </div>
 

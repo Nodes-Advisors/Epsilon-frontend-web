@@ -3,7 +3,6 @@ import venture_logo from '../assets/images/venture-logo-example.png'
 import Skeleton from 'react-loading-skeleton'
 import { useEffect, useRef, useState, useContext } from 'react'
 
-import { FieldSet, Record } from 'airtable'
 import { useNavigate } from 'react-router-dom'
 import { useClientsStore, useFundsStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
