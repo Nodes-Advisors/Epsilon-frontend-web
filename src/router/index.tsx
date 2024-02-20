@@ -44,7 +44,7 @@ const router = createBrowserRouter([
 
   { path: 'kpi-dash', element: <KPIDash /> },
   { path: 'my-saved-list/:collection', element: <SavedList /> },
-  { path: 'user-profile', element: <UserProfile /> },
+  { path: 'user-profile/:username', element: <UserProfile /> },
   { path: 'database', element: <Database /> },
   { path: 'intelligence', element: <Intelligence /> },
   { path: 'client-card/:id', element: <ClientProfile /> },

@@ -23,7 +23,7 @@ export default function HeadImgWrapper({status, headImg}: THeadImgWrapperProps) 
         loading='eager' 
         loader={<div style={{ background: '#888' }}/>}
         error={<div style={{ background: '#eee' }}/>}
-        onClick={() => navigate('/user-profile') }
+        onClick={() => navigate('/user-profile/me') }
         Transition={Blur}
         style={{
           width: '3.96419rem',

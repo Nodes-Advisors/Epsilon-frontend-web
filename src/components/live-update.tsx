@@ -17,6 +17,7 @@ function LiveUpdate({user}: {user: any}) {
   const [hoveredName, setHoveredName] = useState('')
   const [page, setPage] = useState(1)
   const [hoveredData, setHoveredData] = useState([])
+  const [nodesTeam, setNodesTeam] = useState([])
   // const [isAccoundHolder, setIsAccountHolder] = useState(false)
   const messagesEndRef = useRef(null)
   const [isScolled, setIsScrolled] = useState<boolean>(false)
@@ -204,6 +205,45 @@ function LiveUpdate({user}: {user: any}) {
     }
   }
 
+  useEffect(() => {
+    const fetchNodesTeam = async () => {
+      setLoading(true)
+      try {
+        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        if (res.status === 200) {
+          setLoading(false)
+          setNodesTeam(res.data)
+          // console.log(res.data)
+        }
+      } catch (error) {
+        setLoading(false)
+        console.error(error)
+      }
+    }
+    fetchNodesTeam()
+    
+  }, [])
+
+  const getImage = (name: string | undefined | null) => {
+    if (name) {
+      console.log(name)
+      // console.log(nodesTeam)
+      const found = nodesTeam.find(item => item.name.includes(name))
+      console.log(found)
+      if (found) {
+        console.log(found.profile_image)
+        return found.profile_image
+      } else {
+        return ''
+      }
+    }
+    return ''
+  }
+
   return (
     <div style={{ width: '100%', padding: '1rem' }}>
       <div className={styles['live-update-button-layout']}>
@@ -263,7 +303,7 @@ function LiveUpdate({user}: {user: any}) {
                     <li key={item.id} style={{ display: 'flex', alignItems: 'center' }}>
 
                       <AsyncImage
-                        src=''
+                        src={getImage(item.account_holder)}
                         style={{ width: '3rem', height: '3rem', borderRadius: '50%', marginRight: '1rem' }}
                       /> 
                       <div>

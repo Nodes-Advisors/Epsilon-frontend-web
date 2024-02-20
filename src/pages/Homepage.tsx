@@ -1,5 +1,5 @@
 import styles from '../styles/home.module.less'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useUserStore, useTokenStore } from '../store/store'
 import TodayNews from '../components/today-news'
 import LiveUpdate from '../components/live-update'
@@ -7,6 +7,8 @@ import axios from 'axios'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from '../websocket/WebsocketContext'
 import CancelImgIcon from '../assets/images/cancel.png'
+import FlipPage from 'react-flip-page'
+
 export default function Home() {
   
   const setUser = useUserStore(state => state.setUser)
@@ -22,6 +24,29 @@ export default function Home() {
   const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
   const [tooltipData, setTooltipData] = useState([])
   const [pinnedMessages, setPinnedMessages] = useState([])
+  const [switchTab, setSwitchTab] = useState<'Pinned' | 'Milestone' | 'Approval Request'>('Pinned')
+  const [prevTab, setPrevTab] = useState(null)
+  const [animationClass, setAnimationClass] = useState('')
+  const ulRef = useRef(null)
+  useEffect(() => {
+    if (prevTab !== null) {
+      setAnimationClass(switchTab !== prevTab ? 'tab-enter' : 'tab-exit')
+    }
+    setPrevTab(switchTab)
+  }, [switchTab, prevTab])
+
+  useEffect(() => {
+    const ul = ulRef.current
+    const handleAnimationEnd = () => {
+      setAnimationClass('')
+    }
+
+    ul.addEventListener('animationend', handleAnimationEnd)
+    return () => {
+      ul.removeEventListener('animationend', handleAnimationEnd)
+    }
+  }, [])
+
   const [followupMessages, setFollowupMessages] = useState([
     {
       message: 'Tyler Aroner should catch up with Schenkein at GV for ANTION after contacted on 08-10-2021',
@@ -39,6 +64,10 @@ export default function Home() {
       message: 'Tyler Aroner should catch up with Robbins at GV for STA after contacted on 03-02-2022',
     },
   ])
+
+  useEffect(() => {
+    setPrevTab(switchTab)
+  }, [switchTab])
 
   useEffect(() => {
     fetch('http://localhost:5001/getAllGPTPrompt')
@@ -173,6 +202,7 @@ export default function Home() {
     }
   
     return (
+      
       <div 
         style={{ backgroundColor: highlighted ? '#7774' : 'transparent' }} // Add this line
         onContextMenu={showMenu} onClick={closeMenu} onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
@@ -299,68 +329,87 @@ export default function Home() {
 
   return (
     // <div style={{ width: '100%', minHeight: '90vh' }} >
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
-      {/* <p id={styles['welcome']}>{'Welcome to Nodes EpsilonAI, '}<span id={styles['name']}>{user ? userInfo?.name || userInfo?.username || user?.email || 'Unknown User': 'Guest'}</span>!</p> */}
+    <div style={{ overflowX: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
-      <div style={{ width: '100%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr' }}>
-        <div style={{ gridRow: '1', gridColumn: '1' }}>
-          
-          <div style={{ width: '97.5%',  backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h3  className={styles['news-sub-title']}>Pinned</h3>
-            {/* <TodayNews /> */}
-            <ul style={{ height: '8.75rem' }} className={styles['news-ul']}>
-              {
-                pinnedMessages.map((message, index) => 
-                {
-                  // if (message.type) {
-                  return (
-                    <CustomContextMenu tooltip={message} key={index}>
-                      <li>{message.message}</li>
-                    </CustomContextMenu>
-                  )
-                  // }
-                },
-                )
-              }
-            </ul>
+      <div style={{ width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr', height: '80vh' }}>
+        <div style={{ gridRow: '1', gridColumn: '1', position: 'relative' }}>
+          <div style={{ display: 'flex', position: 'absolute', top: 0, right: '40px', color: '#DDD', gap: '0.5rem' }}>
+            <span onClick={() => setSwitchTab('Pinned')}
+              style={{ color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
+            <span>|</span>
+            <span onClick={() => setSwitchTab('Milestone')}
+              style={{ color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
+            <span>|</span>
+            <span onClick={() => setSwitchTab('Approval Request')}
+              style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
           </div>
-          
-          <div style={{ width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h3  className={styles['news-sub-title']}>Milestones</h3>
-            {/* <TodayNews /> */}
-            <ul style={{ height: '8.75rem' }} className={styles['news-ul']}>
-              <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
-              <li>Avivo has recieved 16 meetings request this month!</li>
-              <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
-
-             
-            </ul>
+          <div 
+            ref={ulRef}
+            className={`${styles['tab-content']} ${styles[animationClass]}`} 
+            style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+            <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</h2>
+            <div className={styles['animation-container']}> {/* Add this line */}
+              <ul style={{ maxHeight: '75%' }} className={`${styles['news-ul']}`}>
+                {
+                  switchTab === 'Milestone' && 
+              <>
+                <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
+                <li>Avivo has recieved 16 meetings request this month!</li>
+                <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
+              </>
+                }
+                {
+                  switchTab === 'Pinned' && pinnedMessages.map((message, index) => 
+                  {
+                    // if (message.type) {
+                    return (
+                      <CustomContextMenu tooltip={message} key={index}>
+                        <li>{message.message}</li>
+                      </CustomContextMenu>
+                    )
+                    // }
+                  },
+                  )
+                }
+                {
+                  switchTab === 'Approval Request' && 
+              <>
+                <li>Avivo has recieved 16 meetings request this month!</li>
+                <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
+              </>
+                }
+              </ul>
+            </div> {/* Add this line */}
           </div>
         </div>
+
+
   
         <div style={{  gridRow: '1', gridColumn: '2' }}>
-          <div style={{ width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+          <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>
             
-            <ul style={{ maxHeight: '30rem' }} className={styles['news-ul']}>
+            <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
               {
                 followupMessages.length > 0 &&
                 followupMessages.map((message, index) => (
                   <CustomContextMenu tooltip={message} key={index}>
                     <li>{message.message}</li>
+                    <li>{message.message}</li>
                   </CustomContextMenu>
                 ),
+                
                 )
               }
             </ul>
 
           </div>
         </div>
-        <div style={{  gridRow: '2', gridColumn: '2' }}>
-          <div style={{ width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>GPT prompt</h2>
+        <div style={{  gridRow: '2', gridColumn: '2', height: '50%' }}>
+          <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+            <h2 style={{ marginTop: '2rem' }} className={styles['news-title']}>GPT prompt</h2>
             
-            <ul style={{ maxHeight: '50rem' }} className={styles['news-ul']}>
+            <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
               {
                 tooltipData.length > 0 &&
                 tooltipData.map((message, index) => (
@@ -378,7 +427,7 @@ export default function Home() {
         </div>
 
      
-        <div style={{ gridRow: '2', gridColumn: '1', backgroundColor: '#aaa1', 
+        <div style={{ height: '35vh', gridRow: '2', gridColumn: '1', backgroundColor: '#aaa1', 
           boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
           borderRadius: '1rem', marginTop: '2rem', width: '97.5%' }}>
           <div className={styles['live-update-layout']}>

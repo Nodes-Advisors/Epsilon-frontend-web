@@ -445,8 +445,16 @@ app.get('/getUser', async (req, res) => {
     const database = client.db('dev')
     const collection = database.collection('NodesTeam')
     const email = req.query.email
-
-    const user = await collection.findOne({ email: email })
+    const name = req.query.name
+    let user
+    if (email) {
+      user = await collection.findOne({ email: email })
+    } else if (name) {
+      // convert name from  xx-xx-xx to xx xx xx
+      user = await collection.findOne({ name: { $regex: new RegExp(`^${name.replace(/-/g, ' ')}$`, 'i') } })
+    } else {
+      return res.status(400).send('Invalid request')
+    }
 
     if (user) {
       res.status(200).json(user)
@@ -459,6 +467,20 @@ app.get('/getUser', async (req, res) => {
   } 
 })
 
+app.get('/getNodesProfileImage', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('NodesTeam')
+    // get all the profile images and names
+    const nodes = await collection.find({}).toArray()
+    const profileImages = nodes.map(node => ({ email: node.email, profile_image: node.profile_image, name: node.name }))
+    // console.log(profileImages)
+    res.json(profileImages)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }
+})
 
 app.get('/fundStatus', async (req, res) => {
   try {

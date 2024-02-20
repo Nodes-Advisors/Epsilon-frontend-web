@@ -356,7 +356,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                 {
                   openPanel && 
                   <div style={{ textAlign: 'start', position: 'absolute', right: '-1rem', top: '5rem', zIndex: 1000 }}>
-                    <a className={styles['toggle']} href='/user-profile' style={{ display: 'block', width: '8rem', zIndex: 1001 }}>Go To My Profile</a>
+                    <a className={styles['toggle']} href='/user-profile/me' style={{ display: 'block', width: '8rem', zIndex: 1001 }}>Go To My Profile</a>
                     <a className={styles['toggle']} style={{ display: 'block', zIndex: 1001, position: 'relative' }}
                       onClick={logout}
                     >Sign Out</a>

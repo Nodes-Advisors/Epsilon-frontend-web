@@ -15,6 +15,7 @@ import { useTokenStore } from '../store/store'
 export default function UserProfile() {
 
   const user = useUserStore(state => state.user)
+  const [otherUser, setOtherUser] = useState<any>(undefined)
   const navigate = useNavigate()
   const [data, setData] = useState<any>(undefined)
   const [loading, setLoading] = useState<boolean>(false)
@@ -31,16 +32,17 @@ export default function UserProfile() {
           'Authorization': token,
         },
         params: {
-          email: user?.email,
+          email: window.location.href.split('/').pop() === 'me' ? user.email : undefined,
+          name: window.location.href.split('/').pop() === 'me' ? undefined : window.location.href.split('/').pop(),
         },
       })
       const data = result.data
-      console.log(data)
+      // console.log(data)
       setData(data)
       setLoading(false)
     }
     fetchData()
-  }, [])
+  }, [window.location.href])
 
   return (
     <section style={{ display: 'flex', justifyContent: 'center', marginTop: '10rem', gap: '20rem', marginLeft: '-35rem' }}>
@@ -49,7 +51,7 @@ export default function UserProfile() {
           <>
             <div>
               <AsyncImage
-                src={user?.picture ? user.picture : UserAvatar}
+                src={data?.profile_image ? data?.profile_image : UserAvatar}
                 loading='eager' 
                 loader={<div style={{ background: '#888' }}/>}
                 error={<div style={{ background: '#eee' }}/>}
@@ -170,7 +172,7 @@ export default function UserProfile() {
               </div>
               <span style={{ fontSize: '1.6rem', opacity: '0.6' }}><span style={{ textTransform: 'capitalize' }}>{data?.department}</span> at {'Nodes Advisors AG' }</span>
               <div >
-                <a style={{ textDecoration: 'none', color: 'white', opacity: '0.6', marginRight: '2rem', fontSize: '1.6rem' }} href='www.google.com'>{user?.email || 'www.personal_web.com'}</a>
+                <a style={{ textDecoration: 'none', color: 'white', opacity: '0.6', marginRight: '2rem', fontSize: '1.6rem' }} href='www.google.com'>{data?.email || 'www.personal_web.com'}</a>
                 <span style={{ fontSize: '1.6rem', opacity: 0.6 }}>{data?.location.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Zurich, Switzerland'}</span>
               </div>
               <span style={{ marginTop: '2rem', fontSize: '2rem', fontWeight: 550 }}>User&apos;s KPI Dashboard</span>

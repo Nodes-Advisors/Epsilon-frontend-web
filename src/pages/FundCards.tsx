@@ -919,6 +919,7 @@ export default function FundCards() {
         <ReactPaginate
           className={styles['fund-card-pagination']}
           // breakClassName={styles['fund-card-pagination-li']}
+          
           pageLinkClassName={styles['fund-card-pagination-link']}
           pageClassName={styles['fund-card-pagination-li']}
           activeClassName={styles['fund-card-pagination-li-active']}
