@@ -23,7 +23,7 @@ export default function Clients() {
 
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
   const [isLoading, setLoading] = useState(true)
-  const filterNames: CLIENT_FILTER_NAME[] = ['Client', 'Location', 'Transaction Type', 'Sector', 'Industry', 'Deal Type', 'Deal Size', 'Committed Investors', 'Active Funds', 'Success Rate', 'Predictor Score', 'Clear Filters']
+  const filterNames: CLIENT_FILTER_NAME[] = ['Client', 'Location', 'Status', 'Transaction Type', 'Sector', 'Industry', 'Deal Type', 'Deal Size', 'Committed Investors', 'Active Funds', 'Success Rate', 'Predictor Score', 'Clear Filters']
   const [filterName, setFilterName] = useState<CLIENT_FILTER_NAME>('')
   const [filteredData, setFilteredData] = useState<Record<FieldSet>[]>([])
   const user = useUserStore(state => state.user)
@@ -37,6 +37,7 @@ export default function Clients() {
     '': [],
     'Client': [],
     'Location': [],
+    'Status': [],
     'Transaction Type': [],
     'Sector': [],
     'Industry': [],
@@ -81,6 +82,11 @@ export default function Clients() {
               // console.log(filteredList[filterName], 'filteredList[filterName]')
                 return filteredList[filterName].some((filter) => 
                   filter === record['hq location'] || (record['hq location'] && record['hq location'].includes(filter)),
+                )
+              case 'Status':
+                
+                return filteredList[filterName].some((filter) => 
+                  filter === record['status'] || (record['status'] && record['status'].includes(filter)),
                 )
               case 'Transaction Type':
                 return filteredList[filterName].some((filter) => 
@@ -159,6 +165,11 @@ export default function Clients() {
           // console.log(filteredList[filterName], 'filteredList[filterName]')
           return filteredList[filterName].some((filter) => 
             filter === record['hq location'] || (record['hq location'] && record['hq location'].includes(filter)),
+          )
+        case 'Status':
+            
+          return filteredList[filterName].some((filter) => 
+            filter === record['status'] || (record['status'] && record['status'].includes(filter)),
           )
         case 'Transaction Type':
           return filteredList[filterName].some((filter) => 
@@ -243,6 +254,8 @@ export default function Clients() {
       return removeDuplicatesAndNull(clients.map((client) => client['name']))
     case 'Location':
       return removeDuplicatesAndNull(clients.map((client) => client['hq location']))
+    case 'Status':
+      return removeDuplicatesAndNull(clients.map((client) => client['status']))
     case 'Transaction Type':
       return removeDuplicatesAndNull(clients.map((client) => client['transaction_type']))
     case 'Sector':
@@ -286,6 +299,7 @@ export default function Clients() {
           '': [],
           'Client': [],
           'Location': [],
+          'Status': [],
           'Transaction Type': [],
           'Sector': [],
           'Industry': [],
@@ -531,7 +545,11 @@ export default function Clients() {
                           </div>
                             
                         </div>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['status'] as string[] | string) as string || 'n/a'}</span>
+                        <span className={styles['fund-list-item']}
+                          data-label='Status'
+                          onClick={handleClickToFilter}>
+                          {convertedOutput(record['status'] as string[] | string) as string || 'n/a'}
+                        </span>
                         <span
                           className={styles['fund-list-item']}
                           data-label='Transaction Type'

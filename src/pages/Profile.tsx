@@ -267,18 +267,30 @@ export default function Profile(): JSX.Element {
                     </>  
                     :
                     <>
+                    
+                      
+                    
                       {
                         hislogs.length > 0
                           ?
                           <ul
                             style={{ listStyleType: 'none', color: '#9b93af', fontSize: '1.25rem',
-                              padding: '0', margin: '0', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                              maxHeight: '30vh', overflowY: 'auto', overflowX: 'hidden',
+                              paddingRight: '4rem', margin: '0', display: 'flex', flexDirection: 'column', gap: '4rem' }}
                           >
                             {
                               hislogs.map((log, i) => (
-                                <li key={i}>
-                                  <span>{log.Nodes ? log.Nodes : 'Someone'}</span>
-                                  <span>{log.Contact}</span>
+                                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                    <img src={''} alt="" className={styles['headImg']} />
+                                    <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Nodes ? log.Nodes : 'Someone'}</span>
+                                  </div>
+                                  
+                                  <div style={{ width: '5rem', height: '0.1px', backgroundColor: '#fff' }}></div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
+                                    <img src={''} alt="" className={styles['headImg']} />
+                                    <span style={{ position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Contact}</span>
+                                  </div>
                                 </li>
                               ))
     
