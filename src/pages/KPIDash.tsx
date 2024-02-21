@@ -2077,6 +2077,178 @@ export default function KPIDash() {
                   fontSize="0.9375rem"
                   style={{ textAlign: "left" }}
                 >
+                  KPI of the Selected Clients
+                </KPIText>
+                <div
+                  className={styles["kpi-horizontal-layout"]}
+                  style={{ gap: "3rem" }}
+                >
+                  <KPIBlock
+                    extraClass={styles["kpi-medium-dashboard"]}
+                    width="85.25rem"
+                    height="20.125rem"
+                    style={{ overflow: "auto" }}
+                  >
+                    <div
+                      ref={chartRef}
+                      style={{ width: "1300px", height: "330px" }}
+                    ></div>
+                  </KPIBlock>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  className={styles["kpi-horizontal-layout"]}
+                  style={{ gap: "1rem" }}
+                >
+                  <KPIBlock
+                    extraClass={styles["kpi-medium-dashboard"]}
+                    width="65.25rem"
+                    height="20.125rem"
+                    style={{ overflow: "auto" }}
+                  >
+                    <div style={kpiTableContainerStyle}>
+                      <ThemeProvider theme={theme}>
+                        <TableContainer component={Paper}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell style={categoryHeaderStyle}>
+                                  Category
+                                </TableCell>
+                                {selectedClients.map((client, index) => (
+                                  <TableCell
+                                    key={index}
+                                    style={categoryHeaderStyle}
+                                  >
+                                    {client.toUpperCase()}
+                                  </TableCell>
+                                ))}
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {selectedClientTableData.map(
+                                (row, index, array) => (
+                                  <React.Fragment key={`fragment-${index}`}>
+                                    <TableRow>
+                                      <TableCell style={leftmostColumnStyle}>
+                                        {row.year}
+                                      </TableCell>
+                                      {selectedClients.map((client) => (
+                                        <TableCell
+                                          key={`${client}-${index}`}
+                                          style={otherCellsStyle}
+                                        >
+                                          {row[client.toLowerCase()] !==
+                                          undefined
+                                            ? row[client.toLowerCase()]
+                                            : "-"}
+                                        </TableCell>
+                                      ))}
+                                    </TableRow>
+                                    {index > 0 && (
+                                      <TableRow>
+                                        <TableCell style={leftmostColumnStyle}>
+                                          Change from Previous
+                                        </TableCell>
+                                        {selectedClients.map((client, idx) => {
+                                          const currentValue =
+                                            row[client.toLowerCase()];
+                                          const previousValue =
+                                            array[index - 1][
+                                              client.toLowerCase()
+                                            ];
+                                          return (
+                                            <TableCell
+                                              key={`change-${client}-${index}`}
+                                              style={changeCellsStyle}
+                                            >
+                                              {previousValue !== undefined &&
+                                              currentValue !== undefined
+                                                ? calculatePercentageChange(
+                                                    previousValue,
+                                                    currentValue
+                                                  )
+                                                : "-"}
+                                            </TableCell>
+                                          );
+                                        })}
+                                      </TableRow>
+                                    )}
+                                  </React.Fragment>
+                                )
+                              )}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </ThemeProvider>
+                    </div>
+                  </KPIBlock>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <KPIText
+                  fontColor="#fff"
+                  fontSize="0.9375rem"
+                  style={{ textAlign: "left" }}
+                >
+                  KPI Conversion Ratio
+                </KPIText>
+                <div
+                  className={styles["kpi-horizontal-layout"]}
+                  style={{ gap: "3rem" }}
+                >
+                  <KPIBlock
+                    extraClass={styles["kpi-medium-dashboard"]}
+                    width="85.25rem"
+                    height="20.125rem"
+                    style={{ overflow: "auto" }}
+                  >
+                    {focused === "all" ? (
+                      <div
+                        style={{
+                          width: "550px",
+                          height: "600px",
+                          padding: "20px",
+                        }}
+                      >
+                        {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
+                        <div className="chart" style={chartStyle}>
+                          <div className="header" style={headerStyle}>
+                            {/* Performance */}
+                          </div>
+                          <div
+                            ref={chartDivRef}
+                            style={{ width: "1300px", height: "260px" }}
+                          ></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          width: "550px",
+                          height: "600px",
+                          padding: "20px",
+                        }}
+                      >
+                        <Bar
+                          data={createChartDataFromKPIs(tylerKPIs)}
+                          options={kpiChartOptions}
+                        />
+                      </div>
+                    )}
+                  </KPIBlock>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <KPIText
+                  fontColor="#fff"
+                  fontSize="0.9375rem"
+                  style={{ textAlign: "left" }}
+                >
                   Overall KPI in Timescale
                 </KPIText>
                 <div
@@ -2166,252 +2338,6 @@ export default function KPIDash() {
                     <div style={{ height: "57rem", width: "55rem" }}>
                       <Bar data={dealChartData} options={chartOptions} />
                     </div>
-                  </KPIBlock>
-                </div>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {/* <KPIText
-                  fontColor="#fff"
-                  fontSize="0.9375rem"
-                  style={{ textAlign: "left" }}
-                >
-                  
-                </KPIText> */}
-                <div
-                  className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
-                >
-                  <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
-                    width="52.25rem"
-                    height="26.125rem"
-                    style={{ overflow: "auto" }}
-                  >
-                    {focused === "all" ? (
-                      <div
-                        style={{
-                          width: "550px",
-                          height: "600px",
-                          padding: "20px",
-                        }}
-                      >
-                        {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
-                        <div className="chart" style={chartStyle}>
-                          <div className="header" style={headerStyle}>
-                            {/* Performance */}
-                          </div>
-                          <div
-                            ref={chartDivRef}
-                            style={{ width: "700px", height: "350px" }}
-                          ></div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          width: "550px",
-                          height: "600px",
-                          padding: "20px",
-                        }}
-                      >
-                        <Bar
-                          data={createChartDataFromKPIs(tylerKPIs)}
-                          options={kpiChartOptions}
-                        />
-                      </div>
-                    )}
-                  </KPIBlock>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <KPIText
-                  fontColor="#fff"
-                  fontSize="0.9375rem"
-                  style={{ textAlign: "left" }}
-                >
-                  KPI of the Selected Clients
-                </KPIText>
-                <div
-                  className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
-                >
-                  <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
-                    width="52.25rem"
-                    height="26.125rem"
-                    style={{ overflow: "auto" }}
-                  >
-                    <div style={kpiTableContainerStyle}>
-                      <ThemeProvider theme={theme}>
-                        <TableContainer component={Paper}>
-                          <Table>
-                            <TableHead>
-                              <TableRow>
-                                <TableCell style={categoryHeaderStyle}>
-                                  Category
-                                </TableCell>
-                                {selectedClients.map((client, index) => (
-                                  <TableCell
-                                    key={index}
-                                    style={categoryHeaderStyle}
-                                  >
-                                    {client.toUpperCase()}
-                                  </TableCell>
-                                ))}
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {selectedClientTableData.map(
-                                (row, index, array) => (
-                                  <React.Fragment key={`fragment-${index}`}>
-                                    <TableRow>
-                                      <TableCell style={leftmostColumnStyle}>
-                                        {row.year}
-                                      </TableCell>
-                                      {selectedClients.map((client) => (
-                                        <TableCell
-                                          key={`${client}-${index}`}
-                                          style={otherCellsStyle}
-                                        >
-                                          {row[client.toLowerCase()] !==
-                                          undefined
-                                            ? row[client.toLowerCase()]
-                                            : "-"}
-                                        </TableCell>
-                                      ))}
-                                    </TableRow>
-                                    {index > 0 && (
-                                      <TableRow>
-                                        <TableCell style={leftmostColumnStyle}>
-                                          Change from Previous
-                                        </TableCell>
-                                        {selectedClients.map((client, idx) => {
-                                          const currentValue =
-                                            row[client.toLowerCase()];
-                                          const previousValue =
-                                            array[index - 1][
-                                              client.toLowerCase()
-                                            ];
-                                          return (
-                                            <TableCell
-                                              key={`change-${client}-${index}`}
-                                              style={changeCellsStyle}
-                                            >
-                                              {previousValue !== undefined &&
-                                              currentValue !== undefined
-                                                ? calculatePercentageChange(
-                                                    previousValue,
-                                                    currentValue
-                                                  )
-                                                : "-"}
-                                            </TableCell>
-                                          );
-                                        })}
-                                      </TableRow>
-                                    )}
-                                  </React.Fragment>
-                                )
-                              )}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      </ThemeProvider>
-                    </div>
-                  </KPIBlock>
-
-                  {/* <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
-                    width="52.25rem"
-                    height="26.125rem"
-                    style={{ overflow: "auto" }}
-                  >
-                    <div style={kpiTableContainerStyle}>
-                      <table style={kpiTableStyle}>
-                        <thead>
-                          <tr>
-                            <th style={tableHeaderStyle}>Category</th>
-                            {selectedClients.map((client) => (
-                              <th key={client} style={tableHeaderStyle}>
-                                {client}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {selectedClientTableData.map((row, index, array) => (
-                            <>
-                              <tr
-                                key={`data-${index}`}
-                                style={getTableRowStyle(index)}
-                              >
-                                <td style={tableCellStyle}>{row.year}</td>
-                                {selectedClients.map((client) => (
-                                  <td
-                                    key={`${client.toLowerCase()}-${index}`}
-                                    style={tableCellStyle}
-                                  >
-                                    {row[client.toLowerCase()] !== undefined
-                                      ? row[client.toLowerCase()]
-                                      : "-"}
-                                  </td>
-                                ))}
-                              </tr>
-                              {index < array.length - 1 && ( // Don't add for the last row
-                                <tr
-                                  key={`change-${index}`}
-                                  style={getTableRowStyle(index)}
-                                >
-                                  <td style={tableCellStyle}>Change</td>
-                                  {selectedClients.map(
-                                    (client, clientIndex) => {
-                                      const oldValue =
-                                        row[client.toLowerCase()];
-                                      const newValue =
-                                        array[index + 1][client.toLowerCase()];
-                                      return (
-                                        <td
-                                          key={`change-${client.toLowerCase()}-${index}`}
-                                          style={tableCellStyle}
-                                        >
-                                          {oldValue !== undefined &&
-                                          newValue !== undefined
-                                            ? calculatePercentageChange(
-                                                oldValue,
-                                                newValue
-                                              )
-                                            : "-"}
-                                        </td>
-                                      );
-                                    }
-                                  )}
-                                </tr>
-                              )}
-                            </>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </KPIBlock> */}
-
-                  <KPIBlock
-                    extraClass={styles["kpi-medium-dashboard"]}
-                    width="60.25rem"
-                    height="26.125rem"
-                    style={{ overflow: "auto" }}
-                  >
-                    {/* Line Plot for Each Account Holder */}
-                    {/* <div style={{ height: "21rem", width: "57rem" }}>
-                      <Line
-                        data={accountHoldersLineData}
-                        options={lineChartOptions}
-                      /> 
-                    </div> */}
-                    <div
-                      ref={chartRef}
-                      style={{ width: "900px", height: "400px" }}
-                    ></div>
                   </KPIBlock>
                 </div>
               </div>
