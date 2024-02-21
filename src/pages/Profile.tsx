@@ -7,7 +7,7 @@ import VectorLogo from '../assets/svgs/vector.svg?react'
 import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
-import { useFundsStore, useSavedFundsStore, useUserStore } from '../store/store'
+import { useFundsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import { STATUS_COLOR_LIST } from '../lib/constants'
 import FundStatusLarger from '../components/status-larger'
@@ -43,6 +43,7 @@ export default function Profile(): JSX.Element {
   const [changeToInput, setChangeToInput] = useState<boolean>(false)
   const newCollectionRef = useRef<HTMLInputElement>(null)
   const [nodesTeam, setNodesTeam] = useState<any[]>([])
+  const token = useTokenStore(state => state.token)
 
   function formatDate(timestamp) {
     const date = new Date(timestamp)
@@ -71,20 +72,30 @@ export default function Profile(): JSX.Element {
     setSelectedFundName(record.Funds)
     async function fetchHistoricalLog() {
       try {
-        const res = await fetch(`http://localhost:5001/gethislog/${record.Funds}`)
-        const data = await res.json()
-        // console.log(data)
+        const record = funds.filter((record) => record._id === id)[0]
+        const res = await axios.get(`http://localhost:5001/gethislog/${record.Funds}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
+          },
+        })
+        const data = res.data
+        console.log(data)
         setHisLogs(data)
       } catch (error) {
         console.error(error)
       }
     }
-    fetchHistoricalLog()
+    if (token) {
+      fetchHistoricalLog()
+      
+    }
     setLocation(['HQ Country' ].reduce((acc, cur, curIndex, array) =>
       acc += record[cur] ? curIndex !== array.length - 1 ? record[cur] + ', ' : record[cur] : '', ''))
     setRecord(record)
     setTimeout(() => setLoading(false), 1000)
-  }, [id])
+  }, [id, token])
   
   const generateColorList = (length, contact, status) => {
     // console.log(length)
@@ -109,6 +120,8 @@ export default function Profile(): JSX.Element {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {
@@ -130,6 +143,8 @@ export default function Profile(): JSX.Element {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {
@@ -174,6 +189,8 @@ export default function Profile(): JSX.Element {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       toast.success('Request sent successfully!')
@@ -192,6 +209,8 @@ export default function Profile(): JSX.Element {
         },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setSavedCollections(res.data)
@@ -199,8 +218,8 @@ export default function Profile(): JSX.Element {
         toast.error(error?.response?.data)
       })
     }
-    fetchSavedCollections()
-  }, [])
+    if (token) fetchSavedCollections()
+  }, [token])
 
   useEffect(() => {
     const fetchNodesTeam = async () => {
@@ -209,27 +228,29 @@ export default function Profile(): JSX.Element {
         const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
           },
         })
         if (res.status === 200) {
           setLoading(false)
           setNodesTeam(res.data)
-          // console.log(res.data)
+          console.log(res.data)
         }
       } catch (error) {
         setLoading(false)
         console.error(error)
       }
     }
-    fetchNodesTeam()
+    if (token) fetchNodesTeam()
     
-  }, [])
+  }, [token])
 
   const getImage = (name: string | undefined | null) => {
     if (name) {
       // console.log(name)
       // console.log(nodesTeam)
-      const found = nodesTeam.find(item => item.name.includes(name))
+      const found = nodesTeam.find(item => item.name && item.name.includes(name))
       // console.log(found)
       if (found) {
         // console.log(found.profile_image)
@@ -322,7 +343,7 @@ export default function Profile(): JSX.Element {
                             {
                               hislogs
                                 .filter((log, index, self) =>
-                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact)
+                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact),
                                 )
                                 .map((log, i) => (
                                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>

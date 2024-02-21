@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Table from './Table'
-import { useTokenStore } from '../store/store'
+import { useTokenStore, useUserStore } from '../store/store'
 // import './app.css'
 
 interface IDataItem {
@@ -18,13 +18,15 @@ function GPTdata() {
   const [senders, setSenders] = useState<string[]>([])
   const [investorEmails, setInvestorEmails] = useState<string[]>([])
   const [deals, setDeals] = useState<string[]>([])
-
+  const user = useUserStore((state) => state.user)
+  
   useEffect(() => {
     const fetchData = async () => {
       const res = await axios.get(`http://localhost:5001?q=${query}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
+          'email': user?.email,
         },
       })
       setData(res.data)
@@ -50,8 +52,10 @@ function GPTdata() {
       // );
       // setDeals(uniqueDeals as string[]);
     }
-    if (query.length === 0 || query.length > 2) fetchData()
-  }, [query])
+    if (query.length === 0 || query.length > 2) {
+      if (token) fetchData()
+    }
+  }, [query, token])
 
   // const filterBySender = (sender: string) => {
   //   const filteredSender = data.filter(

@@ -5,6 +5,7 @@ import GPTdata from './GPTdata'
 import axios from 'axios'
 import { AsyncImage } from 'loadable-image'
 import { useNavigate } from 'react-router-dom'
+import { useTokenStore } from '../store/store'
 
 function LiveUpdate({user}: {user: any}) {
   const [isLoading, setLoading] = useState(true)
@@ -25,12 +26,15 @@ function LiveUpdate({user}: {user: any}) {
   const loader = useRef(null)
   const [currentScrollHeight, setCurrentScrollHeight] = useState(0)
   const navigate = useNavigate()
-
+  const token = useTokenStore((state) => state.token)
+  
   useEffect(() => {
     const fetchCompanyData = async() => {
       const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {
@@ -46,6 +50,8 @@ function LiveUpdate({user}: {user: any}) {
       const res = await axios.get(`http://localhost:5001/fundrisingpipeline?page=${page}`, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {
@@ -208,6 +214,8 @@ function LiveUpdate({user}: {user: any}) {
         const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
           },
         })
         if (res.status === 200) {

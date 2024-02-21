@@ -240,6 +240,7 @@ export default function KPIDash() {
             headers: {
               'Content-Type': 'application/json',
               Authorization: token,
+              'email': user?.email,
             },
           }
         );
@@ -253,6 +254,8 @@ export default function KPIDash() {
       const res = await axios.get('http://localhost:5001/fundrisingpipeline', {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       });
       if (res.status === 200) {

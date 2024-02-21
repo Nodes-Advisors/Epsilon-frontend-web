@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
+import { useTokenStore, useUserStore } from '../store/store'
 export default function Database() {
   const [query, setQuery] = useState<string>('')
   const [data, setData] = useState<any[]>([])
@@ -12,6 +13,8 @@ export default function Database() {
   const [fields, setFields] = useState<string[]>([])
   const formRef = useRef(null)
   const [remaining, setRemaining] = useState(true)
+  const token = useTokenStore((state) => state.token)
+  const user = useUserStore((state) => state.user)
   // const [isFilterActive, setIsFilterActive] = useState(false)
 
   // const [filters, setFilters] = useState({})
@@ -20,13 +23,25 @@ export default function Database() {
     if (query === '') return
     const fetchFields = async (query) => {
       const res = await axios.get(`http://localhost:5001/getFields/${query}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
       })
       setFields(res.data)
       // console.log(res.data)
       const newFilterOptions = {}
       // console.log(res.data)
       for (const field of res.data) {
-        const res2 = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`)
+        const res2 = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token,
+              'email': user?.email,
+            },
+          })
         // console.log(res2.data)
         newFilterOptions[field] = res2.data
       }
@@ -46,6 +61,11 @@ export default function Database() {
           page: page,
           pageSize: 500,
           filters: JSON.stringify(filters),
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.data.length === 0) {
@@ -99,6 +119,8 @@ export default function Database() {
       const res = await axios.get('http://localhost:5001/getCollections', {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {

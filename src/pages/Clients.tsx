@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { FieldSet, Record } from 'airtable'
 import { useNavigate } from 'react-router-dom'
-import { useClientsStore } from '../store/store'
+import { useClientsStore, useTokenStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
@@ -31,6 +31,7 @@ export default function Clients() {
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState('')
+  const token = useTokenStore(state => state.token)
   const [filteredList, setFilteredList] = useState<{
     [key: string]: string[]
   }>(localStorage.getItem('client-filter') ? JSON.parse(localStorage.getItem('client-filter') as string) :{
@@ -51,94 +52,104 @@ export default function Clients() {
   })
 
   useEffect(() => {
-    setLoading(true)
-    axios.get('http://localhost:5001/getAllClients')
-      .then((res) => {
+    
+    if (token) {
+      setLoading(true)
+      axios.get('http://localhost:5001/getAllClients',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
+          },
+        })
+        .then((res) => {
         
-        setClients(res.data)  
-        setFilteredData(res.data)
+          setClients(res.data)  
+          setFilteredData(res.data)
        
-        setTotalClientCount(res.data.length)
+          setTotalClientCount(res.data.length)
         
-        if (localStorage.getItem('client-filter')) {
-          const filteredList = JSON.parse(localStorage.getItem('client-filter') as string)
-          if (Object.values(filteredList).every(filter => filter.length === 0)) {
-            setFilteredData(res.data)
-            return
-          }
-          setFilteredData(clients.filter((record) => {
-            return Object.keys(filteredList).every((filterName) => {
-            // If no filter is set for this filterName, return false
-              if (filteredList[filterName].length === 0) {
-                return true
-              }
+          if (localStorage.getItem('client-filter')) {
+            const filteredList = JSON.parse(localStorage.getItem('client-filter') as string)
+            if (Object.values(filteredList).every(filter => filter.length === 0)) {
+              setFilteredData(res.data)
+              return
+            }
+            setFilteredData(clients.filter((record) => {
+              return Object.keys(filteredList).every((filterName) => {
+                // If no filter is set for this filterName, return false
+                if (filteredList[filterName].length === 0) {
+                  return true
+                }
       
-              switch (filterName) {
-              case 'Client':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['name'] || (record['name'] && record['name'].includes(filter)),
-                )
-              case 'Location':
-              // console.log(filteredList[filterName], 'filteredList[filterName]')
-                return filteredList[filterName].some((filter) => 
-                  filter === record['hq location'] || (record['hq location'] && record['hq location'].includes(filter)),
-                )
-              case 'Status':
+                switch (filterName) {
+                case 'Client':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['name'] || (record['name'] && record['name'].includes(filter)),
+                  )
+                case 'Location':
+                  // console.log(filteredList[filterName], 'filteredList[filterName]')
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['hq location'] || (record['hq location'] && record['hq location'].includes(filter)),
+                  )
+                case 'Status':
                 
-                return filteredList[filterName].some((filter) => 
-                  filter === record['status'] || (record['status'] && record['status'].includes(filter)),
-                )
-              case 'Transaction Type':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['transaction_type'] || (record['transaction_type'] && record['transaction_type'].includes(filter)),
-                )
-              case 'Sector':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['sector'] || (record['sector'] && record['sector'].includes(filter)),
-                )
-              case 'Industry':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['industry'] || (record['industry'] && record['industry'].includes(filter)),
-                )
-              case 'Deal Type':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['deal_type'] || (record['deal_type'] && filter === record['deal_type'].toString()),
-                )
-              case 'Deal Size':
-                return filteredList[filterName].some((filter) => 
-                  filter === record['deal_size'] || (record['deal_size'] && filter === record['deal_size'].toString()),
-                )
-              case 'Committed Investors':
-                return filteredList[filterName].some((filter) => 
-                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
-                )
-              case 'Active Funds':
-                return filteredList[filterName].some((filter) => 
-                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
-                )
-              case 'Success Rate':
-                return filteredList[filterName].some((filter) => 
-                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
-                )
-              case 'Predictor Score':
-                return filteredList[filterName].some((filter) => 
-                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
-                )
-              default:
-                return true
-              }
-            })
-          }))
-        }
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['status'] || (record['status'] && record['status'].includes(filter)),
+                  )
+                case 'Transaction Type':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['transaction_type'] || (record['transaction_type'] && record['transaction_type'].includes(filter)),
+                  )
+                case 'Sector':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['sector'] || (record['sector'] && record['sector'].includes(filter)),
+                  )
+                case 'Industry':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['industry'] || (record['industry'] && record['industry'].includes(filter)),
+                  )
+                case 'Deal Type':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['deal_type'] || (record['deal_type'] && filter === record['deal_type'].toString()),
+                  )
+                case 'Deal Size':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record['deal_size'] || (record['deal_size'] && filter === record['deal_size'].toString()),
+                  )
+                case 'Committed Investors':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                  )
+                case 'Active Funds':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                  )
+                case 'Success Rate':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                  )
+                case 'Predictor Score':
+                  return filteredList[filterName].some((filter) => 
+                    filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                  )
+                default:
+                  return true
+                }
+              })
+            }))
+          }
           
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+  }, [token])
 
   useEffect(() => {
     // If no filter is applied, show all data
@@ -494,7 +505,7 @@ export default function Clients() {
             :
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalClientCount ? `${totalClientCount} Funds` : `${filteredData.length} Funds (out of ${totalClientCount} Funds)`}</span>
+              <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalClientCount ? `${totalClientCount} Clients` : `${filteredData.length} Clients (out of ${totalClientCount} Clients)`}</span>
               <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '2fr repeat(10, 1fr)', width: '100%', textAlign: 'left'  }}>
                 <span>Clients</span>
                 <span>Status</span>

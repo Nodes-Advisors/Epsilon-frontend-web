@@ -1,20 +1,20 @@
 // @ts-nocheck
-import { KPIBlock, KPIText } from "../components/kpi-component";
-import styles from "../styles/kpi-block.module.less";
-import TICKIcon from "../assets/svgs/tick.svg?react";
-import EpsilonLogo from "../assets/images/epsilon-logo.png";
-import { useEffect, useState, useRef } from "react";
-import Skeleton from "react-loading-skeleton";
-import { Bar, Line } from "react-chartjs-2";
-import axios from "axios";
-import cancelButton from "../assets/images/cancel.png";
-import { useTokenStore } from "../store/store";
-import { STAGES } from "../lib/constants";
-import { Chart, registerables } from "chart.js";
-import * as am5 from "@amcharts/amcharts5";
-import * as am5xy from "@amcharts/amcharts5/xy";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import React from "react";
+import { KPIBlock, KPIText } from "../components/kpi-component"
+import styles from "../styles/kpi-block.module.less"
+import TICKIcon from "../assets/svgs/tick.svg?react"
+import EpsilonLogo from "../assets/images/epsilon-logo.png"
+import { useEffect, useState, useRef } from "react"
+import Skeleton from "react-loading-skeleton"
+import { Bar, Line } from "react-chartjs-2"
+import axios from "axios"
+import cancelButton from "../assets/images/cancel.png"
+import { useTokenStore, useUserStore } from "../store/store"
+import { STAGES } from "../lib/constants"
+import { Chart, registerables } from "chart.js"
+import * as am5 from "@amcharts/amcharts5"
+import * as am5xy from "@amcharts/amcharts5/xy"
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated"
+import React from "react"
 import {
   Table,
   TableBody,
@@ -23,9 +23,9 @@ import {
   TableHead,
   TableRow,
   Paper,
-} from "@mui/material";
+} from "@mui/material"
 
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles"
 
 const theme = createTheme({
   palette: {
@@ -41,7 +41,7 @@ const theme = createTheme({
     },
   },
   // ...other theme options
-});
+})
 
 import {
   Chart as ChartJS,
@@ -54,8 +54,8 @@ import {
   Tooltip,
   Legend,
   Filler,
-} from "chart.js";
-import MemoizedDealFunnel from "../components/deal-funnel";
+} from "chart.js"
+import MemoizedDealFunnel from "../components/deal-funnel"
 
 ChartJS.register(
   CategoryScale,
@@ -67,50 +67,50 @@ ChartJS.register(
   Tooltip,
   Legend,
   Filler
-);
+)
 
 const chartStyle = {
   // background: "#eff2f7",
   borderRadius: "8px",
   width: "fit-content",
   height: "fit-content",
-};
+}
 
 const headerStyle = {
   padding: "10px",
   borderBottom: "1px solid #cdcdcd",
   fontFamily: "sans-serif",
-};
+}
 
 const bodyStyle2 = {
   fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-};
+}
 
 // Inline styles for the table container and table elements
 const kpiTableContainerStyle = {
   overflowX: "auto", // Ensure table is scrollable on small screens
   marginTop: "1rem",
-};
+}
 
 const kpiTableStyle = {
   width: "100%",
   borderCollapse: "separate", // Use 'separate' to apply spacing between cells
   borderSpacing: "0 1rem", // Horizontal and vertical spacing
   textAlign: "left", // Align text to the left for readability
-};
+}
 
 const tableHeaderStyle = {
   padding: "0.75rem", // Add padding inside each cell for space
   backgroundColor: "#6958a8", // Slightly darker background for headers
   // color: "#E6E6FA", // Dark text for headers for contrast
   border: "1px solid #aaa", // Light border for cells
-};
+}
 
 const tableCellStyle = {
   padding: "0.75rem", // Add padding inside each cell for space
   // backgroundColor: "#474E68", // Light background for cells for contrast
   border: "1px solid #aaa", // Light border for cells
-};
+}
 
 // const groupRowStyle = {
 //   marginBottom: "1rem", // Adjust the space between groups
@@ -132,27 +132,27 @@ const tableCellStyle = {
 const categoryHeaderStyle = {
   backgroundColor: "#6451a6",
   color: "#ffffff",
-};
+}
 
 const leftmostColumnStyle = {
   backgroundColor: "#5a60b8",
   color: "#ffffff",
-};
+}
 
 const otherCellsStyle = {
   backgroundColor: "#3d414f",
   color: "#ffffff",
-};
+}
 
 const changeCellsStyle = {
   backgroundColor: "#466bab",
   color: "#ffffff",
-};
+}
 
 // Function to apply alternate row coloring
 const getTableRowStyle = (index) => ({
   // backgroundColor: index % 2 === 0 ? "#000000" : "#000000",
-});
+})
 
 // Define the structure of the data for deals and account holders
 interface DealData {
@@ -171,49 +171,50 @@ interface AccountHolderData {
 }
 
 export default function KPIDash() {
-  const filterRef = useRef<HTMLDivElement>(null);
-  const [clients, setClients] = useState<string[]>([]);
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const [showAllFilters, setShowAllFilters] = useState<boolean>(false);
-  const [focused, setFocused] = useState<"all" | "you">("all");
-  const [isLoading, setLoading] = useState(true);
-  const token = useTokenStore((state) => state.token);
-  const [dealData, setDealData] = useState<DealData[]>([]);
-  const [timeDealData, setTimeDealData] = useState<DealData[]>([]);
+  const filterRef = useRef<HTMLDivElement>(null)
+  const [clients, setClients] = useState<string[]>([])
+  const [selectedClients, setSelectedClients] = useState<string[]>([])
+  const [showAllFilters, setShowAllFilters] = useState<boolean>(false)
+  const [focused, setFocused] = useState<"all" | "you">("all")
+  const [isLoading, setLoading] = useState(true)
+  const token = useTokenStore((state) => state.token)
+  const user = useUserStore(state => state.user)
+  const [dealData, setDealData] = useState<DealData[]>([])
+  const [timeDealData, setTimeDealData] = useState<DealData[]>([])
   const [timeAggregatedDealData, setTimeAggregatedDealData] = useState<
     DealData[]
-  >([]);
+  >([])
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
-  >([]);
+  >([])
   const [dealChartData, setDealChartData] = useState({
     labels: [],
     datasets: [],
-  });
-  const [selectedDeal, setSelectedDeal] = useState("");
-  const [chartData, setChartData] = useState({});
-  const [monthlyTotals, setMonthlyTotals] = useState([]);
-  const [monthlyLineData, setMonthlyLineData] = useState({});
+  })
+  const [selectedDeal, setSelectedDeal] = useState("")
+  const [chartData, setChartData] = useState({})
+  const [monthlyTotals, setMonthlyTotals] = useState([])
+  const [monthlyLineData, setMonthlyLineData] = useState({})
   const [accountHoldersLineData, setAccountHoldersLineData] = useState({
     labels: [],
     datasets: [],
-  });
-  const [combinedChartData, setCombinedChartData] = useState({});
+  })
+  const [combinedChartData, setCombinedChartData] = useState({})
   const [aggregatedKPIs, setAggregatedKPIs] = useState({
     totalOutreach: 0,
     deckRequested: 0,
     meetingRequested: 0,
     ddRequested: 0,
     passes: 0,
-  });
+  })
   const [timeScale, setTimeScale] = useState<
     "today" | "this week" | "last week" | "month to date" | "year to date"
-  >("");
-  const [selectedClientTableData, setSelectedClientTableData] = useState([]);
+  >("")
+  const [selectedClientTableData, setSelectedClientTableData] = useState([])
 
   const tableStyle = {
     width: "100%",
-  };
+  }
 
   useEffect(() => {
     const fetchAggregatedKPIs = async () => {
@@ -226,15 +227,15 @@ export default function KPIDash() {
               Authorization: token, // if you're using authentication
             },
           }
-        );
-        setAggregatedKPIs(response.data);
+        )
+        setAggregatedKPIs(response.data)
       } catch (error) {
-        console.error("Error fetching aggregated KPIs:", error);
+        console.error("Error fetching aggregated KPIs:", error)
       }
-    };
+    }
 
-    fetchAggregatedKPIs();
-  }, []); // Empty dependency array means this effect runs once on mount
+    fetchAggregatedKPIs()
+  }, []) // Empty dependency array means this effect runs once on mount
 
   const kpiChartOptions = {
     showPercentageDifferences: true,
@@ -249,7 +250,7 @@ export default function KPIDash() {
         display: false, // Set to true if you want a legend
       },
     },
-  };
+  }
 
   /////////////// Trying plot for "You" focus only on Tyler ////////////////////
   const [tylerKPIs, setTylerKPIs] = useState({
@@ -257,7 +258,7 @@ export default function KPIDash() {
     deckRequested: 0,
     meetingRequested: 0,
     ddRequested: 0,
-  });
+  })
 
   useEffect(() => {
     if (focused === "you") {
@@ -271,16 +272,16 @@ export default function KPIDash() {
                 Authorization: token, // Include this if you're using token-based auth
               },
             }
-          );
-          setTylerKPIs(response.data);
+          )
+          setTylerKPIs(response.data)
         } catch (error) {
-          console.error("Error fetching KPIs for Tyler:", error);
+          console.error("Error fetching KPIs for Tyler:", error)
         }
-      };
+      }
 
-      fetchTylerKPIs();
+      fetchTylerKPIs()
     }
-  }, [focused]);
+  }, [focused])
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -316,7 +317,7 @@ export default function KPIDash() {
           borderWidth: 1,
         },
       ],
-    };
+    }
   }
 
   const [tasks, setTasks] = useState({
@@ -326,20 +327,20 @@ export default function KPIDash() {
     IV: [],
     V: [],
     VI: [],
-  });
+  })
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
-        setShowAllFilters(false);
+        setShowAllFilters(false)
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside)
     };
-  }, []);
+  }, [])
 
   useEffect(() => {
     // Fetch all clients
@@ -351,38 +352,41 @@ export default function KPIDash() {
             headers: {
               "Content-Type": "application/json",
               Authorization: token,
+              'email': user?.email,
             },
           }
-        );
-        setClients(response.data);
+        )
+        setClients(response.data)
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        console.error("Error fetching clients:", error)
       }
-    };
+    }
 
     const fetchCompanyData = async () => {
       const res = await axios.get("http://localhost:5001/fundrisingpipeline", {
         headers: {
           "Content-Type": "application/json",
+          'Authorization': token,
+          'email': user?.email, 
         },
-      });
+      })
       if (res.status === 200) {
-        setLoading(false);
-        const allTasks = res.data;
-        const stageITasks = allTasks.filter((task) => task.contacted === 1);
-        const stageIITasks = allTasks.filter((task) => task.deck_request === 1);
+        setLoading(false)
+        const allTasks = res.data
+        const stageITasks = allTasks.filter((task) => task.contacted === 1)
+        const stageIITasks = allTasks.filter((task) => task.deck_request === 1)
         const stageIIITasks = allTasks.filter(
           (task) => task.meeting_request === 1
-        );
-        const stageIVTasks = allTasks.filter((task) => task.dd === 1);
-        const stageVTasks = allTasks.filter((task) => task.investments === 1);
+        )
+        const stageIVTasks = allTasks.filter((task) => task.dd === 1)
+        const stageVTasks = allTasks.filter((task) => task.investments === 1)
         const stageVITasks = allTasks.filter(
           (task) =>
             task.pass_contacted === 1 ||
             task.pass_deck === 1 ||
             task.pass_meeting === 1 ||
             task.pass_dd === 1
-        );
+        )
 
         // console.log(stageITasks)
         setTasks({
@@ -392,13 +396,15 @@ export default function KPIDash() {
           IV: stageIVTasks,
           V: stageVTasks,
           VI: stageVITasks,
-        });
+        })
       }
-    };
+    }
 
-    fetchCompanyData();
-    fetchClients();
-  }, []);
+    if (token) {
+      fetchCompanyData()
+      fetchClients()
+    }
+  }, [token])
 
   //////////////// Fetch initial data for deals and account holders /////////////////
   useEffect(() => {
@@ -406,23 +412,23 @@ export default function KPIDash() {
       try {
         const dealsResponse = await axios.get<DealData[]>(
           "http://localhost:5002/deals"
-        );
+        )
         const lowercaseDeals = dealsResponse.data.map((deal) => ({
           ...deal,
           dealName: deal.dealName.toLowerCase(), // Convert dealName to lowercase
-        }));
-        console.log("Lowercase deals:", lowercaseDeals); // Log to verify
-        setDealData(lowercaseDeals); // Use the transformed data with lowercase deal names
+        }))
+        console.log("Lowercase deals:", lowercaseDeals) // Log to verify
+        setDealData(lowercaseDeals) // Use the transformed data with lowercase deal names
         const response = await axios.get<DealData[]>(
           "http://localhost:5002/account-holders"
-        );
-        setAccountHolderData(response.data);
+        )
+        setAccountHolderData(response.data)
       } catch (error) {
-        console.error("Error fetching initial data:", error);
+        console.error("Error fetching initial data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     // if (dealData.length > 0) {
     //   // Set the default selected deal to the one with the most outreach
@@ -432,37 +438,37 @@ export default function KPIDash() {
     //   setSelectedDeal(sortedDeals[0].dealName);
     // }
 
-    fetchInitialData();
-  }, []);
+    fetchInitialData()
+  }, [])
   //////////////////////////////////////////////////////////////////////////////////
 
   const handleSelectChange = (e) => {
-    e.preventDefault(); // Prevent the default form behavior
-    setSelectedDeal(e.target.value);
+    e.preventDefault() // Prevent the default form behavior
+    setSelectedDeal(e.target.value)
   };
 
   // Function to calculate percentage change
   const calculatePercentageChange = (current, previous) => {
-    if (previous === 0) return "N/A"; // Handle division by zero
-    return ((previous / current) * 100).toFixed(2) + "%";
+    if (previous === 0) return "N/A" // Handle division by zero
+    return ((previous / current) * 100).toFixed(2) + "%"
   };
 
   const prepareChartData = (dealName) => {
-    const deal = dealData.find((d) => d.dealName === dealName);
-    if (!deal) return;
+    const deal = dealData.find((d) => d.dealName === dealName)
+    if (!deal) return
 
     const dataPoints = [
       deal.totalOutreach,
       deal.deckRequested,
       deal.meetingRequested,
       deal.ddRequested,
-    ];
+    ]
 
     const percentages = dataPoints
       .slice(1)
       .map((value, index) =>
         calculatePercentageChange(value, dataPoints[index])
-      );
+      )
 
     setChartData({
       labels: [
@@ -491,24 +497,24 @@ export default function KPIDash() {
         },
       ],
       percentages: percentages, // Store calculated percentages for later use
-    });
+    })
   };
 
   useEffect(() => {
     if (selectedDeal) {
-      prepareChartData(selectedDeal);
+      prepareChartData(selectedDeal)
     }
-  }, [selectedDeal, dealData]);
+  }, [selectedDeal, dealData])
 
   useEffect(() => {
     // For Deal KPI Chart
-    const chartLabels = timeDealData.map((item) => item.company_name);
-    const totalOutreachData = timeDealData.map((item) => item.totalOutreach);
-    const deckRequestedData = timeDealData.map((item) => item.deckRequested);
+    const chartLabels = timeDealData.map((item) => item.company_name)
+    const totalOutreachData = timeDealData.map((item) => item.totalOutreach)
+    const deckRequestedData = timeDealData.map((item) => item.deckRequested)
     const meetingRequestedData = timeDealData.map(
       (item) => item.meetingRequested
-    );
-    const ddRequestedData = timeDealData.map((item) => item.ddRequested);
+    )
+    const ddRequestedData = timeDealData.map((item) => item.ddRequested)
 
     setDealChartData({
       labels: chartLabels,
@@ -538,8 +544,8 @@ export default function KPIDash() {
           barThickness: "flex", // Adjust bar thickness
         },
       ],
-    });
-  }, [timeDealData]); // This effect runs when company_name is set
+    })
+  }, [timeDealData]) // This effect runs when company_name is set
 
   // Deal Chart Options
   const chartOptions = {
@@ -576,7 +582,7 @@ export default function KPIDash() {
         },
       },
     },
-  };
+  }
 
   //////////////////////// Line Plot for Each Account Holder ///////////////////
   // useEffect(() => {
@@ -727,11 +733,11 @@ export default function KPIDash() {
 
   const [category, setCategory] = useState<"dashboard" | "deal-funnel">(
     "dashboard"
-  );
+  )
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, [isLoading]);
+    setTimeout(() => setLoading(false), 1000)
+  }, [isLoading])
 
   /////////////////////// Funnel Chart for Fund Raising Pipline /////////////////
   // const data: any[] = [
@@ -839,24 +845,24 @@ export default function KPIDash() {
   //////////////////////////////////////////////////////////////////////////////
 
   /////////////////////// The Two KPI Charts ///////////////////////////////////
-  const filteredDealData = dealData;
+  const filteredDealData = dealData
   // .filter((item) => {
   //   return ["Remedium Bio", "Avivo Biomedical", "Lanier Therapeutics"].includes(
   //     item.dealName
   //   );
   // });
 
-  const chartDivRef = useRef(null); // Ref for the first chart container
-  const chartRef = useRef(null); // Ref for the second chart container
-  const rootRef1 = useRef(null); // Ref to store the first Root instance
-  const rootRef2 = useRef(null); // Ref to store the second Root instance
+  const chartDivRef = useRef(null) // Ref for the first chart container
+  const chartRef = useRef(null) // Ref for the second chart container
+  const rootRef1 = useRef(null) // Ref to store the first Root instance
+  const rootRef2 = useRef(null) // Ref to store the second Root instance
 
   useEffect(() => {
     if (chartDivRef.current && !rootRef1.current) {
-      const root = am5.Root.new(chartDivRef.current);
-      rootRef1.current = root;
+      const root = am5.Root.new(chartDivRef.current)
+      rootRef1.current = root
 
-      root.setThemes([am5themes_Animated.new(root)]);
+      root.setThemes([am5themes_Animated.new(root)])
 
       const chart = root.container.children.push(
         am5xy.XYChart.new(root, {
@@ -867,7 +873,7 @@ export default function KPIDash() {
           paddingLeft: 0,
           layout: root.verticalLayout,
         })
-      );
+      )
 
       const data = [
         {
@@ -915,7 +921,7 @@ export default function KPIDash() {
                   100
                 ).toFixed(2),
         },
-      ];
+      ]
 
       const xAxis = chart.xAxes.push(
         am5xy.CategoryAxis.new(root, {
@@ -925,14 +931,14 @@ export default function KPIDash() {
             minGridDistance: 60,
           }),
         })
-      );
-      xAxis.data.setAll(data);
+      )
+      xAxis.data.setAll(data)
       xAxis.get("renderer").labels.template.setAll({
         fill: am5.color("#ffffff"), // White color for axis labels
-      });
+      })
       xAxis.get("renderer").grid.template.setAll({
         stroke: am5.color("#ffffff"), // White color for grid lines
-      });
+      })
 
       const yAxis = chart.yAxes.push(
         am5xy.ValueAxis.new(root, {
@@ -940,13 +946,13 @@ export default function KPIDash() {
           extraMax: 0.1,
           renderer: am5xy.AxisRendererY.new(root, {}),
         })
-      );
+      )
       yAxis.get("renderer").labels.template.setAll({
         fill: am5.color("#ffffff"), // White color for axis labels
-      });
+      })
       yAxis.get("renderer").grid.template.setAll({
         stroke: am5.color("#ffffff"), // White color for grid lines
-      });
+      })
 
       const series1 = chart.series.push(
         am5xy.ColumnSeries.new(root, {
@@ -955,8 +961,8 @@ export default function KPIDash() {
           valueYField: "income",
           categoryXField: "stage",
         })
-      );
-      series1.data.setAll(data);
+      )
+      series1.data.setAll(data)
 
       const series2 = chart.series.push(
         am5xy.LineSeries.new(root, {
@@ -965,8 +971,8 @@ export default function KPIDash() {
           valueYField: "expenses",
           categoryXField: "stage",
         })
-      );
-      series2.data.setAll(data);
+      )
+      series2.data.setAll(data)
 
       series2.bullets.push((root, series, dataItem) => {
         const bullet = am5.Bullet.new(root, {
@@ -979,18 +985,18 @@ export default function KPIDash() {
             centerX: am5.p50,
             populateText: true,
           }),
-        });
+        })
         // This adjusts the label's y position based on the line series data point y position
         bullet.get("sprite").on("dataitemchanged", function (ev) {
-          let dataItem = ev.target.dataItem;
-          let value = dataItem.get("valueY");
-          let position = series.yAxis.valueToPosition(value);
+          let dataItem = ev.target.dataItem
+          let value = dataItem.get("valueY")
+          let position = series.yAxis.valueToPosition(value)
 
           // Adjust the dy value here to position the label above the line plot
-          ev.target.set("dy", -series.yAxis.height * (1 - position) - 20); // The 20 is an offset to position the label above the line
-        });
-        return bullet;
-      });
+          ev.target.set("dy", -series.yAxis.height * (1 - position) - 20) // The 20 is an offset to position the label above the line
+        })
+        return bullet
+      })
 
       // // Modify this part of your amCharts configuration
       // series2.bullets.push(function (root, series, dataItem) {
@@ -1018,32 +1024,32 @@ export default function KPIDash() {
       //   return bullet;
       // });
 
-      chart.appear(1000, 100);
-      series1.appear();
+      chart.appear(1000, 100)
+      series1.appear()
 
       return () => {
-        root.dispose();
-        rootRef1.current = null;
+        root.dispose()
+        rootRef1.current = null
       };
     }
-  }, [timeAggregatedDealData, chartDivRef, rootRef1]);
+  }, [timeAggregatedDealData, chartDivRef, rootRef1])
 
   useEffect(() => {
-    console.log("Selected Clients:", selectedClients);
+    console.log("Selected Clients:", selectedClients)
 
     const disposeChart = () => {
       if (rootRef2.current) {
-        rootRef2.current.dispose();
-        rootRef2.current = null;
+        rootRef2.current.dispose()
+        rootRef2.current = null
       }
-    };
+    }
 
     if (chartRef.current && !rootRef2.current) {
-      document.body.style = bodyStyle2;
+      document.body.style = bodyStyle2
 
-      const root = am5.Root.new(chartRef.current);
-      rootRef2.current = root;
-      root.setThemes([am5themes_Animated.new(root)]);
+      const root = am5.Root.new(chartRef.current)
+      rootRef2.current = root
+      root.setThemes([am5themes_Animated.new(root)])
 
       const chart = root.container.children.push(
         am5xy.XYChart.new(root, {
@@ -1054,10 +1060,10 @@ export default function KPIDash() {
           wheelY: "zoomX",
           layout: root.verticalLayout,
         })
-      );
+      )
 
-      chart.set("fontFamily", "Arial");
-      chart.setAll({ fill: am5.color(0xffffff) });
+      chart.set("fontFamily", "Arial")
+      chart.setAll({ fill: am5.color(0xffffff) })
 
       const legend = chart.children.push(
         am5.Legend.new(root, {
@@ -1065,52 +1071,52 @@ export default function KPIDash() {
           x: am5.p50,
           fill: am5.color(0xffffff),
         })
-      );
+      )
 
-      console.log("Selected Clients:", selectedClients); // Log selected clients
+      console.log("Selected Clients:", selectedClients) // Log selected clients
 
       const categories = [
         "totalOutreach",
         "deckRequested",
         "meetingRequested",
         "ddRequested",
-      ];
+      ]
 
       const data2 = categories.map((category) => {
-        const entry = { year: category };
+        const entry = { year: category }
 
-        let clientNamesForLaterUse = [];
+        let clientNamesForLaterUse = []
 
         selectedClients.forEach((clientName) => {
-          const saveClientName = clientName.toLowerCase();
-          clientNamesForLaterUse.push(saveClientName);
+          const saveClientName = clientName.toLowerCase()
+          clientNamesForLaterUse.push(saveClientName)
 
-          const clientNameLower = clientName.toLowerCase();
-          console.log("Client Name Lower:", clientNameLower); // Log lowercase client name
+          const clientNameLower = clientName.toLowerCase()
+          console.log("Client Name Lower:", clientNameLower) // Log lowercase client name
           const deal = filteredDealData.find(
             (deal) => deal.dealName.toLowerCase() === clientNameLower
-          );
-          console.log("Deal:", deal); // Log deal object
+          )
+          console.log("Deal:", deal) // Log deal object
           if (deal) {
-            const dealKey = deal.dealName; // Use the original case for dealKey
+            const dealKey = deal.dealName // Use the original case for dealKey
             // Directly use the category names without conversion, assuming they match the deal object properties
-            entry[dealKey] = deal[category];
-            console.log(`Value for ${dealKey} in ${category}:`, entry[dealKey]);
+            entry[dealKey] = deal[category]
+            console.log(`Value for ${dealKey} in ${category}:`, entry[dealKey])
           }
-        });
-        console.log("clientNamesForLaterUse:", clientNamesForLaterUse);
+        })
+        console.log("clientNamesForLaterUse:", clientNamesForLaterUse)
 
-        return entry;
-      });
+        return entry
+      })
 
-      console.log("Data for Chart:", data2); // Log the structured data for the chart
+      console.log("Data for Chart:", data2) // Log the structured data for the chart
 
-      setSelectedClientTableData(data2);
+      setSelectedClientTableData(data2)
 
       const xRenderer = am5xy.AxisRendererX.new(root, {
         cellStartLocation: 0.1,
         cellEndLocation: 0.9,
-      });
+      })
       const xAxis = chart.xAxes.push(
         am5xy.CategoryAxis.new(root, {
           categoryField: "year",
@@ -1118,28 +1124,28 @@ export default function KPIDash() {
           tooltip: am5.Tooltip.new(root, {}),
           fill: am5.color(0xffffff),
         })
-      );
+      )
 
       xAxis
         .get("renderer")
-        .labels.template.setAll({ fill: am5.color(0xffffff) });
+        .labels.template.setAll({ fill: am5.color(0xffffff) })
       xAxis
         .get("renderer")
-        .grid.template.setAll({ stroke: am5.color(0xffffff) });
-      xAxis.data.setAll(data2);
+        .grid.template.setAll({ stroke: am5.color(0xffffff) })
+      xAxis.data.setAll(data2)
 
       const yAxis = chart.yAxes.push(
         am5xy.ValueAxis.new(root, {
           renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 }),
         })
-      );
+      )
 
       yAxis
         .get("renderer")
-        .labels.template.setAll({ fill: am5.color(0xffffff) });
+        .labels.template.setAll({ fill: am5.color(0xffffff) })
       yAxis
         .get("renderer")
-        .grid.template.setAll({ stroke: am5.color(0xffffff) });
+        .grid.template.setAll({ stroke: am5.color(0xffffff) })
 
       // selectedClients.forEach((clientName) => {
       //   const clientNameLower = clientName.toLowerCase();
@@ -1188,12 +1194,12 @@ export default function KPIDash() {
       // });
 
       selectedClients.forEach((clientName) => {
-        const clientNameLower = clientName.toLowerCase();
+        const clientNameLower = clientName.toLowerCase()
         const deal = filteredDealData.find(
           (deal) => deal.dealName.toLowerCase() === clientNameLower
-        );
+        )
         if (deal) {
-          const dealKey = deal.dealName; // Use the original case for dealKey
+          const dealKey = deal.dealName // Use the original case for dealKey
 
           const series = chart.series.push(
             am5xy.ColumnSeries.new(root, {
@@ -1203,17 +1209,17 @@ export default function KPIDash() {
               valueYField: dealKey,
               categoryXField: "year",
             })
-          );
+          )
 
           series.columns.template.setAll({
             tooltipText: "{name}, {categoryX}:{valueY}",
             width: am5.percent(90),
             tooltipY: 0,
             strokeOpacity: 0,
-          });
+          })
 
-          series.data.setAll(data2);
-          series.appear();
+          series.data.setAll(data2)
+          series.appear()
 
           // Add LabelBullet to display data values above bars
           series.bullets.push(() => {
@@ -1226,34 +1232,34 @@ export default function KPIDash() {
                 centerX: am5.p50,
                 populateText: true,
               }),
-            });
+            })
             bullet.get("sprite").setAll({
               dy: -5, // Adjust position above the bar
               fontSize: 14, // Set font size
-            });
-            return bullet;
-          });
+            })
+            return bullet
+          })
 
-          legend.data.push(series);
+          legend.data.push(series)
         }
-      });
+      })
 
-      legend.labels.template.setAll({ fill: am5.color(0xffffff) });
-      chart.appear(1000, 100);
+      legend.labels.template.setAll({ fill: am5.color(0xffffff) })
+      chart.appear(1000, 100)
 
       return () => {
-        disposeChart();
+        disposeChart()
       };
     }
 
     return () => {
-      disposeChart();
+      disposeChart()
     };
-  }, [selectedClients]); // Only re-run the effect if selectedClients changes
+  }, [selectedClients]) // Only re-run the effect if selectedClients changes
 
   useEffect(() => {
-    console.log("selectedClientTableData:", selectedClientTableData);
-  }, [selectedClientTableData]);
+    console.log("selectedClientTableData:", selectedClientTableData)
+  }, [selectedClientTableData])
 
   // useEffect(() => {
   //   const disposeChart = () => {
@@ -1393,78 +1399,78 @@ export default function KPIDash() {
   //////////////////////////////////////////////////////////////////////////////
 
   function getDateRangeForTimeScale(timeScale) {
-    const now = new Date();
+    const now = new Date()
     // Subtract one year from the current date
     const oneYearAgo = new Date(
       now.getFullYear() - 1,
       now.getMonth(),
       now.getDate()
-    );
+    )
 
     // Use `oneYearAgo` to calculate other time scales
     const today = new Date(
       oneYearAgo.getFullYear(),
       oneYearAgo.getMonth(),
       oneYearAgo.getDate()
-    ); // Reset hours, minutes, seconds, and milliseconds
+    ) // Reset hours, minutes, seconds, and milliseconds
 
     const getStartOfWeek = (date) => {
-      const tempDate = new Date(date); // Create a new Date object to avoid modifying the original date
-      const day = tempDate.getDay();
-      const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust to start from Monday
-      return new Date(tempDate.setDate(diff));
+      const tempDate = new Date(date) // Create a new Date object to avoid modifying the original date
+      const day = tempDate.getDay()
+      const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1) // Adjust to start from Monday
+      return new Date(tempDate.setDate(diff))
     };
 
-    const startOfWeek = getStartOfWeek(oneYearAgo);
-    const startOfLastWeek = new Date(startOfWeek);
-    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
-    const endOfLastWeek = new Date(startOfLastWeek);
-    endOfLastWeek.setDate(endOfLastWeek.getDate() + 6);
+    const startOfWeek = getStartOfWeek(oneYearAgo)
+    const startOfLastWeek = new Date(startOfWeek)
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7)
+    const endOfLastWeek = new Date(startOfLastWeek)
+    endOfLastWeek.setDate(endOfLastWeek.getDate() + 6)
     const startOfMonth = new Date(
       oneYearAgo.getFullYear(),
       oneYearAgo.getMonth(),
       1
-    );
-    const startOfYear = new Date(oneYearAgo.getFullYear(), 0, 1);
+    )
+    const startOfYear = new Date(oneYearAgo.getFullYear(), 0, 1)
 
     switch (timeScale) {
       case "today":
-        return { startDate: formatDate(today), endDate: formatDate(today) };
+        return { startDate: formatDate(today), endDate: formatDate(today) }
       case "this week":
         return {
           startDate: formatDate(startOfWeek),
           endDate: formatDate(today),
-        };
+        }
       case "last week":
         return {
           startDate: formatDate(startOfLastWeek),
           endDate: formatDate(endOfLastWeek),
-        };
+        }
       case "month to date":
         return {
           startDate: formatDate(startOfMonth),
           endDate: formatDate(today),
-        };
+        }
       case "year to date":
         return {
           startDate: formatDate(startOfYear),
           endDate: formatDate(today),
-        };
+        }
       default:
-        return { startDate: null, endDate: null }; // No filter
+        return { startDate: null, endDate: null } // No filter
     }
   }
 
   function formatDate(date) {
-    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    return date.toISOString().split("T")[0] // Convert to YYYY-MM-DD format
   }
 
   useEffect(() => {
     const fetchTimeDealData = async () => {
-      const { startDate, endDate } = getDateRangeForTimeScale(timeScale);
+      const { startDate, endDate } = getDateRangeForTimeScale(timeScale)
 
-      console.log(`Requesting deals data for timescale: ${timeScale}`);
-      console.log(`Date range: ${startDate} to ${endDate}`);
+      console.log(`Requesting deals data for timescale: ${timeScale}`)
+      console.log(`Date range: ${startDate} to ${endDate}`)
 
       try {
         const response = await axios.get(
@@ -1479,36 +1485,36 @@ export default function KPIDash() {
               Authorization: token,
             },
           }
-        );
+        )
 
         console.log(
           `Received ${response.data.length} deals for timescale: ${timeScale}`
-        );
-        console.log(`Data within the selected timescale:`, response.data);
-        setTimeDealData(response.data);
+        )
+        console.log(`Data within the selected timescale:`, response.data)
+        setTimeDealData(response.data)
       } catch (error) {
-        console.error("Error fetching deal data:", error);
+        console.error("Error fetching deal data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     if (timeScale) {
-      setLoading(true);
-      fetchTimeDealData();
+      setLoading(true)
+      fetchTimeDealData()
     }
-  }, [timeScale, token]);
+  }, [timeScale, token])
 
   function formatDate(date) {
-    return date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    return date.toISOString().split("T")[0] // Convert to YYYY-MM-DD format
   }
 
   useEffect(() => {
     const fetchTimeAggregatedDealData = async () => {
-      const { startDate, endDate } = getDateRangeForTimeScale(timeScale);
+      const { startDate, endDate } = getDateRangeForTimeScale(timeScale)
 
-      console.log(`Requesting deals data for timescale: ${timeScale}`);
-      console.log(`Date range: ${startDate} to ${endDate}`);
+      console.log(`Requesting deals data for timescale: ${timeScale}`)
+      console.log(`Date range: ${startDate} to ${endDate}`)
 
       try {
         const response = await axios.get(
@@ -1523,25 +1529,25 @@ export default function KPIDash() {
               Authorization: token,
             },
           }
-        );
+        )
 
         console.log(
           `Received ${response.data.length} deals for timescale: ${timeScale}`
-        );
-        console.log(`Data within the selected timescale:`, response.data);
-        setTimeAggregatedDealData(response.data);
+        )
+        console.log(`Data within the selected timescale:`, response.data)
+        setTimeAggregatedDealData(response.data)
       } catch (error) {
-        console.error("Error fetching deal data:", error);
+        console.error("Error fetching deal data:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     if (timeScale) {
-      setLoading(true);
-      fetchTimeAggregatedDealData();
+      setLoading(true)
+      fetchTimeAggregatedDealData()
     }
-  }, [timeScale, token]);
+  }, [timeScale, token])
 
   return (
     <div
@@ -1621,9 +1627,9 @@ export default function KPIDash() {
               <KPIText extraClass={styles["kpi-filter-text-restore"]}>
                 <span
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setTimeScale("");
-                    setSelectedClients([]);
+                    e.stopPropagation()
+                    setTimeScale("")
+                    setSelectedClients([])
                   }}
                 >
                   Restore default
@@ -1638,8 +1644,8 @@ export default function KPIDash() {
               </KPIText>
               <ul
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setTimeScale(e.target.innerText);
+                  e.stopPropagation()
+                  setTimeScale(e.target.innerText)
                 }}
                 className={styles["kpi-ul"]}
               >
@@ -1817,8 +1823,8 @@ export default function KPIDash() {
                       : styles["kpi-option"]
                   }
                   onClick={() => {
-                    setFocused("all");
-                    setLoading(true);
+                    setFocused("all")
+                    setLoading(true)
                   }}
                 >
                   All
@@ -1830,8 +1836,8 @@ export default function KPIDash() {
                       : styles["kpi-option"]
                   }
                   onClick={() => {
-                    setFocused("you");
-                    setLoading(true);
+                    setFocused("you")
+                    setLoading(true)
                   }}
                 >
                   You
@@ -2154,11 +2160,11 @@ export default function KPIDash() {
                                         </TableCell>
                                         {selectedClients.map((client, idx) => {
                                           const currentValue =
-                                            row[client.toLowerCase()];
+                                            row[client.toLowerCase()]
                                           const previousValue =
                                             array[index - 1][
                                               client.toLowerCase()
-                                            ];
+                                            ]
                                           return (
                                             <TableCell
                                               key={`change-${client}-${index}`}
@@ -2172,7 +2178,7 @@ export default function KPIDash() {
                                                   )
                                                 : "-"}
                                             </TableCell>
-                                          );
+                                          )
                                         })}
                                       </TableRow>
                                     )}
@@ -2353,5 +2359,5 @@ export default function KPIDash() {
         </div>
       </div>
     </div>
-  );
+  )
 }

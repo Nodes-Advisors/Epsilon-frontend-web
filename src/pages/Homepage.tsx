@@ -70,8 +70,15 @@ export default function Home() {
   }, [switchTab])
 
   useEffect(() => {
-    fetch('http://localhost:5001/getAllGPTPrompt')
-      .then(res => res.json())
+    axios.get('http://localhost:5001/getAllGPTPrompt',
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
+      .then(res => res.data)
       .then(data => {
         setTooltipData(data)
       })
@@ -82,7 +89,13 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get(`http://localhost:5001?q=${query}`)
+      const res = await axios.get(`http://localhost:5001?q=${query}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
       setData(res.data)
       setFilteredData(res.data)
 
@@ -115,6 +128,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
+          'email': user?.email,
         },
         params: {
           email: user?.email,

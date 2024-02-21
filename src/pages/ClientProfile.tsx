@@ -7,7 +7,7 @@ import VectorLogo from '../assets/svgs/vector.svg?react'
 import { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
-import { useClientsStore, useFundsStore, useSavedFundsStore, useUserStore } from '../store/store'
+import { useClientsStore, useFundsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import { STATUS_COLOR_LIST } from '../lib/constants'
 import FundStatusLarger from '../components/status-larger'
@@ -53,7 +53,8 @@ export default function ClientProfile(): JSX.Element {
   
     return `${day}/${month}/${year}`
   }
-  
+  const token = useTokenStore(state => state.token)
+  // const user = useUserStore(state => state.user)
   const clients = useClientsStore(state => state.clients)
   const id = window.location.pathname.split('/')[2]
   localStorage.setItem('client-id', id)
@@ -63,23 +64,31 @@ export default function ClientProfile(): JSX.Element {
   
   useEffect(() => {
     const record = clients.filter((record) => record._id === id)[0]
-    console.log(record)
+    // console.log(record)
     async function fetchHistoricalLog() {
       try {
-        const res = await fetch(`http://localhost:5001/getclienthislog/${record.acronym}`)
-        const data = await res.json()
-        console.log(data)
+        const res = await axios.get(`http://localhost:5001/getclienthislog/${record.acronym}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token,
+              'email': user?.email,
+            },
+          }
+        )
+        const data = await res.data
+        // console.log(data)
         setHisLogs(data)
       } catch (error) {
         console.log(error)
       }
     }
-    fetchHistoricalLog()
+    if (token) fetchHistoricalLog()
     setLocation(['hq location' ].reduce((acc, cur, curIndex, array) =>
       acc += record[cur] ? curIndex !== array.length - 1 ? record[cur] + ', ' : record[cur] : '', ''))
     setRecord(record)
     setTimeout(() => setLoading(false), 1000)
-  }, [id])
+  }, [id, token])
   
 
   useEffect(() => {
@@ -90,6 +99,8 @@ export default function ClientProfile(): JSX.Element {
         },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setSavedCollections(res.data)
@@ -97,8 +108,8 @@ export default function ClientProfile(): JSX.Element {
         toast.error(error?.response?.data)
       })
     }
-    fetchSavedCollections()
-  }, [])
+    if (token) fetchSavedCollections()
+  }, [token])
 
 
   useEffect(() => {
@@ -108,6 +119,8 @@ export default function ClientProfile(): JSX.Element {
         const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
           },
         })
         if (res.status === 200) {
@@ -120,15 +133,15 @@ export default function ClientProfile(): JSX.Element {
         console.error(error)
       }
     }
-    fetchNodesTeam()
+    if (token) fetchNodesTeam()
     
-  }, [])
-
+  }, [token])
+  
   const getImage = (name: string | undefined | null) => {
     if (name) {
-      // console.log(name)
-      // console.log(nodesTeam)
-      const found = nodesTeam.find(item => item.name.includes(name))
+      console.log(name)
+      console.log(nodesTeam)
+      const found = nodesTeam.find(item => item.name && item.name.includes(name))
       // console.log(found)
       if (found) {
         // console.log(found.profile_image)
@@ -202,18 +215,18 @@ export default function ClientProfile(): JSX.Element {
                             {
                               hislogs
                                 .filter((log, index, self) =>
-                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact)
+                                  index === self.findIndex((l) => l.Nodes === log.Nodes && l.Contact === log.Contact),
                                 )
                                 .map((log, i) => (
                                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', position: 'relative' }}>
                                       <AsyncImage 
-                                       onClick={() => {
-                                        if (log.Nodes) {
-                                          navigate(`/user-profile/${log.Nodes.split(' ').join('-')}`)
+                                        onClick={() => {
+                                          if (log.Nodes) {
+                                            navigate(`/user-profile/${log.Nodes.split(' ').join('-')}`)
                                         
-                                        }
-                                       }}
+                                          }
+                                        }}
                                         src={getImage(log.Nodes)} alt="" className={styles['headImg']} />
 
                                       <span style={{  cursor: 'pointer', position: 'absolute', top: '4rem', textWrap: 'wrap', width: '10rem' }}>{log.Nodes ? log.Nodes : 'Someone@Nodes'}</span>

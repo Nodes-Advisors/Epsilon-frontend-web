@@ -12,18 +12,6 @@ expressWs(app)
 app.use(cors())
 app.use(express.json())
 
-app.use(function (req, res, next) {
-  // console.log('middleware')
-  req.testing = 'testing'
-  return next()
-})
-
-app.get('/1', function(req, res, next){
-  console.log('get route', req.testing)
-  res.end()
-})
-
-
 
 const uri = 'mongodb+srv://Admin:NodesAdvisors2024@dev.jq8me.mongodb.net/'
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -52,41 +40,6 @@ async function connectToMongoDB() {
 }
 
 let connections = {}
-app.ws('/websocket/:email', function(ws, req) {
-  // Store the WebSocket connection using the email as the key
-  connections[req.params.email] = ws
-
-  ws.on('message', async function(msg) {
-    const messageObject = JSON.parse(msg)
-    console.log('messageObject', messageObject.type)
-    if (messageObject.type === 'approval request') {
-      const db = client.db(dbName)
-      const collection = db.collection('NodesTeam')
-  
-      try {
-        // Query the database to get the receiver's email
-        const receiver = await collection.findOne({ name: messageObject.receiveName })
-        const receiverEmail = receiver ? receiver.email : 'Unknown'
-  
-        // Add the receiver's email to the message object
-        messageObject.receiverEmail = receiverEmail
-  
-        // Get the receiver's WebSocket connection and send the message
-        const receiverWs = connections[receiverEmail]
-        if (receiverWs) {
-          receiverWs.send(JSON.stringify(messageObject))
-        } else {
-          console.log('Receiver is offline')
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-    
-  })
-  console.log('socket', req.testing)
-  console.log('email', req.params.email)
-})
 
 app.post('/login', async (req, res) => {
   try {
@@ -117,7 +70,7 @@ app.post('/login', async (req, res) => {
       },
     )
 
-    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 1) // Current time in seconds + one hour
+    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 60 * 5) // Current time in seconds + one hour
     const token = jwt.sign({ email: user.email, expiration_date }, 'YOUR_SECRET_KEY') // Replace 'YOUR_SECRET_KEY' with your actual secret key
 
     res.json({ token })
@@ -251,8 +204,43 @@ app.post('/logout', async (req, res) => {
   } 
 })
 
-// important one
-// app.use(verifyToken);
+// important one, to enable this please add authoriation to each request
+app.use(verifyToken)
+
+app.ws('/websocket/:email', function(ws, req) {
+  // Store the WebSocket connection using the email as the key
+  connections[req.params.email] = ws
+
+  ws.on('message', async function(msg) {
+    const messageObject = JSON.parse(msg)
+    // console.log('messageObject', messageObject.type)
+    if (messageObject.type === 'approval request') {
+      const db = client.db(dbName)
+      const collection = db.collection('NodesTeam')
+  
+      try {
+        // Query the database to get the receiver's email
+        const receiver = await collection.findOne({ name: messageObject.receiveName })
+        const receiverEmail = receiver ? receiver.email : 'Unknown'
+  
+        // Add the receiver's email to the message object
+        messageObject.receiverEmail = receiverEmail
+  
+        // Get the receiver's WebSocket connection and send the message
+        const receiverWs = connections[receiverEmail]
+        if (receiverWs) {
+          receiverWs.send(JSON.stringify(messageObject))
+        } else {
+          console.log('Receiver is offline')
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    
+  })
+
+})
 
 app.get('/getAllGPTPrompt', async (req, res) => {
   try {
@@ -749,6 +737,7 @@ app.get('/verifyToken', verifyToken, (req, res) => {
 })
 
 async function verifyToken(req, res, next) {
+  // console.log(req.headers)
   const token = req.header('Authorization')
   if (!token) return res.status(401).send('Access Denied')
 

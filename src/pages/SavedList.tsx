@@ -1,6 +1,6 @@
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
-import { useClientsStore, useSavedFundsStore, useUserStore } from '../store/store'
+import { useClientsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import venture_logo from '../assets/images/venture-logo-example.png'
@@ -43,7 +43,8 @@ export default function SavedList() {
   const [selectedFundName, setSelectedFundName] = useState<string>('')
   const [data, setData] = useState<any[]>([])
   const clients = useClientsStore(state => state.clients)
-  
+  const token = useTokenStore(state => state.token)
+
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -128,6 +129,8 @@ export default function SavedList() {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       toast.success('Request sent successfully!')
@@ -147,6 +150,8 @@ export default function SavedList() {
         },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         // console.log(res.data)
@@ -233,6 +238,8 @@ export default function SavedList() {
         // },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setPendingList(res.data.map((record) => record['Fund Name'] as string))
@@ -379,6 +386,8 @@ export default function SavedList() {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {

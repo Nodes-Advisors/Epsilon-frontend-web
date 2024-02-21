@@ -4,9 +4,13 @@ import { useEffect, useMemo, useState } from 'react'
 import DropdownUl from './dropdown-ul'
 import { useQuery } from 'react-query'
 import { throttle, debounce } from 'lodash'
+import { useTokenStore, useUserStore } from '../store/store'
+import axios from 'axios'
 
 export default function SearchBar() {
 
+  const token = useTokenStore((state) => state.token)
+  const user = useUserStore((state) => state.user)
   const [inputValue, setInputValue] = useState<string>('')
   const [focus, setFocus] = useState<boolean>(false)
   const fetchSearch = async () => {
@@ -14,13 +18,20 @@ export default function SearchBar() {
       return
     }
     // import.meta.env.VITE_DEVELOPMENT_SERVER_HOST + 
-    const res = await fetch(`http://localhost:5001/?q=${inputValue}`,
-      { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    if (!res.ok) {
+    const res = await axios.get(`http://localhost:5001/?q=${inputValue}`,
+      { 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'email': user?.email,
+        },
+        
+      })
+    if (res.status !== 200) {
       throw new Error('Network response was not ok')
 
     }
-    return res.json()
+    return res.data
   }
 
   const setSearchValue = useMemo(() => {

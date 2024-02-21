@@ -1,5 +1,6 @@
 // Example endpoint to fetch KPIs for a specific account holder
 router.get("/account-holder-kpis/:accountHolder", async (req, res) => {
+  console.log(req.url)
   const accountHolderName = req.params.accountHolder; // Get the account holder from the URL parameter
   try {
     const database = client.db(dbName);

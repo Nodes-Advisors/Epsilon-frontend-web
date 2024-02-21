@@ -4,7 +4,7 @@ import Skeleton from 'react-loading-skeleton'
 import { useEffect, useRef, useState, useContext } from 'react'
 
 import { useNavigate } from 'react-router-dom'
-import { useClientsStore, useFundsStore } from '../store/store'
+import { useClientsStore, useFundsStore, useTokenStore } from '../store/store'
 import CancelButtonIcon from '../assets/svgs/cancel-button.svg?react'
 import styles from '../styles/profile.module.less'
 import { convertedOutput } from '../lib/utils'
@@ -77,7 +77,7 @@ export default function FundCards() {
     'Clear Filters': [],
     'Responsiveness Rate': [],
   })
-
+  const token = useTokenStore(state => state.token)
   const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
 
   // according to filteredList, filter data
@@ -90,6 +90,8 @@ export default function FundCards() {
         },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setSavedCollections(res.data)
@@ -102,7 +104,15 @@ export default function FundCards() {
 
   useEffect(() => {
     setLoading(true)
-    axios.get('http://localhost:5001/getAllFunds')
+    axios.get('http://localhost:5001/getAllFunds',
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },  
+      },
+    )
       .then((res) => {
         setTotalFundCount(res.data.length)   
         setData(res.data)
@@ -252,7 +262,15 @@ export default function FundCards() {
   }, [filteredList])
 
   useEffect(() => {
-    axios.get('http://localhost:5001/getAllClients')
+    axios.get('http://localhost:5001/getAllClients',
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      },
+    )
       .then((res) => {
         setClients(res.data)
       })
@@ -263,7 +281,15 @@ export default function FundCards() {
   , [])
 
   useEffect(() => {
-    axios.get('http://localhost:5001/fundStatus').then((res) => { 
+    axios.get('http://localhost:5001/fundStatus',
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      }
+    ).then((res) => { 
       setFundStatus(res.data)
     }).catch((error) => {
       toast.error(error?.response?.data)
@@ -419,6 +445,8 @@ export default function FundCards() {
         // },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setPendingList(res.data.map((record) => record['Fund Name'] as string))
@@ -452,6 +480,8 @@ export default function FundCards() {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       toast.success('Request sent successfully!')
@@ -488,6 +518,8 @@ export default function FundCards() {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {
@@ -539,6 +571,8 @@ export default function FundCards() {
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       })
       if (res.status === 200) {

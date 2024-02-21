@@ -108,7 +108,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
       const res = await axios.get('http://localhost:5001/getUser', {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': token,
+          'Authorization': token,
+          'email': user?.email,
         },
         params: {
           email: user?.email,
@@ -140,6 +141,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         },
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
         },
       }).then((res) => {
         setSavedCollections(res.data)

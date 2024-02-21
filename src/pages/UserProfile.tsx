@@ -30,6 +30,7 @@ export default function UserProfile() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
+          'email': user?.email,
         },
         params: {
           email: window.location.href.split('/').pop() === 'me' ? user.email : 'undefined',
