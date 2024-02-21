@@ -331,7 +331,7 @@ export default function Home() {
     // <div style={{ width: '100%', minHeight: '90vh' }} >
     <div style={{ overflowX: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
-      <div style={{ width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr', height: '80vh' }}>
+      <div style={{ paddingLeft: '0.5%', width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr', height: '80vh' }}>
         <div style={{ gridRow: '1', gridColumn: '1', position: 'relative' }}>
           <div style={{ display: 'flex', position: 'absolute', top: 0, right: '40px', color: '#DDD', gap: '0.5rem' }}>
             <span onClick={() => setSwitchTab('Pinned')}
@@ -348,7 +348,7 @@ export default function Home() {
             className={`${styles['tab-content']} ${styles[animationClass]}`} 
             style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</h2>
-            <div className={styles['animation-container']}> {/* Add this line */}
+            <div className={styles['animation-container']}> 
               <ul style={{ maxHeight: '75%' }} className={`${styles['news-ul']}`}>
                 {
                   switchTab === 'Milestone' && 
