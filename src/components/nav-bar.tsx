@@ -108,7 +108,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
       const res = await axios.get('http://localhost:5001/getUser', {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token,
+          // 'Authorization': token,
         },
         params: {
           email: user?.email,
@@ -120,8 +120,10 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         setUserInfo(res.data)
       }
     }
-    fetchUser()
-  }, [])
+    if (token) {
+      fetchUser()
+    }
+  }, [token])
 
   useEffect(() => {
     setOpenLeftNavBar(!(window.location.href.includes('/my-saved-list') || window.location.href.includes('/fund-cards') 
@@ -145,8 +147,10 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
         toast.error(error?.response?.data)
       })
     }
-    fetchSavedCollections()
-  }, [])
+    if (token) {
+      fetchSavedCollections()
+    }
+  }, [token])
 
   const handleSavedSearchClick = () => {
     if (savedCollections.length === 0) {

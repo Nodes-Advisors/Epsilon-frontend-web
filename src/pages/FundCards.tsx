@@ -702,7 +702,7 @@ export default function FundCards() {
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalFundCount ? `${totalFundCount} Funds` : `${filteredData.length} Funds (out of ${totalFundCount} Funds)`}</span>
-              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr', width: '100%', textAlign: 'left'  }}>
+              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr', width: '100%', textAlign: 'left'  }}>
                 <span>Funds</span>
                 <span>Status</span>
                 <span>Past Deals</span>
@@ -722,7 +722,7 @@ export default function FundCards() {
                   ?
                   currentItems.map((record, index) => (
                     <>
-                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr' }}> 
+                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr' }}> 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
@@ -767,7 +767,9 @@ export default function FundCards() {
                           </div>
                             
                         </div>
-                        <span>
+                        <span
+                          style={{ textAlign: 'left' }}
+                        >
                           {
                             isInClientList(record['Status'])
                               ?
@@ -782,7 +784,9 @@ export default function FundCards() {
                               convertedOutput(record['Status']) as string || 'n/a'
                           }
                         </span>
-                        <span>
+                        <span
+                          style={{ textAlign: 'left' }}
+                        >
                           {
                             (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
                               <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
@@ -802,7 +806,7 @@ export default function FundCards() {
                           data-label= 'Type'
                           onClick={e => handleFullTextFilter(e, setFilteredList)}
                           className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
-                        <span
+                        <span style={{ textAlign: 'left' }}
                           data-label= 'Contact'
                         >
                           {
@@ -817,7 +821,9 @@ export default function FundCards() {
                           }
                         </span>
                         
-                        <span>
+                        <span
+                          style={{ textAlign: 'left' }}
+                        >
                           {
                             (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
                               <>
@@ -832,7 +838,13 @@ export default function FundCards() {
                         <span 
                           data-label= 'Suitability Score'
                           onClick={handleAddFilter}
-                          className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
+                          className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}
+                        </span>
+                        <span 
+                          data-label= 'Responsiveness Rate'
+                          onClick={handleAddFilter}
+                          className={styles['fund-list-item']}>{convertedOutput(record['Responsiveness Rate'] as string[] | string) as string || 'n/a'}
+                        </span>
                       </div>
                       <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>
                     </>

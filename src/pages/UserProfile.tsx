@@ -32,8 +32,8 @@ export default function UserProfile() {
           'Authorization': token,
         },
         params: {
-          email: window.location.href.split('/').pop() === 'me' ? user.email : undefined,
-          name: window.location.href.split('/').pop() === 'me' ? undefined : window.location.href.split('/').pop(),
+          email: window.location.href.split('/').pop() === 'me' ? user.email : 'undefined',
+          name: window.location.href.split('/').pop() === 'me' ? 'undefined' : window.location.href.split('/').pop(),
         },
       })
       const data = result.data

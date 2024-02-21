@@ -614,7 +614,7 @@ export default function SavedList() {
                 ?
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length} Funds<span>{`(${decodeURIComponent(window.location.href.split('/')[window.location.href.split('/').length - 1])} list)`}</span></span>
-                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr', gap: '2rem', width: '100%', textAlign: 'left'  }}>
+                  <div style={{ fontSize: '1.15rem', display: 'grid', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr', gap: '2rem', width: '100%', textAlign: 'left'  }}>
                     <span>Funds</span>
                     <span>Status</span>
                     <span>Past Deals</span>
@@ -631,7 +631,7 @@ export default function SavedList() {
                   {
                     currentItems.map((record, index) => (
                       <>
-                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2fr repeat(2, 1fr) 1.5fr 1.5fr' }}> 
+                        <div key={record._id} style={{ display: 'grid', lineHeight: 1, width: '100%', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr' }}> 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                               <button
@@ -667,72 +667,81 @@ export default function SavedList() {
                             </div>
                             
                           </div>
-                          <span>
-                          {
-                            isInClientList(record['Status'])
-                              ?
-                              <>
-                                <span >{isInClientList(record['Status']).prev}</span>
-                                <span 
-                                  onClick={() => navigate(`/client-card/${isInClientList(record['Status']).id}`)}
-                                  style={{ color: '#23D5F9', fontWeight: '700', cursor: 'pointer' }}>{isInClientList(record['Status']).match}</span>
-                                <span>{isInClientList(record['Status']).next}</span>
-                              </>
-                              :
+                          <span style={{ textAlign: 'left' }}>
+                            {
+                              isInClientList(record['Status'])
+                                ?
+                                <>
+                                  <span >{isInClientList(record['Status']).prev}</span>
+                                  <span 
+                                    onClick={() => navigate(`/client-card/${isInClientList(record['Status']).id}`)}
+                                    style={{ color: '#23D5F9', fontWeight: '700', cursor: 'pointer' }}>{isInClientList(record['Status']).match}</span>
+                                  <span>{isInClientList(record['Status']).next}</span>
+                                </>
+                                :
                               convertedOutput(record['Status']) as string || 'n/a'
-                          }
-                        </span>
-                        <span>
-                          {
-                            (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
-                              <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
-                            ))
-                          }
-                        </span>
-                        <span
+                            }
+                          </span>
+                          <span style={{ textAlign: 'left' }}>
+                            {
+                              (record['Past Deals'] || 'n/a').split(',').map((deal, index) => (
+                                <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Deals' className={styles['fund-list-multiple-item']} key={index}>{deal}</span>
+                              ))
+                            }
+                          </span>
+                          <span
 
-data-label= 'Account Manager'
-onClick={e => handleFullTextFilter(e, setFilteredList)}
-className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
-<span 
-data-label= 'Sector'
+                            data-label= 'Account Manager'
+                            onClick={e => handleFullTextFilter(e, setFilteredList)}
+                            className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
+                          <span 
+                            data-label= 'Sector'
 
-className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
-<span 
-data-label= 'Type'
-onClick={e => handleFullTextFilter(e, setFilteredList)}
-className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
-<span
-data-label= 'Contact'
->
-{
-  (record['Contact'] || 'n/a').split(',').map((contact, index) => (
-    <>
-      <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
-      {
-        index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
-      }
-    </>
-  ))
-}
-</span>
+                            className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
+                          <span 
+                            data-label= 'Type'
+                            onClick={e => handleFullTextFilter(e, setFilteredList)}
+                            className={styles['fund-list-item']}>{convertedOutput(record['Type'] as string[] | string) as string || 'n/a'}</span>
+                          <span
+                            style={{ textAlign: 'left' }}
+                            data-label= 'Contact'
+                          >
+                            {
+                              (record['Contact'] || 'n/a').split(',').map((contact, index) => (
+                                <>
+                                  <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Contact' className={styles['fund-list-multiple-item']} key={index}>{contact}</span>
+                                  {
+                                    index < ((record['Contact'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+                                  }
+                                </>
+                              ))
+                            }
+                          </span>
 
-<span>
-{
-  (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
-    <>
-      <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
-      {
-        index < ((record['Co-Investors'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
-      }
-    </>
-  ))
-}
-</span>
-<span 
-                          data-label= 'Suitability Score'
-                          onClick={handleAddFilter}
-                          className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}</span>
+                          <span
+                            style={{ textAlign: 'left' }}
+                          >
+                            {
+                              (record['Co-Investors'] || 'n/a').split(',').map((coInvestor, index) => (
+                                <>
+                                  <span onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Co-Investors' className={styles['fund-list-multiple-item']} key={index}>{coInvestor}</span>
+                                  {
+                                    index < ((record['Co-Investors'] as string) || 'n/a').split(',').length - 1 && <span>, </span>
+                                  }
+                                </>
+                              ))
+                            }
+                          </span>
+                          <span 
+                            data-label= 'Suitability Score'
+                            onClick={handleAddFilter}
+                            className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}
+                          </span>
+                          <span 
+                            data-label= 'Responsiveness Rate'
+                            onClick={handleAddFilter}
+                            className={styles['fund-list-item']}>{convertedOutput(record['Responsiveness Rate'] as string[] | string) as string || 'n/a'}
+                          </span>
                         </div>
                         <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem'}}></div>
                       </>

@@ -126,8 +126,8 @@ export default function Home() {
         setUserInfo(res.data)
       }
     }
-    fetchUser()
-  }, [])
+    if (token) fetchUser()
+  }, [token])
 
 
   const isPinned = (message) => {
