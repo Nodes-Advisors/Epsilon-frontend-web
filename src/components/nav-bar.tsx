@@ -27,6 +27,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   //   logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
+  // const setUser = useUserStore(state => state.setUser)
   const panelRef = useRef<HTMLDivElement>(null)
   const [openNotification, setOpenNotification] = useState<boolean>(false)
   const notificationRef = useRef<HTMLDivElement>(null)
@@ -74,8 +75,20 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
               'email': user?.email,
             },
           })
-    
-          if (response.status !== 200) {
+          if (response.status === 200) {
+            if (!user) {
+              axios.get('http://localhost:5001/getUserByToken', {
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token,
+                },
+              }).then(res => setUser({
+                email: res.data.email,
+                status: 'online',
+              }))
+            }
+          }
+          else if (response.status !== 200) {
             // Handle invalid token here
             toast.error('Token is invalid')
           }
@@ -86,7 +99,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
             await logout()
           }, 1000)
         }
-      }, 1000) // Runs every 60,000 milliseconds (1 minute)
+      }, 5000) // Runs every 60,000 milliseconds (1 minute)
     
       // Clear interval on component unmount
       return () => {

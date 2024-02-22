@@ -41,6 +41,36 @@ async function connectToMongoDB() {
 
 let connections = {}
 
+app.get('/getUserByToken', async(req, res) => {
+  try {
+    const token = req.header('Authorization')
+    if (!token) return res.status(400).send('Token does not exist')
+    
+    const database = client.db('dev')
+    const collection = database.collection('NodesTeam')
+
+    const verified = jwt.verify(token, 'YOUR_SECRET_KEY')
+    const user = await collection.findOne({ email: verified.email })
+    if (!user) return res.status(400).send('No user match this token')
+
+    const email = verified.email
+
+    await collection.updateOne(
+      { email },
+      {
+        $set: {
+          last_time_online: new Date(),
+        },
+      },
+    )
+
+    res.json({ email })
+  } catch (error) {
+    console.error('Error fetching user via token:', error)
+    res.status(500).send('Error fetching user via token')
+  }
+})
+
 app.post('/login', async (req, res) => {
   try {
     const database = client.db('dev')
@@ -70,7 +100,7 @@ app.post('/login', async (req, res) => {
       },
     )
 
-    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 1) // Current time in seconds + one hour
+    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 60 * 24) // Current time in seconds + one hour
     const token = jwt.sign({ email: user.email, expiration_date }, 'YOUR_SECRET_KEY') // Replace 'YOUR_SECRET_KEY' with your actual secret key
 
     res.json({ token })
