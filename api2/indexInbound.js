@@ -234,9 +234,6 @@ app.post('/logout', async (req, res) => {
   } 
 })
 
-// important one, to enable this please add authoriation to each request
-app.use(verifyToken)
-
 app.ws('/websocket/:email', function(ws, req) {
   // Store the WebSocket connection using the email as the key
   connections[req.params.email] = ws
@@ -247,22 +244,36 @@ app.ws('/websocket/:email', function(ws, req) {
     if (messageObject.type === 'approval request') {
       const db = client.db(dbName)
       const collection = db.collection('NodesTeam')
-  
+    
       try {
         // Query the database to get the receiver's email
-        const receiver = await collection.findOne({ name: messageObject.receiveName })
-        const receiverEmail = receiver ? receiver.email : 'Unknown'
-  
-        // Add the receiver's email to the message object
-        messageObject.receiverEmail = receiverEmail
-  
-        // Get the receiver's WebSocket connection and send the message
-        const receiverWs = connections[receiverEmail]
-        if (receiverWs) {
-          receiverWs.send(JSON.stringify(messageObject))
+        if (messageObject.receiveName === 'all' || messageObject.receiveName === 'All' || messageObject.receiveName === 'ALL') {
+          // pass the information to all the users
+          const users = await collection.find({}).toArray()
+          users.forEach(user => {
+            const receiverWs = connections[user.email]
+            if (receiverWs) {
+              receiverWs.send(JSON.stringify(messageObject))
+            } else {
+              console.log('Receiver is offline')
+            }
+          })
         } else {
-          console.log('Receiver is offline')
+          const receiver = await collection.findOne({ name: messageObject.receiveName })
+          const receiverEmail = receiver ? receiver.email : 'Unknown'
+    
+          // Add the receiver's email to the message object
+          messageObject.receiverEmail = receiverEmail
+    
+          // Get the receiver's WebSocket connection and send the message
+          const receiverWs = connections[receiverEmail]
+          if (receiverWs) {
+            receiverWs.send(JSON.stringify(messageObject))
+          } else {
+            console.log('Receiver is offline')
+          }
         }
+        
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -271,6 +282,11 @@ app.ws('/websocket/:email', function(ws, req) {
   })
 
 })
+
+// important one, to enable this please add authoriation to each request
+app.use(verifyToken)
+
+
 
 app.get('/getAllGPTPrompt', async (req, res) => {
   try {
