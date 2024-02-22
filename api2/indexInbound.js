@@ -70,7 +70,7 @@ app.post('/login', async (req, res) => {
       },
     )
 
-    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 60 * 5) // Current time in seconds + one hour
+    const expiration_date = Math.floor(Date.now() / 1000) + (60 * 1) // Current time in seconds + one hour
     const token = jwt.sign({ email: user.email, expiration_date }, 'YOUR_SECRET_KEY') // Replace 'YOUR_SECRET_KEY' with your actual secret key
 
     res.json({ token })

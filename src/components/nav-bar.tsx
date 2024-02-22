@@ -50,6 +50,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           'Content-Type': 'application/json',
         },
       })
+      setToken(undefined)
       toast.success('Successfully logged out')
     } catch (error) {
       toast.error(error?.response?.data)
@@ -61,6 +62,38 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     setToken(undefined)
     navigate('/')
   }
+
+  useEffect(() => {
+    if (token) {
+      const intervalId = setInterval(async () => {
+        try {
+          const response = await axios.get('http://localhost:5001/verifyToken', {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token,
+              'email': user?.email,
+            },
+          })
+    
+          if (response.status !== 200) {
+            // Handle invalid token here
+            toast.error('Token is invalid')
+          }
+        } catch (error) {
+          // Handle error here
+          toast.error('Error verifying token, the system will log you out')
+          setTimeout(async() => {
+            await logout()
+          }, 1000)
+        }
+      }, 1000) // Runs every 60,000 milliseconds (1 minute)
+    
+      // Clear interval on component unmount
+      return () => {
+        clearInterval(intervalId)
+      }
+    }
+  }, [token])  
 
   useEffect(() => {
     if (lastMessage) {
@@ -164,25 +197,8 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     // navigate('/my-saved-list')
   }
 
-  // useEffect(() => {
-  //   const fetchUserRequest = async () => {
-  //     if (token) {
-  //       await axios.get('http://localhost:5001/getrequest', {
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           'Authorization': `Bearer ${token}`,
-  //         },
-  //       }).then((res) => {
-  //         setRequests(res.data)
-  //         // console.log(res.data)
-  //       }).catch((error) => {
-  //         toast.error(error?.response?.data)
-  //       })
-  //     }
-  //   }
-  //   fetchUserRequest()
+  // set a function which can get access to the server to check if the token is valid or not every 1 mins
 
-  // }, [])
 
   return (
     <>
