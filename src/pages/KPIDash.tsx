@@ -26,6 +26,7 @@ import {
 } from "@mui/material"
 
 import { createTheme, ThemeProvider } from "@mui/material/styles"
+import { SERVER_ADDRESS } from "../lib/constants"
 
 const theme = createTheme({
   palette: {
