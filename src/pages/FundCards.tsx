@@ -288,7 +288,7 @@ export default function FundCards() {
           'Authorization': token,
           'email': user?.email,
         },
-      }
+      },
     ).then((res) => { 
       setFundStatus(res.data)
     }).catch((error) => {
@@ -468,6 +468,8 @@ export default function FundCards() {
 
     try {
       // console.log('executed')
+      const randomId = Math.random().toString(36).substring(7)
+      const currentTime = new Date()
       await axios.post('http://localhost:5001/sendRequest', {
         requestName,
         approvers,
@@ -477,6 +479,8 @@ export default function FundCards() {
         details,
         selectedFundName,
         email: user?.email,
+        requestId: randomId,
+        time: currentTime,
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -497,8 +501,16 @@ export default function FundCards() {
         contactPerson: contactPerson,
         deal: deal,
         requestName: requestName,
+        requestId: randomId,
+        time: currentTime,
       }
       sendMessage(JSON.stringify(messageObject))
+      if (localStorage.getItem('approvalRequests')) {
+        const approvalRequests = JSON.parse(localStorage.getItem('approvalRequests') as string)
+        localStorage.setItem('approvalRequests', JSON.stringify([...approvalRequests, messageObject]))
+      } else {
+        localStorage.setItem('approvalRequests', JSON.stringify([messageObject]))
+      }
     } catch (error) {
       toast.error(error?.response?.data)
     }

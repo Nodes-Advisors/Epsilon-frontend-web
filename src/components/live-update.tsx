@@ -94,7 +94,7 @@ function LiveUpdate({user}: {user: any}) {
     const height = e.currentTarget.offsetHeight
     const timeout = setTimeout(() => {
       // console.log(rect.left, rect.top, width, height)
-      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 150})
+      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 240})
       setShowPopup(true)
       setHoveredName(name)
     }, 500)
@@ -560,7 +560,7 @@ function LiveUpdate({user}: {user: any}) {
                       {
                         hoveredData.filter(item => item?.company_name === hoveredName).map(item => {
                           return (
-                            <li key={item.id} style={{ padding: '0.5rem', color: '#eee' }}>
+                            <li key={item.id} style={{ padding: '0.5rem', color: '#eee', fontSize: '1rem' }}>
                             
                               <span style={{ color: 'violet' }}>{getDateDiff(item.last_updated_status_date)}</span>
                               {' - '}

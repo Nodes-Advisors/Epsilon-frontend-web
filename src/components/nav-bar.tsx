@@ -12,8 +12,9 @@ import toast, { Toaster } from 'react-hot-toast'
 import AuthComponent from './auth-component'
 import { useTokenStore, useUserStore } from '../store/store'
 import UserProfileIcon from '../assets/images/github-mark-white.png'
-import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from '../websocket/WebsocketContext'
+import CheckIcon from '../assets/images/check.png'
+import RejectIcon from '../assets/images/reject.png'
 import CancelIcon from '../assets/svgs/cancel-button.svg?react'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
@@ -40,7 +41,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [userInfo, setUserInfo] = useState<any>({})
   const [message, setMessage] = useState<any>({})
   const [openDetail, setOpenDetail] = useState<boolean>(false)
-
+  
   const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
   const [allNotifications, setAllNotifications] = useState<any[]>([])
 
@@ -111,19 +112,20 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   useEffect(() => {
     if (lastMessage) {
       const messageData = JSON.parse(lastMessage.data)
-      const date = new Date()
+      const date = new Date(messageData.time)
       const year = date.getFullYear()
       const month = date.getMonth() + 1
       const day = date.getDate()
       const hour = date.getHours()
       const minute = date.getMinutes()
       const second = date.getSeconds()
-      const time = `${year}-${month}-${day} ${hour}:${minute}:${second}`
-      messageData.time = time
-      setNumNewMsg(prevNum => prevNum + 1)
+      const formatTime = `${day}/${month}/${year} ${hour}:${minute}:${second}`
+      messageData.formatTime = formatTime
+      messageData.status = 'pending'
+      
       if (messageData.type === 'approval request') {
         // get current time and set it to the message, I need format like 2021-09-01 12:00:00
-        
+        setNumNewMsg(prevNum => prevNum + 1)
         setRequests(prevRequests => [...prevRequests, messageData])
         setAllNotifications(prevNotifications => [...prevNotifications, messageData])
       } else {
@@ -210,7 +212,74 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     // navigate('/my-saved-list')
   }
 
-  // set a function which can get access to the server to check if the token is valid or not every 1 mins
+  const acceptRequest = async(request: any) => {
+    try {
+      const res = await axios.post('http://localhost:5001/approveRequest', {
+        requestId: request.requestId,
+        time: request.time,
+
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
+      if (res.status === 200) {
+        setNumNewMsg(prevNum => prevNum - 1)
+        request.status = 'accepted'
+        sendMessage(JSON.stringify({
+          type: 'approval response',
+          requestId: request.requestId,
+          time: request.time,
+          status: 'accepted',
+          receiverEmail: request.sendEmail,
+        },
+        ))
+        
+        // setRequests(prevRequests => prevRequests.filter(req => req.time !== request.time && req.requestId !== request.requestId))
+        // setAllNotifications(prevNotifications => prevNotifications.filter(req =>  req.time !== request.time && req.requestId !== request.requestId))
+        
+        toast.success('Successfully accepted the request')
+      }
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
+
+  const rejectRequest = async(request: any) => {
+    try {
+      const res = await axios.post('http://localhost:5001/rejectRequest', {
+        requestId: request.requestId,
+        time: request.time,
+
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
+      if (res.status === 200) {
+        setNumNewMsg(prevNum => prevNum - 1)
+        request.status = 'rejected'
+        sendMessage(JSON.stringify({
+          type: 'approval response',
+          requestId: request.requestId,
+          time: request.time,
+          status: 'rejected',
+          receiverEmail: request.sendEmail,
+        },
+        ))
+        // setRequests(prevRequests => prevRequests.filter(req => req.time !== request.time && req.requestId !== request.requestId))
+        // setAllNotifications(prevNotifications => prevNotifications.filter(req =>  req.time !== request.time && req.requestId !== request.requestId))
+
+        toast.success('Successfully rejected the request')
+      }
+    } catch (error) {
+      toast.error(error?.response?.data)
+    }
+  }
 
 
   return (
@@ -314,60 +383,28 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   
               </div>
               {
-                openDetail
-                  ?
-                  <div style={{ position: 'absolute', top: '5rem', left: '0', width: '100%', zIndex: 1000, background: '#fff2' }}>
-                    <div style={{ width: '90%', height: '50%', background: '#fff', padding: '1rem', borderRadius: '0.5rem', position: 'relative' }}>
-                      <div style={{ position: 'absolute', top: '0', right: '0', cursor: 'pointer' }} onClick={() => setOpenDetail(false)}>
-                        <CancelIcon style={{ width: '1.5rem', height: 'auto' }} />
-                      </div>
-                      <h2 style={{ margin: 0, textAlign: 'start', fontSize: '1.25rem' }}>{'Fund Name: '}{message.fundName}</h2>
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Type of Request: '}{message.requestName}</p>
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Priority: '}{message.priority}</p>
-                     
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Deal: '}{message.deal}</p>
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Contact Person: '}{message.contactPerson}</p>
-
-                      
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{message.details}</p>
-                      <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Sender Email: '}{message.sendEmail}</p>
-
-
-                      <div style={{ display: 'flex', marginTop: '1rem', gap: '2rem', justifyContent: 'center' }}>
-                        <button
-                          onClick={() => {
-                            const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
-                            setRequests(newRequests)
-                            const allMessages = allNotifications.filter(notification => notification.fundName !== message.fundName && notification.time !== message.time)
-                            setAllNotifications(allMessages)
-                            setOpenDetail(false)
-                            setNumNewMsg(prevNum => prevNum - 1)
-                            toast.success('You have successfully taken this request')
-                          }}
-                        >Take it</button>
-                        <button
-                          onClick={() => {
-                            // remove this request from the list
-                            const newRequests = requests.filter(request => request.fundName !== message.fundName && request.time !== message.time)
-                            setRequests(newRequests)
-                            const allMessages = allNotifications.filter(notification => notification.fundName !== message.fundName && notification.time !== message.time)
-                            setAllNotifications(allMessages)
-                            setOpenDetail(false)
-                            setNumNewMsg(prevNum => prevNum - 1)
-                            toast.success('You have successfully rejected this request')
-                          }}
-                        >Cancel</button>
-                      </div>
+                requests.map((request, index) => (
+                  <div style={{ position: 'relative', padding: '1rem 0', display: 'flex', justifyContent: 'space-between' }} key={index} className={styles['notification-message']} >
+                    <span onClick={() => { setOpenDetail(true); setMessage(request) }}>{ option ? 'null' : `${request.fundName} request created by ${request.sendEmail}` }</span>
+                    <span style={{ position: 'absolute', right: 0, bottom: 0, fontSize: '0.75rem' }}>{request.formatTime}</span>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      {request.status === 'rejected' ? (
+                        <span>Rejected</span>
+                      ) : request.status === 'accepted' ? (
+                        <span>Accepted</span>
+                      ) : (
+                        <>
+                          <img 
+                            onClick={() => { acceptRequest(request); request.status = 'accepted' }}
+                            style={{ width: '1.5rem', height: '1.5rem' }} src={CheckIcon} alt="" />
+                          <img
+                            onClick={() => { rejectRequest(request); request.status = 'rejected' }}
+                            style={{ width: '1.5rem', height: '1.5rem' }} src={RejectIcon} alt="" />
+                        </>
+                      )}
                     </div>
-                    
                   </div>
-                  :
-                  requests.map((request, index) => (
-                    <div style={{ position: 'relative', padding: '1rem 0' }} key={index} className={styles['notification-message']} >
-                      <span onClick={() => { setOpenDetail(true); setMessage(request) }}>{ option ? 'null' : `${request.fundName}approval created by ${request.sendEmail}` }</span>
-                      <span style={{ position: 'absolute', right: 0, bottom: 0, fontSize: '0.75rem' }}>{request.time}</span>
-                    </div>
-                  ))
+                ))
               }
             </div>
           }
@@ -420,6 +457,53 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
                 
                 <AuthComponent setOpenAuthPanel={setOpenAuthPanel}/>
               </div>
+      }
+      {
+
+        openDetail
+        &&
+          <div style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 1000, top: 0, left: 0 }}>
+            <div style={{ background: '#fff', color: '#333', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', padding: '2rem', borderRadius: '1rem' }}>
+              <div style={{ position: 'absolute', top: '1rem', right: '1rem', cursor: 'pointer' }} onClick={() => setOpenDetail(false)}>
+                <CancelIcon style={{ width: '1.5rem', height: 'auto' }} />
+              </div>
+              <h2 style={{ margin: 0, textAlign: 'start', fontSize: '1.25rem' }}>{'Fund Name: '}{message.fundName}</h2>
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Type of Request: '}{message.requestName}</p>
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Priority: '}{message.priority}</p>
+              
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Deal: '}{message.deal}</p>
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Contact Person: '}{message.contactPerson}</p>
+
+              
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{message.details}</p>
+              <p style={{ margin: 0, textAlign: 'start', fontSize: '1rem' }}>{'Sender Email: '}{message.sendEmail}</p>
+
+
+              <div style={{ display: 'flex', marginTop: '1rem', gap: '2rem', justifyContent: 'center' }}>
+                <button
+                  // disabled={message.status === 'accepted' || message.status === 'rejected'}
+                  onClick={() => {
+                    if (message.status === 'accepted' || message.status === 'rejected') toast.error('You have already responded to this request')
+                    else {
+                      acceptRequest(message)
+                      setOpenDetail(false)
+                    }
+                  }}
+                >Take it</button>
+                <button
+                  // disabled={message.status === 'accepted' || message.status === 'rejected'}
+                  onClick={() => {
+                    if (message.status === 'accepted' || message.status === 'rejected') toast.error('You have already responded to this request')
+                    else {
+                      rejectRequest(message)
+                      setOpenDetail(false)
+                    }
+                  }}
+                >Cancel</button>
+              </div>
+            </div>
+            
+          </div>
       }
       {children}
     </>

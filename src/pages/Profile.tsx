@@ -168,7 +168,7 @@ export default function Profile(): JSX.Element {
 
   const sendRequest = async (e) => {
     e.preventDefault()
-    
+
     // Check if all required fields have been filled
     if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
       toast.error('Please fill in all required fields')
@@ -177,6 +177,8 @@ export default function Profile(): JSX.Element {
 
     try {
       // console.log('executed')
+      const randomId = Math.random().toString(36).substring(7)
+      const currentTime = new Date()
       await axios.post('http://localhost:5001/sendRequest', {
         requestName,
         approvers,
@@ -186,6 +188,8 @@ export default function Profile(): JSX.Element {
         details,
         selectedFundName,
         email: user?.email,
+        requestId: randomId,
+        time: currentTime,
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -194,8 +198,22 @@ export default function Profile(): JSX.Element {
         },
       })
       toast.success('Request sent successfully!')
-      setPopoverOpen(false)
-  
+      setOpenRequestPanel(false)
+      setPendingList([...pendingList, selectedFundName])
+      const messageObject = {
+        type: 'approval request',
+        sendEmail: user?.email,
+        receiveName: approvers,
+        fundName: selectedFundName,
+        priority: priority,
+        details: details,
+        contactPerson: contactPerson,
+        deal: deal,
+        requestName: requestName,
+        requestId: randomId,
+        time: currentTime,
+      }
+      sendMessage(JSON.stringify(messageObject))
     } catch (error) {
       toast.error(error?.response?.data)
     }

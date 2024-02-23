@@ -277,8 +277,18 @@ app.ws('/websocket/:email', function(ws, req) {
       } catch (error) {
         console.error('Error fetching data:', error)
       }
+    } 
+    else if (messageObject.type === 'approval response') {
+
+      const receiverEmail = messageObject.receiverEmail
+      const receiverWs = connections[receiverEmail]
+      if (receiverWs) {
+        receiverWs.send(JSON.stringify(messageObject))
+      }
     }
-    
+    else {
+      console.log('Unknown message type')
+    }
   })
 
 })
@@ -480,6 +490,8 @@ app.post('/sendRequest', async (req, res) => {
       priority,
       details,
       email,
+      requestId,
+      time,
     } = req.body
 
     await collection.insertOne({
@@ -492,6 +504,8 @@ app.post('/sendRequest', async (req, res) => {
       'Created by': email,
       'Status': 'Pending',
       'Fund Name': selectedFundName,
+      'Time': time,
+      'RequestId': requestId,
     })
 
     res.status(200).send('Send request successfully!')
@@ -501,6 +515,52 @@ app.post('/sendRequest', async (req, res) => {
   } 
 })
 
+app.post('/approveRequest', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('UsersFundRequests')
+    const { requestId, time } = req.body
+
+    await
+    collection.updateOne(
+      { 'RequestId': requestId, 'Time': time },
+      {
+        $set: {
+          'Status': 'Accepted',
+        },
+      },
+    )
+
+    res.status(200).send('Reject request successfully!')
+  } catch (error) {
+    console.error('Error updating data:', error)
+    res.status(500).send('Error updating data')
+  }
+})
+
+app.post('/rejectRequest', async (req, res) => {
+  try {
+    const database = client.db('dev')
+    const collection = database.collection('UsersFundRequests')
+    const { requestId, time } = req.body
+
+    await
+    collection.updateOne(
+      { 'RequestId': requestId, 'Time': time },
+      {
+        $set: {
+          'Status': 'Rejected',
+        },
+      },
+    )
+
+    res.status(200).send('Reject request successfully!')
+  } catch (error) {
+    console.error('Error updating data:', error)
+    res.status(500).send('Error updating data')
+  }
+})
+
 app.get('/getUser', async (req, res) => {
   try {
     const database = client.db('dev')
@@ -508,9 +568,9 @@ app.get('/getUser', async (req, res) => {
     const email = req.query.email
     const name = req.query.name
     let user
-    if (email) {
+    if (email !== 'undefined') {
       user = await collection.findOne({ email: email })
-    } else if (name) {
+    } else if (name !== 'undefined') {
       // convert name from  xx-xx-xx to xx xx xx
       user = await collection.findOne({ name: { $regex: new RegExp(`^${name.replace(/-/g, ' ')}$`, 'i') } })
     } else {

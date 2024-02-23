@@ -33,7 +33,7 @@ export default function UserProfile() {
           'email': user?.email,
         },
         params: {
-          email: window.location.href.split('/').pop() === 'me' ? user.email : 'undefined',
+          email: window.location.href.split('/').pop() === 'me' ? user?.email : 'undefined',
           name: window.location.href.split('/').pop() === 'me' ? 'undefined' : window.location.href.split('/').pop(),
         },
       })

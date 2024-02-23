@@ -17,7 +17,7 @@ import IntelligenceIcon from '../assets/svgs/intelligence.svg?react'
 import { useNavigate } from 'react-router-dom'
 import DatabaseImg from '../assets/images/database.png'
 import ClientImg from '../assets/images/client.png'
-
+import HomeIcon from '../assets/images/home.png'
 export default function LeftNavBar({style, show}: {style?: React.CSSProperties, show: boolean}) {
 
   const { isAuthenticated, user: auth0User, 
@@ -46,6 +46,7 @@ export default function LeftNavBar({style, show}: {style?: React.CSSProperties, 
 
       <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
       <nav>
+        <NavWidget src={HomeIcon} Svg={KPIDashIcon} width='3.75rem' height='3.75rem' to='/' text='Home' />
         <NavWidget src={ClientImg} Svg={KPIDashIcon} width='4rem' height='4rem' to='/client-cards' text= 'Clients'/>
         <NavWidget src={KPIDashImg} Svg={KPIDashIcon} width='4rem' height='4rem' to='/kpi-dash' text= 'KPI Dash'/>
         <NavWidget src={FundCardImg} Svg={FundCardIcon} width='4rem' height='4rem' to='/fund-cards' text='Fund Cards' />

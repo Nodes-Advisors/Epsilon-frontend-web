@@ -28,6 +28,7 @@ export default function Home() {
   const [prevTab, setPrevTab] = useState(null)
   const [animationClass, setAnimationClass] = useState('')
   const ulRef = useRef(null)
+  const [approveRequests, setApproveRequests] = useState<any[]>([])
   useEffect(() => {
     if (prevTab !== null) {
       setAnimationClass(switchTab !== prevTab ? 'tab-enter' : 'tab-exit')
@@ -143,6 +144,57 @@ export default function Home() {
     if (token) fetchUser()
   }, [token])
 
+  const formatedTime = (time: string) => {
+    const date = new Date(time)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const hour = date.getHours().toString().padStart(2, '0')
+    const minute = date.getMinutes().toString().padStart(2, '0')
+    const second = date.getSeconds().toString().padStart(2, '0')
+    return `${day}/${month}/${year} ${hour}:${minute}:${second}`
+  }
+
+  useEffect(() => {
+    if (lastMessage) {
+      const messageData = JSON.parse(lastMessage.data)
+      const date = new Date(messageData.time)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const hour = date.getHours().toString().padStart(2, '0');
+      const minute = date.getMinutes().toString().padStart(2, '0');
+      const second = date.getSeconds().toString().padStart(2, '0');
+      const formatTime = `${day}/${month}/${year} ${hour}:${minute}:${second}`
+      messageData.formatTime = formatTime
+      
+      if (messageData.type === 'approval request') {
+        // get current time and set it to the message, I need format like 2021-09-01 12:00:00
+        // console.log('messageData', messageData)
+        if (localStorage.getItem('approvalRequests')) {
+          const prevRequests = JSON.parse(localStorage.getItem('approvalRequests'))
+          setApproveRequests( [...prevRequests])
+          
+        } else {
+          localStorage.setItem('approvalRequests', JSON.stringify([messageData]))
+          setApproveRequests(prevRequests => [...prevRequests, messageData])
+        }
+
+        // setAllNotifications(prevNotifications => [...prevNotifications, messageData])
+      } else if (messageData.type === 'approval response') {
+        console.log('Approval response')
+        if (localStorage.getItem('approvalRequests')) {
+          setApproveRequests(prevRequests => prevRequests.filter(req => req.requestId !== messageData.requestId))
+          
+        } else {
+          
+
+          setApproveRequests(prevRequests => prevRequests.filter(req => req.requestId !== messageData.requestId))
+        }
+      }
+      
+    }
+  }, [lastMessage])
 
   const isPinned = (message) => {
     // console.log('message', message)
@@ -363,19 +415,18 @@ export default function Home() {
             style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
             <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</h2>
             <div className={styles['animation-container']}> 
-              <ul style={{ maxHeight: '75%' }} className={`${styles['news-ul']}`}>
+              <ul style={{ maxHeight: '75%', overflow: 'auto' }} className={styles['news-ul']}>
                 {
                   switchTab === 'Milestone' && 
-              <>
-                <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
-                <li>Avivo has recieved 16 meetings request this month!</li>
-                <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
-              </>
+                  <>
+                    <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
+                    <li>Avivo has recieved 16 meetings request this month!</li>
+                    <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
+                  </>
                 }
                 {
                   switchTab === 'Pinned' && pinnedMessages.map((message, index) => 
                   {
-                    // if (message.type) {
                     return (
                       <CustomContextMenu tooltip={message} key={index}>
                         <li>{message.message}</li>
@@ -387,13 +438,18 @@ export default function Home() {
                 }
                 {
                   switchTab === 'Approval Request' && 
-              <>
-                <li>Avivo has recieved 16 meetings request this month!</li>
-                <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
-              </>
+                  <>
+                    {
+                      approveRequests.length > 0 &&
+                      approveRequests.map((message, index) => (        
+                        <li key={message.time}>{message.sendEmail} sent you a request to {message.contactPerson} at {message.fundName} - {formatedTime(message.time)}</li>               
+                      ),
+                      )
+                    }
+                  </>
                 }
               </ul>
-            </div> {/* Add this line */}
+            </div> 
           </div>
         </div>
 
@@ -409,7 +465,7 @@ export default function Home() {
                 followupMessages.map((message, index) => (
                   <CustomContextMenu tooltip={message} key={index}>
                     <li>{message.message}</li>
-                    <li>{message.message}</li>
+                    {/* <li>{message.message}</li> */}
                   </CustomContextMenu>
                 ),
                 

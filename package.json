@@ -11,7 +11,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "ts-node": "ts-node --esm",
-    "start": "concurrently \"npm run dev-api\" \"npm run dev\" \"npm run dev-api2\""
+    "start": "concurrently \"npm run dev-api\" \"npm run dev-api2\" \"npm run dev\""
   },
   "dependencies": {
     "@amcharts/amcharts5": "^5.8.0",

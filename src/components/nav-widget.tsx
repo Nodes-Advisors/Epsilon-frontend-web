@@ -21,7 +21,7 @@ export default function NavWidget({Svg, width, height, to, text, src=undefined, 
       {
         src 
           ? 
-          to === '/client-cards'
+          to === '/client-cards' 
             ?
             <img src={src} alt='nav-widget-img-clients' onClick={() => navigate(to)} className={styles['nav-widget-img-clients']} style={{ ...style, width, height }} />
             :

@@ -40,6 +40,7 @@ const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<
         })
         toast.success(mode === 'login' ? 'Logged in successfully!' : 'Signed up successfully!')
         setOpenAuthPanel(false)
+        window.location.reload()
       }
     } catch (error) {
       toast.error(error?.response?.data)
