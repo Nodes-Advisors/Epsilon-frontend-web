@@ -640,6 +640,48 @@ app.get('/getClients', async (req, res) => {
   }
 })
 
+app.get('/search', async (req, res) => {
+  const { q } = req.query // get the query parameter
+  const database = client.db('dev')
+
+  try {
+    // Define the collections to search
+    const collections = ['Clients', 'FundCard2', 'NodesTeam', 'SavedCollections']
+
+    // Initialize an empty result object
+    let result = {}
+
+    // Loop over the collections
+    for (let collectionName of collections) {
+      const collection = database.collection(collectionName)
+
+      // Perform a case-insensitive regex search in the current collection
+      const searchResult = await collection.find({
+        $or: [
+          
+          { 'Fund Name': { $regex: q, $options: 'i' } },
+          { name: { $regex: q, $options: 'i' } },
+          { username: { $regex: q, $options: 'i' } },
+          { email: { $regex: q, $options: 'i' } },
+          { Funds: { $regex: q, $options: 'i' } },
+          { acronym: { $regex: q, $options: 'i' } },
+          
+          // Add more fields as needed
+        ],
+      }).toArray()
+
+      // Add the search result to the result object
+      result[collectionName] = searchResult
+    }
+    // console.log(result)
+    // Send the result object as the response
+    res.json(result)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    res.status(500).send('Error fetching data')
+  }
+})
+
 app.get('/getAllFunds', async (req, res) => {
   try {
     const database = client.db('dev')

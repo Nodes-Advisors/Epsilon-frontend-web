@@ -4,7 +4,7 @@ import LocationIcon from '../assets/svgs/location.svg?react'
 import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useFundsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
+import WebSocketContext from '../websocket/WebsocketContext'
 
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
@@ -44,7 +45,8 @@ export default function Profile(): JSX.Element {
   const newCollectionRef = useRef<HTMLInputElement>(null)
   const [nodesTeam, setNodesTeam] = useState<any[]>([])
   const token = useTokenStore(state => state.token)
-
+  const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
+  
   function formatDate(timestamp) {
     const date = new Date(timestamp)
   
@@ -198,8 +200,7 @@ export default function Profile(): JSX.Element {
         },
       })
       toast.success('Request sent successfully!')
-      setOpenRequestPanel(false)
-      setPendingList([...pendingList, selectedFundName])
+
       const messageObject = {
         type: 'approval request',
         sendEmail: user?.email,
@@ -214,6 +215,7 @@ export default function Profile(): JSX.Element {
         time: currentTime,
       }
       sendMessage(JSON.stringify(messageObject))
+      setPopoverOpen(false)
     } catch (error) {
       toast.error(error?.response?.data)
     }

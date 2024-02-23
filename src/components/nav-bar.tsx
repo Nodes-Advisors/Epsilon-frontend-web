@@ -41,9 +41,59 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [userInfo, setUserInfo] = useState<any>({})
   const [message, setMessage] = useState<any>({})
   const [openDetail, setOpenDetail] = useState<boolean>(false)
-  
+  const [showResults, setShowResults] = useState(false)
   const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
   const [allNotifications, setAllNotifications] = useState<any[]>([])
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+
+  const searchBarRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target)) {
+        setShowResults(false)
+      } else {
+        setShowResults(true)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (searchTerm && token && user) {
+      axios.get(`http://localhost:5001/search?q=${searchTerm}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
+          },
+        },
+      )
+        .then(response => response.data)
+        .then(data => {
+          setSearchResults(data)
+          // console.log(data)
+        })
+        .catch(error => console.error('Error:', error))
+    }
+  }, [searchTerm, token, user])
+
+  const handleInputChange = event => {
+    setSearchTerm(event.target.value)
+    if (event.target.value.length > 0) {
+      setShowResults(true)
+    } else {
+      setShowResults(false)
+    }
+  }
+
 
   const logout = async() => {
     try {
@@ -313,11 +363,73 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           onClick={() => navigate('/home')}
           // src={EpsilonLogo} 
           style={{ width: '10rem', height: 'auto', marginLeft: '2rem' }} alt="" />
-        <div style={{ position: 'relative', marginLeft: '2rem' }}>
+        <div ref={searchBarRef} style={{ position: 'relative', marginLeft: '2rem' }}>
           <SearchBarIcon style={{ width: '1.5rem', position: 'absolute', paddingLeft: '1rem' }} />
           <input 
+            value={searchTerm}
+            onChange={handleInputChange}
             className= {styles['nav-search-bar']}
             type="text" placeholder='Search Everything' />
+          {showResults &&
+            searchTerm &&
+            <ul style={{ position: 'absolute', width: 'calc(60vw + 2rem)',
+              borderRadius: '0.5rem',
+              padding: '1rem',
+              
+              listStyleType: 'none',
+              backgroundColor: '#262C65',
+              color: '#fff', textAlign: 'left', maxHeight: '40vh', overflow: 'auto' }}>
+              {/* ['Clients', 'FundCard2', 'NodesTeam', 'SavedCollections'] */}
+              {
+                searchResults['NodesTeam'] && searchResults['NodesTeam'].length > 0 &&
+                <li style={{ fontSize: '1.5rem', fontWeight: 600  }} key={'team'}>Nodes People</li>
+              }
+              {
+              
+                searchResults['NodesTeam'] && searchResults['NodesTeam'].length > 0 && searchResults['NodesTeam'].map((result, index) => (
+                  <li key={index} style={{ padding: '0.2rem 1rem', fontSize: '1rem', cursor: 'pointer'}}
+                    onClick={() => {
+                      setShowResults(false)
+                      navigate(`/user-profile/${result.name.split(' ').join('-')}`)
+                    }}
+                  >{result?.name}</li>
+                ))
+              }
+              {
+                searchResults['FundCard2'] && searchResults['FundCard2'].length > 0 &&
+                <li style={{ fontSize: '1.5rem', fontWeight: 600  }} key={'VC'}>Funds</li>
+              }
+              {
+              
+                searchResults['FundCard2'] && searchResults['FundCard2'].length > 0 && searchResults['FundCard2'].map((result, index) => (
+                  <li key={index} style={{ padding: '0.2rem 1rem', fontSize: '1rem', cursor: 'pointer'}}
+                    onClick={() => {
+                      localStorage.setItem('fund-id', result._id)
+                      setShowResults(false)
+                      navigate(`/fund-card/${result._id}`)
+                    }}
+                  >{result?.Funds}</li>
+                ))
+              }
+              {
+                searchResults['Clients'] && searchResults['Clients'].length > 0 &&
+                <li style={{ fontSize: '1.5rem', fontWeight: 600  }} key={'clients'}>Clients</li>
+              }
+              {
+              
+                searchResults['Clients'] && searchResults['Clients'].length > 0 && searchResults['Clients'].map((result, index) => (
+                  <li key={index} style={{ padding: '0.2rem 1rem', fontSize: '1rem', cursor: 'pointer'}}
+                    onClick={() => {
+                      localStorage.setItem('client-id', result._id)
+                      setShowResults(false)
+                      navigate(`/client-card/${result._id}`)
+                    }}
+                  >{result?.name === '' || !result?.name ? result?.acronym : result?.name}</li>
+                ))
+              }
+            </ul>
+          }
+
         </div>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <span 

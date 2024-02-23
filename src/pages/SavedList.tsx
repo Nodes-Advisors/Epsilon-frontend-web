@@ -1,7 +1,7 @@
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useClientsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import venture_logo from '../assets/images/venture-logo-example.png'
 import styles from '../styles/profile.module.less'
@@ -20,6 +20,8 @@ import axios from 'axios'
 import FundStatus from '../components/status'
 import ReactPaginate from 'react-paginate'
 import { handleFullTextFilter } from '../lib/utils'
+import WebSocketContext from '../websocket/WebsocketContext'
+
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
@@ -44,7 +46,8 @@ export default function SavedList() {
   const [data, setData] = useState<any[]>([])
   const clients = useClientsStore(state => state.clients)
   const token = useTokenStore(state => state.token)
-
+  const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
+  
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -108,7 +111,7 @@ export default function SavedList() {
 
   const sendRequest = async (e) => {
     e.preventDefault()
-    
+
     // Check if all required fields have been filled
     if (!requestName || !approvers || !deal || !contactPerson || !priority || !selectedFundName) {
       toast.error('Please fill in all required fields')
@@ -117,6 +120,8 @@ export default function SavedList() {
 
     try {
       // console.log('executed')
+      const randomId = Math.random().toString(36).substring(7)
+      const currentTime = new Date()
       await axios.post('http://localhost:5001/sendRequest', {
         requestName,
         approvers,
@@ -126,6 +131,8 @@ export default function SavedList() {
         details,
         selectedFundName,
         email: user?.email,
+        requestId: randomId,
+        time: currentTime,
       }, {
         headers: {
           'Content-Type': 'application/json',
@@ -136,6 +143,26 @@ export default function SavedList() {
       toast.success('Request sent successfully!')
       setOpenRequestPanel(false)
       setPendingList([...pendingList, selectedFundName])
+      const messageObject = {
+        type: 'approval request',
+        sendEmail: user?.email,
+        receiveName: approvers,
+        fundName: selectedFundName,
+        priority: priority,
+        details: details,
+        contactPerson: contactPerson,
+        deal: deal,
+        requestName: requestName,
+        requestId: randomId,
+        time: currentTime,
+      }
+      sendMessage(JSON.stringify(messageObject))
+      if (localStorage.getItem('approvalRequests')) {
+        const approvalRequests = JSON.parse(localStorage.getItem('approvalRequests') as string)
+        localStorage.setItem('approvalRequests', JSON.stringify([...approvalRequests, messageObject]))
+      } else {
+        localStorage.setItem('approvalRequests', JSON.stringify([messageObject]))
+      }
     } catch (error) {
       toast.error(error?.response?.data)
     }
