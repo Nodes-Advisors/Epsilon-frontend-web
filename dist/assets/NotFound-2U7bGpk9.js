@@ -1,1 +1,0 @@
-import{j as e}from"./index-Us0FpZC3.js";function r(){return e.jsxs("div",{children:[e.jsx("h1",{style:{fontSize:"10rem",color:"red"},children:"404"}),e.jsx("div",{children:"Page not found"})]})}export{r as default};

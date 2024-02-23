@@ -2,7 +2,7 @@ import styles from '../styles/left-nav-bar.module.less'
 import HeadImgWrapper from './headimg-wrapper'
 import Divider from './divider'
 import NavWidget from './nav-widget'
-import { useAuth0 } from '@auth0/auth0-react'
+
 import { useEffect } from 'react'
 import { useUserStore } from '../store/store'
 
@@ -20,8 +20,6 @@ import ClientImg from '../assets/images/client.png'
 import HomeIcon from '../assets/images/home.png'
 export default function LeftNavBar({style, show}: {style?: React.CSSProperties, show: boolean}) {
 
-  const { isAuthenticated, user: auth0User, 
-    logout, loginWithRedirect } = useAuth0()
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
     
@@ -31,11 +29,8 @@ export default function LeftNavBar({style, show}: {style?: React.CSSProperties, 
       localStorage.removeItem('logout')
     }
     
-    if (isAuthenticated) {
-      const user = {...auth0User, status: 'online' as const } 
-      setUser(user)
-    } 
-  }, [isAuthenticated])
+    
+  }, [])
       
   const navigate = useNavigate()
   

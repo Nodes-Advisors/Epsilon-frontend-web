@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import WebSocketContext from '../websocket/WebsocketContext'
 
 export default function Profile(): JSX.Element {
-  // const { user, isLoading } = useAuth0()
+
   const [isLoading, setLoading] = useState(true)
   const [record, setRecord] = useState<object | null>(null)
   const [location, setLocation] = useState<string | null>(null)

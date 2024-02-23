@@ -18,7 +18,6 @@ import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
 
 export default function ClientProfile(): JSX.Element {
-  // const { user, isLoading } = useAuth0()
   const [isLoading, setLoading] = useState(true)
   const [record, setRecord] = useState<object | null>(null)
   const [location, setLocation] = useState<string | null>(null)

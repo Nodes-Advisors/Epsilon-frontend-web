@@ -12,11 +12,9 @@
     "preview": "vite preview",
     "ts-node": "ts-node --esm",
     "start": "concurrently \"npm run dev-api\" \"npm run dev-api2\" \"npm run dev\""
-
   },
   "dependencies": {
     "@amcharts/amcharts5": "^5.8.0",
-    "@auth0/auth0-react": "^2.2.3",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@headlessui/react": "^1.7.17",

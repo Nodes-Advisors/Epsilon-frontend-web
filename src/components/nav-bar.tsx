@@ -24,11 +24,10 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   const [openPanel, setOpenPanel] = useState(false)
   const [openAuthPanel, setOpenAuthPanel] = useState(false)
   const [notificationCategory, setNotificationCategory] = useState<'all' | 'approval'>('all')
-  // const { user: auth0User, 
-  //   logout, loginWithRedirect, isAuthenticated, isLoading } = useAuth0()
+
   const setUser = useUserStore(state => state.setUser)
   const user = useUserStore(state => state.user)
-  // const setUser = useUserStore(state => state.setUser)
+
   const panelRef = useRef<HTMLDivElement>(null)
   const [openNotification, setOpenNotification] = useState<boolean>(false)
   const notificationRef = useRef<HTMLDivElement>(null)
