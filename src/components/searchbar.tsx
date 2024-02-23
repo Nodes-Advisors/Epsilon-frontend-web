@@ -6,7 +6,7 @@ import { useQuery } from 'react-query'
 import { throttle, debounce } from 'lodash'
 import { useTokenStore, useUserStore } from '../store/store'
 import axios from 'axios'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 export default function SearchBar() {
 
   const token = useTokenStore((state) => state.token)
@@ -18,7 +18,7 @@ export default function SearchBar() {
       return
     }
     // import.meta.env.VITE_DEVELOPMENT_SERVER_HOST + 
-    const res = await axios.get(`http://localhost:5001/?q=${inputValue}`,
+    const res = await axios.get(`http://${SERVER_ADDRESS}:5001/?q=${inputValue}`,
       { 
         headers: {
           'Content-Type': 'application/json',

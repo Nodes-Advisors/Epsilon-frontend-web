@@ -15,6 +15,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
+import { SERVER_ADDRESS } from '../lib/utils'
 
 ChartJS.register(
   CategoryScale,
@@ -73,7 +74,7 @@ const App: React.FC = () => {
     const fetchDealData = async () => {
       try {
         const response = await axios.get<DealData[]>(
-          'http://localhost:5002/deals',
+          `http://${SERVER_ADDRESS}:5002/deals`,
         )
         setDealData(response.data)
       } catch (error) {
@@ -85,7 +86,7 @@ const App: React.FC = () => {
     const fetchAccountHolderData = async () => {
       try {
         const response = await axios.get<AccountHolderData[]>(
-          'http://localhost:5002/account-holders',
+          `http://${SERVER_ADDRESS}:5002/account-holders`,
         )
         setAccountHolderData(response.data)
       } catch (error) {
@@ -174,7 +175,7 @@ const App: React.FC = () => {
     const fetchMonthlyTotals = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5002/monthly-totals',
+          `http://${SERVER_ADDRESS}:5002/monthly-totals`,
         )
         setMonthlyTotals(response.data)
       } catch (error) {
@@ -315,7 +316,7 @@ const App: React.FC = () => {
     const fetchAccountHolderKPIs = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5002/account-holder-kpis',
+          `http://${SERVER_ADDRESS}:5002/account-holder-kpis`,
         )
         const transformedData = transformDataForChart(response.data)
         setAccountHoldersLineData(transformedData)
@@ -331,7 +332,7 @@ const App: React.FC = () => {
     const fetchTotalOutreachPerAccountHolder = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5002/total-outreach-per-account-holder',
+          `http://${SERVER_ADDRESS}:5002/total-outreach-per-account-holder`,
         )
         const dataForPieChart = transformDataForPieChart(response.data)
         setAccountHoldersPieData(dataForPieChart)
@@ -365,7 +366,7 @@ const App: React.FC = () => {
     const fetchMonthlyTotals = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:5002/monthly-totals',
+          `http://${SERVER_ADDRESS}:5002/monthly-totals`,
         )
         setMonthlyTotals(response.data)
         // Here we create the combined chart data

@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import { useTokenStore, useUserStore } from '../store/store'
+import { SERVER_ADDRESS } from '../lib/utils'
 export default function Database() {
   const [query, setQuery] = useState<string>('')
   const [data, setData] = useState<any[]>([])
@@ -15,14 +16,12 @@ export default function Database() {
   const [remaining, setRemaining] = useState(true)
   const token = useTokenStore((state) => state.token)
   const user = useUserStore((state) => state.user)
-  // const [isFilterActive, setIsFilterActive] = useState(false)
-
-  // const [filters, setFilters] = useState({})
+  
   
   useEffect(() => {
     if (query === '') return
     const fetchFields = async (query) => {
-      const res = await axios.get(`http://localhost:5001/getFields/${query}`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getFields/${query}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
@@ -34,7 +33,7 @@ export default function Database() {
       const newFilterOptions = {}
       // console.log(res.data)
       for (const field of res.data) {
-        const res2 = await axios.get(`http://localhost:5001/getUniqueValues/${query}/${field}`,
+        const res2 = await axios.get(`http://${SERVER_ADDRESS}:5001/getUniqueValues/${query}/${field}`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -56,7 +55,7 @@ export default function Database() {
   useEffect(() => {
     if (query === '') return
     const fetchData = async (query, page) => {
-      const res = await axios.get(`http://localhost:5001/getCollections/${query}`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getCollections/${query}`, {
         params: {
           page: page,
           pageSize: 500,
@@ -116,7 +115,7 @@ export default function Database() {
 
   useEffect(() => {
     const fetchCollections = async() => {
-      const res = await axios.get('http://localhost:5001/getCollections', {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getCollections`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,

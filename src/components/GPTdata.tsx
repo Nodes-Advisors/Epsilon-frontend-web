@@ -3,7 +3,7 @@ import axios from 'axios'
 import Table from './Table'
 import { useTokenStore, useUserStore } from '../store/store'
 // import './app.css'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 interface IDataItem {
   sender: string;
   isInvestorEmail: boolean;
@@ -22,7 +22,7 @@ function GPTdata() {
   
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get(`http://localhost:5001?q=${query}`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001?q=${query}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,

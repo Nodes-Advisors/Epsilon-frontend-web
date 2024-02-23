@@ -8,6 +8,7 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from '../websocket/WebsocketContext'
 import CancelImgIcon from '../assets/images/cancel.png'
 import FlipPage from 'react-flip-page'
+import { SERVER_ADDRESS } from '../lib/utils'
 
 export default function Home() {
   
@@ -71,7 +72,7 @@ export default function Home() {
   }, [switchTab])
 
   useEffect(() => {
-    axios.get('http://localhost:5001/getAllGPTPrompt',
+    axios.get(`http://${SERVER_ADDRESS}:5001/getAllGPTPrompt`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await axios.get(`http://localhost:5001?q=${query}`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001?q=${query}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
@@ -125,7 +126,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await axios.get('http://localhost:5001/getUser', {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getUser`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,

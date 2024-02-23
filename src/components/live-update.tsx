@@ -6,7 +6,7 @@ import axios from 'axios'
 import { AsyncImage } from 'loadable-image'
 import { useNavigate } from 'react-router-dom'
 import { useTokenStore } from '../store/store'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 function LiveUpdate({user}: {user: any}) {
   const [isLoading, setLoading] = useState(true)
   const [focused, setFocused] = useState<'all' | 'you'>('all')
@@ -30,7 +30,7 @@ function LiveUpdate({user}: {user: any}) {
   
   useEffect(() => {
     const fetchCompanyData = async() => {
-      const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/fundrisingpipeline`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
@@ -47,7 +47,7 @@ function LiveUpdate({user}: {user: any}) {
 
   useEffect(() => {
     const fetchCompanyData = async() => {
-      const res = await axios.get(`http://localhost:5001/fundrisingpipeline?page=${page}`, {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/fundrisingpipeline?page=${page}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
@@ -211,7 +211,7 @@ function LiveUpdate({user}: {user: any}) {
     const fetchNodesTeam = async () => {
       setLoading(true)
       try {
-        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+        const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token,

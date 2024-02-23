@@ -11,7 +11,7 @@ import { KPIBlock, KPIText } from '../components/kpi-component'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTokenStore } from '../store/store'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 export default function UserProfile() {
 
   const user = useUserStore(state => state.user)
@@ -26,7 +26,7 @@ export default function UserProfile() {
     const fetchData = async () => {
       if (loading) return
       setLoading(true)
-      const result = await axios.get('http://localhost:5001/getUser', {
+      const result = await axios.get(`http://${SERVER_ADDRESS}:5001/getUser`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,

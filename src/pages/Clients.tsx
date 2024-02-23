@@ -18,7 +18,7 @@ import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
 import BookIcon from '../assets/images/book.png'
 import { handleFullTextFilter } from '../lib/utils'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 export default function Clients() {
 
   const[filterWindowPosition, setFilterWindowPosition] = useState<{ left: number, top: number }>({ left: 0, top: 0 })
@@ -55,7 +55,7 @@ export default function Clients() {
     
     if (token) {
       setLoading(true)
-      axios.get('http://localhost:5001/getAllClients',
+      axios.get(`http://${SERVER_ADDRESS}:5001/getAllClients`,
         {
           headers: {
             'Content-Type': 'application/json',

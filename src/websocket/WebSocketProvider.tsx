@@ -2,9 +2,10 @@ import { useState } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from './WebsocketContext'
 import { useUserStore } from '../store/store'
+import { SERVER_ADDRESS } from '../lib/utils'
 function WebSocketProvider({ children } : { children: React.ReactNode }) {
   const user = useUserStore(state => state.user)
-  const [socketUrl, setSocketUrl] = useState(`ws://localhost:5001/websocket/${ user?.email ? user?.email: ''}`)
+  const [socketUrl, setSocketUrl] = useState(`ws://${SERVER_ADDRESS}:5001/websocket/${ user?.email ? user?.email: ''}`)
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl)
 
   const connectionStatus = {

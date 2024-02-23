@@ -16,6 +16,7 @@ import WebSocketContext from '../websocket/WebsocketContext'
 import CheckIcon from '../assets/images/check.png'
 import RejectIcon from '../assets/images/reject.png'
 import CancelIcon from '../assets/svgs/cancel-button.svg?react'
+import { SERVER_ADDRESS } from '../lib/utils'
 
 export default function NavBar ({children}: {children: React.ReactNode}) {
   const token = useTokenStore(state => state.token)
@@ -66,7 +67,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     if (searchTerm && token && user) {
-      axios.get(`http://localhost:5001/search?q=${searchTerm}`,
+      axios.get(`http://${SERVER_ADDRESS}:5001/search?q=${searchTerm}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   const logout = async() => {
     try {
-      await axios.post('http://localhost:5001/logout', { email: user?.email  }, {
+      await axios.post(`http://${SERVER_ADDRESS}:5001/logout`, { email: user?.email  }, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -118,7 +119,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
     if (token) {
       const intervalId = setInterval(async () => {
         try {
-          const response = await axios.get('http://localhost:5001/verifyToken', {
+          const response = await axios.get(`http://${SERVER_ADDRESS}:5001/verifyToken`, {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': token,
@@ -127,7 +128,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
           })
           if (response.status === 200) {
             if (!user) {
-              axios.get('http://localhost:5001/getUserByToken', {
+              axios.get(`http://${SERVER_ADDRESS}:5001/getUserByToken`, {
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': token,
@@ -202,7 +203,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await axios.get('http://localhost:5001/getUser', {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getUser`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
@@ -232,7 +233,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
   
   useEffect(() => {
     const fetchSavedCollections = async () => {
-      await axios.get('http://localhost:5001/savedcollections',  {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/savedcollections`,  {
         params: {
           email: user?.email,
         },
@@ -263,7 +264,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   const acceptRequest = async(request: any) => {
     try {
-      const res = await axios.post('http://localhost:5001/approveRequest', {
+      const res = await axios.post(`http://${SERVER_ADDRESS}:5001/approveRequest`, {
         requestId: request.requestId,
         time: request.time,
 
@@ -298,7 +299,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
 
   const rejectRequest = async(request: any) => {
     try {
-      const res = await axios.post('http://localhost:5001/rejectRequest', {
+      const res = await axios.post(`http://${SERVER_ADDRESS}:5001/rejectRequest`, {
         requestId: request.requestId,
         time: request.time,
 

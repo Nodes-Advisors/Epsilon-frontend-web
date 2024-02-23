@@ -21,7 +21,7 @@ import FundStatus from '../components/status'
 import ReactPaginate from 'react-paginate'
 import { handleFullTextFilter } from '../lib/utils'
 import WebSocketContext from '../websocket/WebsocketContext'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 
 export default function SavedList() {
   const [filterName, setFilterName] = useState<FILTER_NAME>('')
@@ -122,7 +122,7 @@ export default function SavedList() {
       // console.log('executed')
       const randomId = Math.random().toString(36).substring(7)
       const currentTime = new Date()
-      await axios.post('http://localhost:5001/sendRequest', {
+      await axios.post(`http://${SERVER_ADDRESS}:5001/sendRequest`, {
         requestName,
         approvers,
         deal,
@@ -171,7 +171,7 @@ export default function SavedList() {
   useEffect(() => {
     async function fetchSavedFunds() {
       
-      await axios.get(`http://localhost:5001/savedcollections/${window.location.href.split('/')[window.location.href.split('/').length - 1]}`, {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/savedcollections/${window.location.href.split('/')[window.location.href.split('/').length - 1]}`, {
         params: {
           email: user?.email,
         },
@@ -259,7 +259,7 @@ export default function SavedList() {
 
   useEffect(() => {
     async function fetchPendingList() {
-      await axios.get('http://localhost:5001/getPendingRequests', {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/getPendingRequests`, {
         // params: {
         //   email: user?.email,
         // },
@@ -406,7 +406,7 @@ export default function SavedList() {
 
   const handleDeleteFundsClick = async (record: any) => {
     try {
-      const res = await axios.post('http://localhost:5001/savedcollections/deletefund', {
+      const res = await axios.post(`http://${SERVER_ADDRESS}:5001/savedcollections/deletefund`, {
         collection: decodeURIComponent(window.location.href.split('/')[window.location.href.split('/').length - 1]),
         fundName: record.Funds,
         email: user?.email,

@@ -220,7 +220,7 @@ export default function KPIDash() {
     const fetchAggregatedKPIs = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5002/total-outreach",
+          `http://${SERVER_ADDRESS}:5002/total-outreach`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -265,7 +265,7 @@ export default function KPIDash() {
       const fetchTylerKPIs = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5002/account-holder-kpis/Tyler",
+            `http://${SERVER_ADDRESS}:5002/account-holder-kpis/Tyler`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -347,7 +347,7 @@ export default function KPIDash() {
     const fetchClients = async () => {
       try {
         const response = await axios.get<string[]>(
-          "http://localhost:5001/getClients",
+          `http://${SERVER_ADDRESS}:5001/getClients`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -363,7 +363,7 @@ export default function KPIDash() {
     }
 
     const fetchCompanyData = async () => {
-      const res = await axios.get("http://localhost:5001/fundrisingpipeline", {
+      const res = await axios.get(`http://${SERVER_ADDRESS}:5001/fundrisingpipeline`, {
         headers: {
           "Content-Type": "application/json",
           'Authorization': token,
@@ -411,7 +411,7 @@ export default function KPIDash() {
     const fetchInitialData = async () => {
       try {
         const dealsResponse = await axios.get<DealData[]>(
-          "http://localhost:5002/deals"
+          `http://${SERVER_ADDRESS}:5002/deals`
         )
         const lowercaseDeals = dealsResponse.data.map((deal) => ({
           ...deal,
@@ -420,7 +420,7 @@ export default function KPIDash() {
         console.log("Lowercase deals:", lowercaseDeals) // Log to verify
         setDealData(lowercaseDeals) // Use the transformed data with lowercase deal names
         const response = await axios.get<DealData[]>(
-          "http://localhost:5002/account-holders"
+          `http://${SERVER_ADDRESS}:5002/account-holders`
         )
         setAccountHolderData(response.data)
       } catch (error) {
@@ -590,7 +590,7 @@ export default function KPIDash() {
   //   const fetchMonthlyTotals = async () => {
   //     try {
   //       const response = await axios.get(
-  //         "http://localhost:5002/monthly-totals"
+  //         "http://${SERVER_ADDRESS}:5002/monthly-totals"
   //       );
   //       setMonthlyTotals(response.data);
   //     } catch (error) {
@@ -704,7 +704,7 @@ export default function KPIDash() {
   //   const fetchAccountHolderKPIs = async () => {
   //     try {
   //       const response = await axios.get(
-  //         "http://localhost:5002/account-holder-kpis"
+  //         "http://${SERVER_ADDRESS}:5002/account-holder-kpis"
   //       );
   //       const transformedData = transformDataForChart(response.data);
   //       setAccountHoldersLineData(transformedData);
@@ -1474,7 +1474,7 @@ export default function KPIDash() {
 
       try {
         const response = await axios.get(
-          "http://localhost:5002/deals/last-updated-status-dates",
+          `http://${SERVER_ADDRESS}:5002/deals/last-updated-status-dates`,
           {
             params: {
               startDate, // No need to call .toISOString(), startDate and endDate are already strings
@@ -1518,7 +1518,7 @@ export default function KPIDash() {
 
       try {
         const response = await axios.get(
-          "http://localhost:5002/deals/aggregated",
+          `http://${SERVER_ADDRESS}:5002/deals/aggregated`,
           {
             params: {
               startDate, // No need to call .toISOString(), startDate and endDate are already strings

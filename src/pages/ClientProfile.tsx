@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
+import { SERVER_ADDRESS } from '../lib/utils'
 
 export default function ClientProfile(): JSX.Element {
   const [isLoading, setLoading] = useState(true)
@@ -66,7 +67,7 @@ export default function ClientProfile(): JSX.Element {
     // console.log(record)
     async function fetchHistoricalLog() {
       try {
-        const res = await axios.get(`http://localhost:5001/getclienthislog/${record.acronym}`,
+        const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getclienthislog/${record.acronym}`,
           {
             headers: {
               'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export default function ClientProfile(): JSX.Element {
 
   useEffect(() => {
     const fetchSavedCollections = async () => {
-      await axios.get('http://localhost:5001/savedcollections',  {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/savedcollections`,  {
         params: {
           email: user?.email,
         },
@@ -115,7 +116,7 @@ export default function ClientProfile(): JSX.Element {
     const fetchNodesTeam = async () => {
       setLoading(true)
       try {
-        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+        const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token,

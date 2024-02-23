@@ -4,7 +4,7 @@ import CancelButton from '../assets/images/cancel.png'
 import styles from '../styles/auth-component.module.less'
 import toast from 'react-hot-toast'
 import { useTokenStore, useUserStore } from '../store/store'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<React.SetStateAction<boolean>>}) => {
   const setToken = useTokenStore((state) => state.setToken)
   const setUser = useUserStore((state) => state.setUser)
@@ -19,13 +19,13 @@ const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<
     try {
       let response
       if (mode === 'signup') {
-        response = await axios.post('http://localhost:5001/signup', { email, username, verificationCode }, {
+        response = await axios.post(`http://${SERVER_ADDRESS}:5001/signup`, { email, username, verificationCode }, {
           headers: {
             'Content-Type': 'application/json',
           },
         })
       } else if (mode === 'login') {
-        response = await axios.post('http://localhost:5001/login', { email, verificationCode }, {
+        response = await axios.post(`http://${SERVER_ADDRESS}:5001/login`, { email, verificationCode }, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -55,7 +55,7 @@ const AuthComponent = ({ setOpenAuthPanel } : {setOpenAuthPanel: React.Dispatch<
     }
     try {
       setIsSending(true)
-      await axios.post('http://localhost:5001/sendVerificationCode',
+      await axios.post(`http://${SERVER_ADDRESS}:5001/sendVerificationCode`,
         { email: email }, {
           headers: {
             'Content-Type': 'application/json',

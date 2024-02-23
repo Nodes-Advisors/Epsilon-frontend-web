@@ -23,3 +23,7 @@ export  const handleFullTextFilter = (e, dispatch) => {
     [label]: [text],
   }))
 }
+
+const isInDEVMode = false
+
+export const SERVER_ADDRESS = isInDEVMode ? 'localhost' : '51.20.51.84'

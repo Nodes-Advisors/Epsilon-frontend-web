@@ -19,7 +19,7 @@ import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
 import WebSocketContext from '../websocket/WebsocketContext'
 import { handleFullTextFilter } from '../lib/utils'
-
+import { SERVER_ADDRESS } from '../lib/utils'
 export default function FundCards() {
   
   const clients = useClientsStore(state => state.clients)
@@ -84,7 +84,7 @@ export default function FundCards() {
 
   useEffect(() => {
     const fetchSavedCollections = async () => {
-      await axios.get('http://localhost:5001/savedcollections',  {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/savedcollections`,  {
         params: {
           email: user?.email,
         },
@@ -104,7 +104,7 @@ export default function FundCards() {
 
   useEffect(() => {
     setLoading(true)
-    axios.get('http://localhost:5001/getAllFunds',
+    axios.get(`http://${SERVER_ADDRESS}:5001/getAllFunds`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -262,7 +262,7 @@ export default function FundCards() {
   }, [filteredList])
 
   useEffect(() => {
-    axios.get('http://localhost:5001/getAllClients',
+    axios.get(`http://${SERVER_ADDRESS}:5001/getAllClients`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -281,7 +281,7 @@ export default function FundCards() {
   , [])
 
   useEffect(() => {
-    axios.get('http://localhost:5001/fundStatus',
+    axios.get(`http://${SERVER_ADDRESS}:5001/fundStatus`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -439,7 +439,7 @@ export default function FundCards() {
 
   useEffect(() => {
     async function fetchPendingList() {
-      await axios.get('http://localhost:5001/getPendingRequests', {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/getPendingRequests`, {
         // params: {
         //   email: user?.email,
         // },
@@ -470,7 +470,7 @@ export default function FundCards() {
       // console.log('executed')
       const randomId = Math.random().toString(36).substring(7)
       const currentTime = new Date()
-      await axios.post('http://localhost:5001/sendRequest', {
+      await axios.post(`http://${SERVER_ADDRESS}:5001/sendRequest`, {
         requestName,
         approvers,
         deal,
@@ -524,7 +524,7 @@ export default function FundCards() {
 
   const handleCreateNewCollection = async () => {
     try {
-      const res  = await axios.post('http://localhost:5001/savedcollections', {
+      const res  = await axios.post(`http://${SERVER_ADDRESS}:5001/savedcollections`, {
         email: user?.email,
         savedcollection: newCollectionRef.current?.value,
       }, {
@@ -576,7 +576,7 @@ export default function FundCards() {
 
   const handleAddToCollection = async () => {
     try {
-      const res = await axios.post('http://localhost:5001/savedcollections/add', {
+      const res = await axios.post(`http://${SERVER_ADDRESS}:5001/savedcollections/add`, {
         email: user?.email,
         collection: hoveredCollection,
         fund: selectedFundName,

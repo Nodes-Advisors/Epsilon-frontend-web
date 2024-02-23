@@ -17,6 +17,7 @@ import axios from 'axios'
 import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
 import WebSocketContext from '../websocket/WebsocketContext'
+import { SERVER_ADDRESS } from '../lib/utils'
 
 export default function Profile(): JSX.Element {
 
@@ -75,7 +76,7 @@ export default function Profile(): JSX.Element {
     async function fetchHistoricalLog() {
       try {
         const record = funds.filter((record) => record._id === id)[0]
-        const res = await axios.get(`http://localhost:5001/gethislog/${record.Funds}`, {
+        const res = await axios.get(`http://${SERVER_ADDRESS}:5001/gethislog/${record.Funds}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token,
@@ -115,7 +116,7 @@ export default function Profile(): JSX.Element {
   const handleAddToCollection = async () => {
     try {
       console.log(selectedFundName)
-      const res = await axios.post('http://localhost:5001/savedcollections/add', {
+      const res = await axios.post(`http://${SERVER_ADDRESS}:5001/savedcollections/add`, {
         email: user?.email,
         collection: hoveredCollection,
         fund: selectedFundName,
@@ -139,7 +140,7 @@ export default function Profile(): JSX.Element {
 
   const handleCreateNewCollection = async () => {
     try {
-      const res  = await axios.post('http://localhost:5001/savedcollections', {
+      const res  = await axios.post(`http://${SERVER_ADDRESS}:5001/savedcollections`, {
         email: user?.email,
         savedcollection: newCollectionRef.current?.value as string,
       }, {
@@ -181,7 +182,7 @@ export default function Profile(): JSX.Element {
       // console.log('executed')
       const randomId = Math.random().toString(36).substring(7)
       const currentTime = new Date()
-      await axios.post('http://localhost:5001/sendRequest', {
+      await axios.post(`http://${SERVER_ADDRESS}:5001/sendRequest`, {
         requestName,
         approvers,
         deal,
@@ -223,7 +224,7 @@ export default function Profile(): JSX.Element {
 
   useEffect(() => {
     const fetchSavedCollections = async () => {
-      await axios.get('http://localhost:5001/savedcollections',  {
+      await axios.get(`http://${SERVER_ADDRESS}:5001/savedcollections`,  {
         params: {
           email: user?.email,
         },
@@ -245,7 +246,7 @@ export default function Profile(): JSX.Element {
     const fetchNodesTeam = async () => {
       setLoading(true)
       try {
-        const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
+        const res = await axios.get(`http://${SERVER_ADDRESS}:5001/getNodesProfileImage`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token,
