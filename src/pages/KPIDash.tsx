@@ -2077,7 +2077,7 @@ export default function KPIDash() {
                 </KPIBlock>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                 <KPIText
                   fontColor="#fff"
                   fontSize="0.9375rem"
@@ -2087,13 +2087,13 @@ export default function KPIDash() {
                 </KPIText>
                 <div
                   className={styles["kpi-horizontal-layout"]}
-                  style={{ gap: "3rem" }}
+                  style={{ gap: "3rem", alignItems: "center", width: "100%" }}
                 >
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="85.25rem"
                     height="20.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: "auto", alignItems: "center", width: "100%"  }}
                   >
                     <div
                       ref={chartRef}
@@ -2110,9 +2110,9 @@ export default function KPIDash() {
                 >
                   <KPIBlock
                     extraClass={styles["kpi-medium-dashboard"]}
-                    width="65.25rem"
+                    width="85.25rem"
                     height="20.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: "auto", alignItems: "center", width: "100%"  }}
                   >
                     <div style={kpiTableContainerStyle}>
                       <ThemeProvider theme={theme}>
@@ -2210,7 +2210,7 @@ export default function KPIDash() {
                     extraClass={styles["kpi-medium-dashboard"]}
                     width="85.25rem"
                     height="20.125rem"
-                    style={{ overflow: "auto" }}
+                    style={{ overflow: "auto", alignItems: "center", width: "100%"  }}
                   >
                     {focused === "all" ? (
                       <div
@@ -2227,7 +2227,7 @@ export default function KPIDash() {
                           </div>
                           <div
                             ref={chartDivRef}
-                            style={{ width: "1300px", height: "260px" }}
+                            style={{ width: "1000px", height: "180px" }}
                           ></div>
                         </div>
                       </div>
