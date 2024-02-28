@@ -26,7 +26,6 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Tabs } from "antd";
-import type { TabsProps } from "antd";
 
 const { TabPane } = Tabs;
 
@@ -200,6 +199,7 @@ export default function KPIDash() {
 
   const tableStyle = {
     width: "100%",
+    color: "white",
   };
 
   useEffect(() => {
@@ -1063,10 +1063,17 @@ export default function KPIDash() {
     }
   }, [timeScale, token]);
 
+  /////////////////////////////// Tabs /////////////////////////////////////////
+  const [activeKey, setActiveKey] = useState("1");
+
   // Tabs change handler
   const onChange = (key: string) => {
     console.log(key);
   };
+
+  const tabStyle = (key) => ({
+    color: "white", // 'inherit' might need adjustment based on your active tab color
+  });
 
   // FirstTabContent.tsx
   const FirstTabContent: React.FC = () => {
@@ -1283,7 +1290,7 @@ export default function KPIDash() {
             <KPIBlock
               extraClass={styles["kpi-medium-dashboard"]}
               width="52.25rem"
-              height="24.125rem"
+              height="50.125rem"
               style={{ overflow: "visible" }}
             >
               {/* Deal Data Table */}
@@ -1371,9 +1378,16 @@ export default function KPIDash() {
   };
 
   const items = [
-    { key: "1", label: "Tab 1", children: <FirstTabContent /> },
-    { key: "2", label: "Tab 2", children: <SecondTabContent /> },
-    { key: "3", label: "Tab 3", children: "Content of Tab Pane 3" },
+    {
+      key: "1",
+      label: <span style={tabStyle("1")}>Charts</span>,
+      children: <FirstTabContent />,
+    },
+    {
+      key: "2",
+      label: <span style={tabStyle("2")}>Detailed Info</span>,
+      children: <SecondTabContent />,
+    },
   ];
 
   return (
