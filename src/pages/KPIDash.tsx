@@ -1085,6 +1085,7 @@ export default function KPIDash() {
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
+            padding: "13px",
           }}
         >
           <KPIText
@@ -1116,7 +1117,9 @@ export default function KPIDash() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", padding: "13px" }}
+        >
           <div
             className={styles["kpi-horizontal-layout"]}
             style={{ gap: "1rem" }}
@@ -1208,6 +1211,7 @@ export default function KPIDash() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            padding: "13px",
           }}
         >
           <KPIText
