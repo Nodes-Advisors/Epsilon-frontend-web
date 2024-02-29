@@ -329,15 +329,66 @@
 //   }
 
 
-// Tab styles in the KPIDash.tsx
-/* Styles for the tabs and tab content */
+// // Tab styles in the KPIDash.tsx
+// /* Styles for the tabs and tab content */
+// .tab {
+//     overflow: auto;
+//     border: 1px solid rgba(213, 212, 225, 0.26);
+//     background-color: rgba(213, 212, 225, 0.26);
+//   }
+  
+//   /* Style the buttons inside the tab */
+//   .tab button {
+//     background-color: inherit;
+//     float: left;
+//     border: none;
+//     outline: none;
+//     cursor: pointer;
+//     padding: 14px 16px;
+//     transition: background-color 0.3s;
+//     font-size: 17px;
+//   }
+  
+//   /* Change background color of buttons on hover */
+//   .tab button:hover {
+//     background-color: rgb(176, 172, 172);
+//   }
+  
+//   /* Create an active/current tablink class */
+//   .tab button.active {
+//     background-color: rgb(198, 194, 194);
+//   }
+  
+//   /* Style the tab content */
+//   .tabcontent {
+//     display: none;
+//     padding: 6px 12px;
+//     border: 1px solid #ccc;
+//     border-top: none;
+//   }
+  
+//   /* Style for hidden class (if you need it for toggling visibility) */
+//   .hidden {
+//     display: none !important;
+//   }
+  
+//   /* When content should be visible */
+//   .tabcontent.active {
+//     display: block;
+//   }
+  
+//   .custom-tabs .ant-tabs-tab:not(.ant-tabs-tab-active) {
+//     color: white !important;
+//   }
+
+/* Style the tab */
 .tab {
-    overflow: auto;
+    overflow: hidden;
     border: 1px solid rgba(213, 212, 225, 0.26);
     background-color: rgba(213, 212, 225, 0.26);
   }
   
-  /* Style the buttons inside the tab */
+  /* Style the buttons that are used to open the tab content */
   .tab button {
     background-color: inherit;
     float: left;
@@ -345,18 +396,17 @@
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
-    transition: background-color 0.3s;
-    font-size: 17px;
+    transition: 0.3s;
   }
   
   /* Change background color of buttons on hover */
   .tab button:hover {
-    background-color: rgb(176, 172, 172);
+    background-color: #ddd;
   }
   
   /* Create an active/current tablink class */
   .tab button.active {
-    background-color: rgb(198, 194, 194);
+    background-color: #ccc;
   }
   
   /* Style the tab content */
@@ -365,18 +415,4 @@
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
-  }
-  
-  /* Style for hidden class (if you need it for toggling visibility) */
-  .hidden {
-    display: none !important;
-  }
-  
-  /* When content should be visible */
-  .tabcontent.active {
-    display: block;
-  }
-  
-  .custom-tabs .ant-tabs-tab:not(.ant-tabs-tab-active) {
-    color: white !important;
   }

@@ -23,9 +23,48 @@ import {
   TableHead,
   TableRow,
   Paper,
+  colors,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Tabs } from "antd";
+// import { Tabs } from "antd";
+
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
 
 const { TabPane } = Tabs;
 
@@ -168,10 +207,10 @@ export default function KPIDash() {
   const [timeDealData, setTimeDealData] = useState<DealData[]>([]);
   const [timeAggregatedDealData, setTimeAggregatedDealData] = useState<
     DealData[]
-    >([]);
+  >([]);
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
-    >([]);
+  >([]);
   const [dealChartData, setDealChartData] = useState({
     labels: [],
     datasets: [],
@@ -194,7 +233,7 @@ export default function KPIDash() {
   });
   const [timeScale, setTimeScale] = useState<
     "today" | "this week" | "last week" | "month to date" | "year to date"
-    >("");
+  >("");
   const [selectedClientTableData, setSelectedClientTableData] = useState([]);
 
   const tableStyle = {
@@ -611,10 +650,10 @@ export default function KPIDash() {
             timeAggregatedDealData.totalOutreach === 0
               ? "0.00"
               : (
-                (timeAggregatedDealData.deckRequested /
-                  timeAggregatedDealData.totalOutreach) *
-                100
-              ).toFixed(2),
+                  (timeAggregatedDealData.deckRequested /
+                    timeAggregatedDealData.totalOutreach) *
+                  100
+                ).toFixed(2),
         },
         {
           stage: "Meeting Requested",
@@ -624,10 +663,10 @@ export default function KPIDash() {
             timeAggregatedDealData.deckRequested === 0
               ? "0.00"
               : (
-                (timeAggregatedDealData.meetingRequested /
-                  timeAggregatedDealData.deckRequested) *
-                100
-              ).toFixed(2),
+                  (timeAggregatedDealData.meetingRequested /
+                    timeAggregatedDealData.deckRequested) *
+                  100
+                ).toFixed(2),
         },
         {
           stage: "DD Requested",
@@ -637,10 +676,10 @@ export default function KPIDash() {
             timeAggregatedDealData.meetingRequested === 0
               ? "0.00"
               : (
-                (timeAggregatedDealData.ddRequested /
-                  timeAggregatedDealData.meetingRequested) *
-                100
-              ).toFixed(2),
+                  (timeAggregatedDealData.ddRequested /
+                    timeAggregatedDealData.meetingRequested) *
+                  100
+                ).toFixed(2),
         },
       ];
 
@@ -1076,323 +1115,350 @@ export default function KPIDash() {
   });
 
   // FirstTabContent.tsx
-  const FirstTabContent: React.FC = () => {
-    return (
-      <div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-            padding: "13px",
-          }}
-        >
-          <KPIText
-            fontColor="#fff"
-            fontSize="0.9375rem"
-            style={{ textAlign: "left" }}
-          >
-            KPI of the Selected Clients
-          </KPIText>
-          <div
-            className={styles["kpi-horizontal-layout"]}
-            style={{ gap: "3rem", alignItems: "center", width: "100%" }}
-          >
-            <KPIBlock
-              extraClass={styles["kpi-medium-dashboard"]}
-              width="85.25rem"
-              height="20.125rem"
-              style={{
-                overflow: "visible",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <div
-                ref={chartRef}
-                style={{ width: "1300px", height: "330px" }}
-              ></div>
-            </KPIBlock>
-          </div>
-        </div>
+  // const FirstTabContent: React.FC = () => {
+  //   return (
+  //     <div>
+  //       <div
+  //         style={{
+  //           display: "flex",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           width: "100%",
+  //           padding: "13px",
+  //         }}
+  //       >
+  //         <KPIText
+  //           fontColor="#fff"
+  //           fontSize="0.9375rem"
+  //           style={{ textAlign: "left" }}
+  //         >
+  //           KPI of the Selected Clients
+  //         </KPIText>
+  //         <div
+  //           className={styles["kpi-horizontal-layout"]}
+  //           style={{ gap: "3rem", alignItems: "center", width: "100%" }}
+  //         >
+  //           <KPIBlock
+  //             extraClass={styles["kpi-medium-dashboard"]}
+  //             width="85.25rem"
+  //             height="20.125rem"
+  //             style={{
+  //               overflow: "visible",
+  //               alignItems: "center",
+  //               width: "100%",
+  //             }}
+  //           >
+  //             <div
+  //               ref={chartRef}
+  //               style={{ width: "1300px", height: "330px" }}
+  //             ></div>
+  //           </KPIBlock>
+  //         </div>
+  //       </div>
 
-        <div
-          style={{ display: "flex", flexDirection: "column", padding: "13px" }}
-        >
-          <div
-            className={styles["kpi-horizontal-layout"]}
-            style={{ gap: "1rem" }}
-          >
-            <KPIBlock
-              extraClass={styles["kpi-medium-dashboard"]}
-              width="85.25rem"
-              height="33.125rem"
-              style={{
-                overflow: "visible",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <div style={kpiTableContainerStyle}>
-                <ThemeProvider theme={theme}>
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell style={categoryHeaderStyle}>
-                            Category
-                          </TableCell>
-                          {selectedClients.map((client, index) => (
-                            <TableCell key={index} style={categoryHeaderStyle}>
-                              {client.toUpperCase()}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedClientTableData.map((row, index, array) => (
-                          <React.Fragment key={`fragment-${index}`}>
-                            <TableRow>
-                              <TableCell style={leftmostColumnStyle}>
-                                {row.year}
-                              </TableCell>
-                              {selectedClients.map((client) => (
-                                <TableCell
-                                  key={`${client}-${index}`}
-                                  style={otherCellsStyle}
-                                >
-                                  {row[client.toLowerCase()] !== undefined
-                                    ? row[client.toLowerCase()]
-                                    : "-"}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                            {index > 0 && (
-                              <TableRow>
-                                <TableCell style={leftmostColumnStyle}>
-                                  Change from Previous
-                                </TableCell>
-                                {selectedClients.map((client, idx) => {
-                                  const currentValue =
-                                    row[client.toLowerCase()];
-                                  const previousValue =
-                                    array[index - 1][client.toLowerCase()];
-                                  return (
-                                    <TableCell
-                                      key={`change-${client}-${index}`}
-                                      style={changeCellsStyle}
-                                    >
-                                      {previousValue !== undefined &&
-                                      currentValue !== undefined
-                                        ? calculatePercentageChange(
-                                          previousValue,
-                                          currentValue
-                                        )
-                                        : "-"}
-                                    </TableCell>
-                                  );
-                                })}
-                              </TableRow>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </ThemeProvider>
-              </div>
-            </KPIBlock>
-          </div>
-        </div>
+  //       <div
+  //         style={{ display: "flex", flexDirection: "column", padding: "13px" }}
+  //       >
+  //         <div
+  //           className={styles["kpi-horizontal-layout"]}
+  //           style={{ gap: "1rem" }}
+  //         >
+  //           <KPIBlock
+  //             extraClass={styles["kpi-medium-dashboard"]}
+  //             width="85.25rem"
+  //             height="33.125rem"
+  //             style={{
+  //               overflow: "visible",
+  //               alignItems: "center",
+  //               width: "100%",
+  //             }}
+  //           >
+  //             <div style={kpiTableContainerStyle}>
+  //               <ThemeProvider theme={theme}>
+  //                 <TableContainer component={Paper}>
+  //                   <Table>
+  //                     <TableHead>
+  //                       <TableRow>
+  //                         <TableCell style={categoryHeaderStyle}>
+  //                           Category
+  //                         </TableCell>
+  //                         {selectedClients.map((client, index) => (
+  //                           <TableCell key={index} style={categoryHeaderStyle}>
+  //                             {client.toUpperCase()}
+  //                           </TableCell>
+  //                         ))}
+  //                       </TableRow>
+  //                     </TableHead>
+  //                     <TableBody>
+  //                       {selectedClientTableData.map((row, index, array) => (
+  //                         <React.Fragment key={`fragment-${index}`}>
+  //                           <TableRow>
+  //                             <TableCell style={leftmostColumnStyle}>
+  //                               {row.year}
+  //                             </TableCell>
+  //                             {selectedClients.map((client) => (
+  //                               <TableCell
+  //                                 key={`${client}-${index}`}
+  //                                 style={otherCellsStyle}
+  //                               >
+  //                                 {row[client.toLowerCase()] !== undefined
+  //                                   ? row[client.toLowerCase()]
+  //                                   : "-"}
+  //                               </TableCell>
+  //                             ))}
+  //                           </TableRow>
+  //                           {index > 0 && (
+  //                             <TableRow>
+  //                               <TableCell style={leftmostColumnStyle}>
+  //                                 Change from Previous
+  //                               </TableCell>
+  //                               {selectedClients.map((client, idx) => {
+  //                                 const currentValue =
+  //                                   row[client.toLowerCase()];
+  //                                 const previousValue =
+  //                                   array[index - 1][client.toLowerCase()];
+  //                                 return (
+  //                                   <TableCell
+  //                                     key={`change-${client}-${index}`}
+  //                                     style={changeCellsStyle}
+  //                                   >
+  //                                     {previousValue !== undefined &&
+  //                                     currentValue !== undefined
+  //                                       ? calculatePercentageChange(
+  //                                           previousValue,
+  //                                           currentValue
+  //                                         )
+  //                                       : "-"}
+  //                                   </TableCell>
+  //                                 );
+  //                               })}
+  //                             </TableRow>
+  //                           )}
+  //                         </React.Fragment>
+  //                       ))}
+  //                     </TableBody>
+  //                   </Table>
+  //                 </TableContainer>
+  //               </ThemeProvider>
+  //             </div>
+  //           </KPIBlock>
+  //         </div>
+  //       </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "13px",
-          }}
-        >
-          <KPIText
-            fontColor="#fff"
-            fontSize="0.9375rem"
-            style={{ textAlign: "left" }}
-          >
-            KPI Conversion Ratio
-          </KPIText>
-          <div
-            className={styles["kpi-horizontal-layout"]}
-            style={{ gap: "3rem" }}
-          >
-            <KPIBlock
-              extraClass={styles["kpi-medium-dashboard"]}
-              width="85.25rem"
-              height="20.125rem"
-              style={{
-                overflow: "visible",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              {focused === "all" ? (
-                <div
-                  style={{
-                    width: "550px",
-                    height: "600px",
-                    padding: "20px",
-                  }}
-                >
-                  {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
-                  <div className="chart" style={chartStyle}>
-                    <div className="header" style={headerStyle}>
-                      {/* Performance */}
-                    </div>
-                    <div
-                      ref={chartDivRef}
-                      style={{ width: "1000px", height: "180px" }}
-                    ></div>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    width: "550px",
-                    height: "600px",
-                    padding: "20px",
-                  }}
-                >
-                  <Bar
-                    data={createChartDataFromKPIs(tylerKPIs)}
-                    options={kpiChartOptions}
-                  />
-                </div>
-              )}
-            </KPIBlock>
-          </div>
-        </div>
-      </div>
-    );
+  //       <div
+  //         style={{
+  //           display: "flex",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           padding: "13px",
+  //         }}
+  //       >
+  //         <KPIText
+  //           fontColor="#fff"
+  //           fontSize="0.9375rem"
+  //           style={{ textAlign: "left" }}
+  //         >
+  //           KPI Conversion Ratio
+  //         </KPIText>
+  //         <div
+  //           className={styles["kpi-horizontal-layout"]}
+  //           style={{ gap: "3rem" }}
+  //         >
+  //           <KPIBlock
+  //             extraClass={styles["kpi-medium-dashboard"]}
+  //             width="85.25rem"
+  //             height="20.125rem"
+  //             style={{
+  //               overflow: "visible",
+  //               alignItems: "center",
+  //               width: "100%",
+  //             }}
+  //           >
+  //             {focused === "all" ? (
+  //               <div
+  //                 style={{
+  //                   width: "550px",
+  //                   height: "600px",
+  //                   padding: "20px",
+  //                 }}
+  //               >
+  //                 {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
+  //                 <div className="chart" style={chartStyle}>
+  //                   <div className="header" style={headerStyle}>
+  //                     {/* Performance */}
+  //                   </div>
+  //                   <div
+  //                     ref={chartDivRef}
+  //                     style={{ width: "1000px", height: "180px" }}
+  //                   ></div>
+  //                 </div>
+  //               </div>
+  //             ) : (
+  //               <div
+  //                 style={{
+  //                   width: "550px",
+  //                   height: "600px",
+  //                   padding: "20px",
+  //                 }}
+  //               >
+  //                 <Bar
+  //                   data={createChartDataFromKPIs(tylerKPIs)}
+  //                   options={kpiChartOptions}
+  //                 />
+  //               </div>
+  //             )}
+  //           </KPIBlock>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // // SecondTabContent.tsx
+  // const SecondTabContent: React.FC = () => {
+  //   return (
+  //     <div>
+  //       <div style={{ display: "flex", flexDirection: "column" }}>
+  //         <KPIText
+  //           fontColor="#fff"
+  //           fontSize="0.9375rem"
+  //           style={{ textAlign: "left" }}
+  //         >
+  //           Overall KPI in Timescale
+  //         </KPIText>
+  //         <div
+  //           className={styles["kpi-horizontal-layout"]}
+  //           style={{ gap: "3rem" }}
+  //         >
+  //           <KPIBlock
+  //             extraClass={styles["kpi-medium-dashboard"]}
+  //             width="52.25rem"
+  //             height="50.125rem"
+  //             style={{ overflow: "visible" }}
+  //           >
+  //             {/* Deal Data Table */}
+  //             <table style={tableStyle}>
+  //               <thead>
+  //                 <tr>
+  //                   <th>Deal Name</th>
+  //                   <th>Total Outreach</th>
+  //                   <th>New Fund</th>
+  //                   <th>Respond or Not</th>
+  //                   <th>Deck Requested</th>
+  //                   <th>Meeting Requested</th>
+  //                   <th>DD Requested</th>
+  //                 </tr>
+  //               </thead>
+  //               <tbody>
+  //                 {timeDealData.map((item, index) => (
+  //                   <tr key={index}>
+  //                     <td>{item.company_name}</td>
+  //                     <td>{item.totalOutreach}</td>
+  //                     <td>{item.newFund}</td>
+  //                     <td>{item.respondOrNot}</td>
+  //                     <td>{item.deckRequested}</td>
+  //                     <td>{item.meetingRequested}</td>
+  //                     <td>{item.ddRequested}</td>
+  //                   </tr>
+  //                 ))}
+  //                 <tr>
+  //                   <td>Grand Total</td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.totalOutreach,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.newFund,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.respondOrNot,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.deckRequested,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.meetingRequested,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                   <td>
+  //                     {timeDealData.reduce(
+  //                       (acc, item) => acc + item.ddRequested,
+  //                       0
+  //                     )}
+  //                   </td>
+  //                 </tr>
+  //               </tbody>
+  //             </table>
+  //           </KPIBlock>
+  //           <KPIBlock
+  //             extraClass={styles["kpi-medium-dashboard"]}
+  //             width="55.25rem"
+  //             height="58.125rem"
+  //             style={{ overflow: "visible" }}
+  //           >
+  //             {/* Horizontal Bar Plot for Each Deal's KPI */}
+  //             <div style={{ height: "57rem", width: "55rem" }}>
+  //               <Bar data={dealChartData} options={chartOptions} />
+  //             </div>
+  //           </KPIBlock>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // const items = [
+  //   {
+  //     key: "1",
+  //     label: <span style={tabStyle("1")}>Charts</span>,
+  //     children: <FirstTabContent />,
+  //   },
+  //   {
+  //     key: "2",
+  //     label: <span style={tabStyle("2")}>Detailed Info</span>,
+  //     children: <SecondTabContent />,
+  //   },
+  // ];
+
+  // function openCity(evt, cityName) {
+  //   // Declare all variables
+  //   var i, tabcontent, tablinks;
+
+  //   // Get all elements with class="tabcontent" and hide them
+  //   tabcontent = document.getElementsByClassName("tabcontent");
+  //   for (i = 0; i < tabcontent.length; i++) {
+  //     tabcontent[i].style.display = "none";
+  //   }
+
+  //   // Get all elements with class="tablinks" and remove the class "active"
+  //   tablinks = document.getElementsByClassName("tablinks");
+  //   for (i = 0; i < tablinks.length; i++) {
+  //     tablinks[i].className = tablinks[i].className.replace(" active", "");
+  //   }
+
+  //   // Show the current tab, and add an "active" class to the button that opened the tab
+  //   document.getElementById(cityName).style.display = "block";
+  //   evt.currentTarget.className += " active";
+  // }
+
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
-
-  // SecondTabContent.tsx
-  const SecondTabContent: React.FC = () => {
-    return (
-      <div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <KPIText
-            fontColor="#fff"
-            fontSize="0.9375rem"
-            style={{ textAlign: "left" }}
-          >
-            Overall KPI in Timescale
-          </KPIText>
-          <div
-            className={styles["kpi-horizontal-layout"]}
-            style={{ gap: "3rem" }}
-          >
-            <KPIBlock
-              extraClass={styles["kpi-medium-dashboard"]}
-              width="52.25rem"
-              height="50.125rem"
-              style={{ overflow: "visible" }}
-            >
-              {/* Deal Data Table */}
-              <table style={tableStyle}>
-                <thead>
-                <tr>
-                  <th>Deal Name</th>
-                  <th>Total Outreach</th>
-                  <th>New Fund</th>
-                  <th>Respond or Not</th>
-                  <th>Deck Requested</th>
-                  <th>Meeting Requested</th>
-                  <th>DD Requested</th>
-                </tr>
-                </thead>
-                <tbody>
-                {timeDealData.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.company_name}</td>
-                    <td>{item.totalOutreach}</td>
-                    <td>{item.newFund}</td>
-                    <td>{item.respondOrNot}</td>
-                    <td>{item.deckRequested}</td>
-                    <td>{item.meetingRequested}</td>
-                    <td>{item.ddRequested}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <td>Grand Total</td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.totalOutreach,
-                      0
-                    )}
-                  </td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.newFund,
-                      0
-                    )}
-                  </td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.respondOrNot,
-                      0
-                    )}
-                  </td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.deckRequested,
-                      0
-                    )}
-                  </td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.meetingRequested,
-                      0
-                    )}
-                  </td>
-                  <td>
-                    {timeDealData.reduce(
-                      (acc, item) => acc + item.ddRequested,
-                      0
-                    )}
-                  </td>
-                </tr>
-                </tbody>
-              </table>
-            </KPIBlock>
-            <KPIBlock
-              extraClass={styles["kpi-medium-dashboard"]}
-              width="55.25rem"
-              height="58.125rem"
-              style={{ overflow: "visible" }}
-            >
-              {/* Horizontal Bar Plot for Each Deal's KPI */}
-              <div style={{ height: "57rem", width: "55rem" }}>
-                <Bar data={dealChartData} options={chartOptions} />
-              </div>
-            </KPIBlock>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const items = [
-    {
-      key: "1",
-      label: <span style={tabStyle("1")}>Charts</span>,
-      children: <FirstTabContent />,
-    },
-    {
-      key: "2",
-      label: <span style={tabStyle("2")}>Detailed Info</span>,
-      children: <SecondTabContent />,
-    },
-  ];
 
   return (
     <div
@@ -1922,7 +1988,348 @@ export default function KPIDash() {
                 </KPIBlock>
               </div>
 
-              <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+              <Box sx={{ width: "100%" }}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                  <Tabs
+                    value={value}
+                    onChange={handleChange}
+                    aria-label="basic tabs example"
+                  >
+                    <Tab label="Charts" {...a11yProps(0)} />
+                    <Tab label="Detailed Info" {...a11yProps(1)} />
+                    {/* <Tab label="Item Three" {...a11yProps(2)} /> */}
+                  </Tabs>
+                </Box>
+                <CustomTabPanel value={value} index={0}>
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        width: "100%",
+                        // padding: "1px",
+                      }}
+                    >
+                      <KPIText
+                        fontColor="#fff"
+                        fontSize="0.9375rem"
+                        style={{ textAlign: "left" }}
+                      >
+                        KPI of the Selected Clients
+                      </KPIText>
+                      <div
+                        className={styles["kpi-horizontal-layout"]}
+                        style={{
+                          gap: "3rem",
+                          alignItems: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <KPIBlock
+                          extraClass={styles["kpi-medium-dashboard"]}
+                          width="80.25rem"
+                          height="32.125rem"
+                          style={{
+                            overflow: "hidden",
+                            alignItems: "center",
+                            width: "100%",
+                          }}
+                        >
+                          <div
+                            ref={chartRef}
+                            style={{ width: "1300px", height: "404px" }}
+                          ></div>
+                        </KPIBlock>
+                      </div>
+                    </div>
+
+                    <br></br>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        // padding: "1px",
+                      }}
+                    >
+                      <div
+                        className={styles["kpi-horizontal-layout"]}
+                        style={{ gap: "1rem" }}
+                      >
+                        <KPIBlock
+                          extraClass={styles["kpi-medium-dashboard"]}
+                          width="85.25rem"
+                          height="33.125rem"
+                          style={{
+                            overflow: "visible",
+                            alignItems: "center",
+                            width: "100%",
+                          }}
+                        >
+                          <div style={kpiTableContainerStyle}>
+                            <ThemeProvider theme={theme}>
+                              <TableContainer component={Paper}>
+                                <Table>
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell style={categoryHeaderStyle}>
+                                        Category
+                                      </TableCell>
+                                      {selectedClients.map((client, index) => (
+                                        <TableCell
+                                          key={index}
+                                          style={categoryHeaderStyle}
+                                        >
+                                          {client.toUpperCase()}
+                                        </TableCell>
+                                      ))}
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {selectedClientTableData.map(
+                                      (row, index, array) => (
+                                        <React.Fragment
+                                          key={`fragment-${index}`}
+                                        >
+                                          <TableRow>
+                                            <TableCell
+                                              style={leftmostColumnStyle}
+                                            >
+                                              {row.year}
+                                            </TableCell>
+                                            {selectedClients.map((client) => (
+                                              <TableCell
+                                                key={`${client}-${index}`}
+                                                style={otherCellsStyle}
+                                              >
+                                                {row[client.toLowerCase()] !==
+                                                undefined
+                                                  ? row[client.toLowerCase()]
+                                                  : "-"}
+                                              </TableCell>
+                                            ))}
+                                          </TableRow>
+                                          {index > 0 && (
+                                            <TableRow>
+                                              <TableCell
+                                                style={leftmostColumnStyle}
+                                              >
+                                                Change from Previous
+                                              </TableCell>
+                                              {selectedClients.map(
+                                                (client, idx) => {
+                                                  const currentValue =
+                                                    row[client.toLowerCase()];
+                                                  const previousValue =
+                                                    array[index - 1][
+                                                      client.toLowerCase()
+                                                    ];
+                                                  return (
+                                                    <TableCell
+                                                      key={`change-${client}-${index}`}
+                                                      style={changeCellsStyle}
+                                                    >
+                                                      {previousValue !==
+                                                        undefined &&
+                                                      currentValue !== undefined
+                                                        ? calculatePercentageChange(
+                                                            previousValue,
+                                                            currentValue
+                                                          )
+                                                        : "-"}
+                                                    </TableCell>
+                                                  );
+                                                }
+                                              )}
+                                            </TableRow>
+                                          )}
+                                        </React.Fragment>
+                                      )
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </TableContainer>
+                            </ThemeProvider>
+                          </div>
+                        </KPIBlock>
+                      </div>
+                    </div>
+
+                    <br></br>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        // padding: "1px",
+                      }}
+                    >
+                      <KPIText
+                        fontColor="#fff"
+                        fontSize="0.9375rem"
+                        style={{ textAlign: "left" }}
+                      >
+                        KPI Conversion Ratio
+                      </KPIText>
+                      <div
+                        className={styles["kpi-horizontal-layout"]}
+                        style={{ gap: "3rem" }}
+                      >
+                        <KPIBlock
+                          extraClass={styles["kpi-medium-dashboard"]}
+                          width="80.25rem"
+                          height="25.125rem"
+                          style={{
+                            overflow: "hidden",
+                            alignItems: "center",
+                            width: "100%",
+                          }}
+                        >
+                          {focused === "all" ? (
+                            <div
+                              style={{
+                                width: "1300px",
+                                height: "404px",
+                                padding: "20px",
+                              }}
+                            >
+                              {/* <Bar data={kpiChartData} options={kpiChartOptions} /> */}
+                              <div className="chart" style={chartStyle}>
+                                <div className="header" style={headerStyle}>
+                                  {/* Performance */}
+                                </div>
+                                <div
+                                  ref={chartDivRef}
+                                  style={{ width: "1000px", height: "180px" }}
+                                ></div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                width: "550px",
+                                height: "600px",
+                                padding: "20px",
+                              }}
+                            >
+                              <Bar
+                                data={createChartDataFromKPIs(tylerKPIs)}
+                                options={kpiChartOptions}
+                              />
+                            </div>
+                          )}
+                        </KPIBlock>
+                      </div>
+                    </div>
+                  </div>
+                </CustomTabPanel>
+                <CustomTabPanel value={value} index={1}>
+                  <div>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <KPIText
+                        fontColor="#fff"
+                        fontSize="0.9375rem"
+                        style={{ textAlign: "left" }}
+                      >
+                        Overall KPI in Timescale
+                      </KPIText>
+                      <div
+                        className={styles["kpi-horizontal-layout"]}
+                        style={{ gap: "3rem" }}
+                      >
+                        <KPIBlock
+                          extraClass={styles["kpi-medium-dashboard"]}
+                          width="52.25rem"
+                          height="50.125rem"
+                          style={{ overflow: "visible" }}
+                        >
+                          {/* Deal Data Table */}
+                          <table style={tableStyle}>
+                            <thead>
+                              <tr>
+                                <th>Deal Name</th>
+                                <th>Total Outreach</th>
+                                <th>New Fund</th>
+                                <th>Respond or Not</th>
+                                <th>Deck Requested</th>
+                                <th>Meeting Requested</th>
+                                <th>DD Requested</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {timeDealData.map((item, index) => (
+                                <tr key={index}>
+                                  <td>{item.company_name}</td>
+                                  <td>{item.totalOutreach}</td>
+                                  <td>{item.newFund}</td>
+                                  <td>{item.respondOrNot}</td>
+                                  <td>{item.deckRequested}</td>
+                                  <td>{item.meetingRequested}</td>
+                                  <td>{item.ddRequested}</td>
+                                </tr>
+                              ))}
+                              <tr>
+                                <td>Grand Total</td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.totalOutreach,
+                                    0
+                                  )}
+                                </td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.newFund,
+                                    0
+                                  )}
+                                </td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.respondOrNot,
+                                    0
+                                  )}
+                                </td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.deckRequested,
+                                    0
+                                  )}
+                                </td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.meetingRequested,
+                                    0
+                                  )}
+                                </td>
+                                <td>
+                                  {timeDealData.reduce(
+                                    (acc, item) => acc + item.ddRequested,
+                                    0
+                                  )}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </KPIBlock>
+                        <KPIBlock
+                          extraClass={styles["kpi-medium-dashboard"]}
+                          width="55.25rem"
+                          height="58.125rem"
+                          style={{ overflow: "visible" }}
+                        >
+                          {/* Horizontal Bar Plot for Each Deal's KPI */}
+                          <div style={{ height: "57rem", width: "55rem" }}>
+                            <Bar data={dealChartData} options={chartOptions} />
+                          </div>
+                        </KPIBlock>
+                      </div>
+                    </div>
+                  </div>
+                </CustomTabPanel>
+              </Box>
+
+              {/* <Tabs defaultActiveKey="1" items={items} onChange={onChange} /> */}
             </div>
           ) : (
             <MemoizedDealFunnel
