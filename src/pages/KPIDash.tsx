@@ -1948,7 +1948,7 @@ export default function KPIDash() {
                   <KPIText
                     extraClass={styles["kpi-align-center-text"]}
                     fontColor="#fff"
-                    fontSize="0.9375rem"
+                    fontSize="1rem"
                   >
                     Number of passes
                   </KPIText>
@@ -1995,9 +1995,16 @@ export default function KPIDash() {
                     onChange={handleChange}
                     aria-label="basic tabs example"
                   >
-                    <Tab label="Charts" {...a11yProps(0)} />
-                    <Tab label="Detailed Info" {...a11yProps(1)} />
-                    {/* <Tab label="Item Three" {...a11yProps(2)} /> */}
+                    <Tab
+                      label="Charts"
+                      {...a11yProps(0)}
+                      sx={{ color: value !== 0 ? "white" : "inherit" }}
+                    />
+                    <Tab
+                      label="Detailed Info"
+                      {...a11yProps(1)}
+                      sx={{ color: value !== 1 ? "white" : "inherit" }}
+                    />
                   </Tabs>
                 </Box>
                 <CustomTabPanel value={value} index={0}>
@@ -2168,7 +2175,7 @@ export default function KPIDash() {
                     >
                       <KPIText
                         fontColor="#fff"
-                        fontSize="0.9375rem"
+                        fontSize="1rem"
                         style={{ textAlign: "left" }}
                       >
                         KPI Conversion Ratio
