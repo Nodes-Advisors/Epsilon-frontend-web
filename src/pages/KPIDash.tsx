@@ -168,10 +168,10 @@ export default function KPIDash() {
   const [timeDealData, setTimeDealData] = useState<DealData[]>([]);
   const [timeAggregatedDealData, setTimeAggregatedDealData] = useState<
     DealData[]
-  >([]);
+    >([]);
   const [accountHolderData, setAccountHolderData] = useState<
     AccountHolderData[]
-  >([]);
+    >([]);
   const [dealChartData, setDealChartData] = useState({
     labels: [],
     datasets: [],
@@ -194,7 +194,7 @@ export default function KPIDash() {
   });
   const [timeScale, setTimeScale] = useState<
     "today" | "this week" | "last week" | "month to date" | "year to date"
-  >("");
+    >("");
   const [selectedClientTableData, setSelectedClientTableData] = useState([]);
 
   const tableStyle = {
@@ -611,10 +611,10 @@ export default function KPIDash() {
             timeAggregatedDealData.totalOutreach === 0
               ? "0.00"
               : (
-                  (timeAggregatedDealData.deckRequested /
-                    timeAggregatedDealData.totalOutreach) *
-                  100
-                ).toFixed(2),
+                (timeAggregatedDealData.deckRequested /
+                  timeAggregatedDealData.totalOutreach) *
+                100
+              ).toFixed(2),
         },
         {
           stage: "Meeting Requested",
@@ -624,10 +624,10 @@ export default function KPIDash() {
             timeAggregatedDealData.deckRequested === 0
               ? "0.00"
               : (
-                  (timeAggregatedDealData.meetingRequested /
-                    timeAggregatedDealData.deckRequested) *
-                  100
-                ).toFixed(2),
+                (timeAggregatedDealData.meetingRequested /
+                  timeAggregatedDealData.deckRequested) *
+                100
+              ).toFixed(2),
         },
         {
           stage: "DD Requested",
@@ -637,10 +637,10 @@ export default function KPIDash() {
             timeAggregatedDealData.meetingRequested === 0
               ? "0.00"
               : (
-                  (timeAggregatedDealData.ddRequested /
-                    timeAggregatedDealData.meetingRequested) *
-                  100
-                ).toFixed(2),
+                (timeAggregatedDealData.ddRequested /
+                  timeAggregatedDealData.meetingRequested) *
+                100
+              ).toFixed(2),
         },
       ];
 
@@ -1186,9 +1186,9 @@ export default function KPIDash() {
                                       {previousValue !== undefined &&
                                       currentValue !== undefined
                                         ? calculatePercentageChange(
-                                            previousValue,
-                                            currentValue
-                                          )
+                                          previousValue,
+                                          currentValue
+                                        )
                                         : "-"}
                                     </TableCell>
                                   );
@@ -1300,67 +1300,67 @@ export default function KPIDash() {
               {/* Deal Data Table */}
               <table style={tableStyle}>
                 <thead>
-                  <tr>
-                    <th>Deal Name</th>
-                    <th>Total Outreach</th>
-                    <th>New Fund</th>
-                    <th>Respond or Not</th>
-                    <th>Deck Requested</th>
-                    <th>Meeting Requested</th>
-                    <th>DD Requested</th>
-                  </tr>
+                <tr>
+                  <th>Deal Name</th>
+                  <th>Total Outreach</th>
+                  <th>New Fund</th>
+                  <th>Respond or Not</th>
+                  <th>Deck Requested</th>
+                  <th>Meeting Requested</th>
+                  <th>DD Requested</th>
+                </tr>
                 </thead>
                 <tbody>
-                  {timeDealData.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.company_name}</td>
-                      <td>{item.totalOutreach}</td>
-                      <td>{item.newFund}</td>
-                      <td>{item.respondOrNot}</td>
-                      <td>{item.deckRequested}</td>
-                      <td>{item.meetingRequested}</td>
-                      <td>{item.ddRequested}</td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td>Grand Total</td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.totalOutreach,
-                        0
-                      )}
-                    </td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.newFund,
-                        0
-                      )}
-                    </td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.respondOrNot,
-                        0
-                      )}
-                    </td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.deckRequested,
-                        0
-                      )}
-                    </td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.meetingRequested,
-                        0
-                      )}
-                    </td>
-                    <td>
-                      {timeDealData.reduce(
-                        (acc, item) => acc + item.ddRequested,
-                        0
-                      )}
-                    </td>
+                {timeDealData.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.company_name}</td>
+                    <td>{item.totalOutreach}</td>
+                    <td>{item.newFund}</td>
+                    <td>{item.respondOrNot}</td>
+                    <td>{item.deckRequested}</td>
+                    <td>{item.meetingRequested}</td>
+                    <td>{item.ddRequested}</td>
                   </tr>
+                ))}
+                <tr>
+                  <td>Grand Total</td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.totalOutreach,
+                      0
+                    )}
+                  </td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.newFund,
+                      0
+                    )}
+                  </td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.respondOrNot,
+                      0
+                    )}
+                  </td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.deckRequested,
+                      0
+                    )}
+                  </td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.meetingRequested,
+                      0
+                    )}
+                  </td>
+                  <td>
+                    {timeDealData.reduce(
+                      (acc, item) => acc + item.ddRequested,
+                      0
+                    )}
+                  </td>
+                </tr>
                 </tbody>
               </table>
             </KPIBlock>
