@@ -604,7 +604,7 @@ export default function FundCards() {
   }
 
   return (
-    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Calibri', sans-serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
         <div 
           style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>

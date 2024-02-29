@@ -1,5 +1,7 @@
 import { lazy } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import {BrowserRouter, createBrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
+import Login from "../pages/Login";
+import LoginRegister from "../pages/LoginRegister";
 
 const Home = lazy(() => import('../pages/Homepage'))
 const About = lazy(() => import('../pages/About'))
@@ -22,10 +24,18 @@ const Intelligence = lazy(() => import('../pages/Intelligence'))
 const ClientProfile = lazy(() => import('../pages/ClientProfile'))
 const Clients = lazy(() => import('../pages/Clients'))
 
-const navWrapper = (children: React.ReactNode) => 
-  <NavBar><div style={{marginTop: '10vh', width: '100%'}}>
-    {children}
-  </div></NavBar>
+const navWrapper = (children: React.ReactNode, path: string) => {
+  if (path === 'login') {
+    console.log("it detects as login")
+    return <div>{children}</div>;
+  } else {
+    return (
+      <NavBar>
+        <div style={{ marginTop: '10vh', width: '100%' }}>{children}</div>
+      </NavBar>
+    );
+  }
+};
 
 
 const router = createBrowserRouter([
@@ -37,7 +47,8 @@ const router = createBrowserRouter([
   { path: 'fund-card/:name', element: <Profile /> },
   { path: '*', element: <NotFound /> },
   { path: 'detailmessage', element: <DetailMessage /> },
-  // { path: 'login', element: <Login /> },
+  { path: 'login', element: <LoginRegister /> },
+
 
   { path: 'gptdata', element: <GPTdata /> },
   { path: 'kpiexcel', element: <KPIExcel /> },
@@ -49,9 +60,8 @@ const router = createBrowserRouter([
   { path: 'intelligence', element: <Intelligence /> },
   { path: 'client-card/:id', element: <ClientProfile /> },
   { path: 'client-cards', element: <Clients /> },
-  
-].map(item => ({ ...item, element: navWrapper(item.element) })),
+
+].map(item => ({ ...item, element: navWrapper(item.element, item.path) })),
 )
-
-
 export default router
+

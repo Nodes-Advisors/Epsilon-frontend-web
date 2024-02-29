@@ -8,6 +8,10 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import WebSocketContext from '../websocket/WebsocketContext'
 import CancelImgIcon from '../assets/images/cancel.png'
 import FlipPage from 'react-flip-page'
+import Draggable from 'react-draggable'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThumbtack,faRoute,faSquareCheck, faArrowsUpToLine, faArrowsDownToLine,faArrowsRotate,faEllipsis } from '@fortawesome/free-solid-svg-icons'
+import {throttle} from "lodash";
 
 export default function Home() {
   
@@ -26,6 +30,10 @@ export default function Home() {
   const [pinnedMessages, setPinnedMessages] = useState([])
   const [switchTab, setSwitchTab] = useState<'Pinned' | 'Milestone' | 'Approval Request'>('Pinned')
   const [prevTab, setPrevTab] = useState(null)
+  const [layoutSize, setLayoutSize] = useState(35)//row1,column1
+  const [dragBounds, setDragBounds] = useState({top:-50,bottom:50})//row1,column1
+
+  //const [prevTab, setPrevTab] = useState(null)
   const [animationClass, setAnimationClass] = useState('')
   const ulRef = useRef(null)
   const [approveRequests, setApproveRequests] = useState<any[]>([])
@@ -47,6 +55,41 @@ export default function Home() {
       ul.removeEventListener('animationend', handleAnimationEnd)
     }
   }, [])
+
+  const handleLayoutSizeChange = (newValue) => {
+    if (newValue >= minSize && newValue <= maxSize) {
+      setLayoutSize(newValue);
+    }
+  };
+
+
+
+  const minSize = 5;
+  const maxSize = 60;
+  const minDragSize = -window.innerHeight*0.1;
+  const maxDragSize = window.innerHeight*0.1;
+  /*bounds={{ top: minDragSize, bottom: maxDragSize*/
+
+  const handleDrag = (e, ui) => {
+    // Calculate new widths based on drag distance;
+    const parentHeight = window.innerHeight;
+    const newHeight = layoutSize + ui.y / parentHeight * 100;
+    // Update widths within constraints (if any)
+    console.log(ui.y);
+    console.log((newHeight-layoutSize)/100);
+    if (newHeight > 5 && newHeight < 60) {
+      setDragBounds({top: -100,bottom:100});
+      setLayoutSize(newHeight);
+    } else if (newHeight >= 60){
+      setLayoutSize(60);
+      setDragBounds({top:-100,bottom:0});
+    } else if (newHeight <= 5){
+      setLayoutSize(5);
+      setDragBounds({top:0,bottom:+100});
+    }
+  };
+
+
 
   const [followupMessages, setFollowupMessages] = useState([
     {
@@ -395,121 +438,149 @@ export default function Home() {
 
   return (
     // <div style={{ width: '100%', minHeight: '90vh' }} >
-    <div style={{ overflowX: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
+    <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
       <div style={{ paddingLeft: '0.5%', width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr', height: '80vh' }}>
-        <div style={{ gridRow: '1', gridColumn: '1', position: 'relative' }}>
-          <div style={{ display: 'flex', position: 'absolute', top: 0, right: '40px', color: '#DDD', gap: '0.5rem' }}>
-            <span onClick={() => setSwitchTab('Pinned')}
-              style={{ color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
-            <span>|</span>
-            <span onClick={() => setSwitchTab('Milestone')}
-              style={{ color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
-            <span>|</span>
-            <span onClick={() => setSwitchTab('Approval Request')}
-              style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
-          </div>
-          <div 
-            ref={ulRef}
-            className={`${styles['tab-content']} ${styles[animationClass]}`} 
-            style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</h2>
-            <div className={styles['animation-container']}> 
-              <ul style={{ maxHeight: '75%', overflow: 'auto' }} className={styles['news-ul']}>
-                {
-                  switchTab === 'Milestone' && 
-                  <>
-                    <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
-                    <li>Avivo has recieved 16 meetings request this month!</li>
-                    <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
-                  </>
-                }
-                {
-                  switchTab === 'Pinned' && pinnedMessages.map((message, index) => 
+        <div style={{ gridColumn: '1', position: 'relative'}}>
+          <div style={{ gridRow: '1'}}>
+            <div style={{ display: 'flex', position: 'absolute', top: 0,borderRadius:'0.2rem', right: '38px', color: '#DDD',gap:'0.1rem',height:'1.2rem'}}>
+              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Pinned' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'white',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                <span><FontAwesomeIcon icon={faThumbtack} style={{color: switchTab === 'Pinned' ? '#FFF' : '#DDD'}}/></span>
+                <span onClick={() => setSwitchTab('Pinned')}
+                      style={{ marginLeft:'0.4rem',color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Milestone' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                <span><FontAwesomeIcon icon={faRoute} style={{color: switchTab === 'Milestone' ? '#FFF' : '#DDD'}}/></span>
+                <span onClick={() => setSwitchTab('Milestone')}
+                      style={{ marginLeft:'0.4rem', color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Approval Request' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                <span><FontAwesomeIcon icon={faSquareCheck} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
+                <span onClick={() => setSwitchTab('Approval Request')}
+                      style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
+              </div>
+              </div>
+            <div
+              ref={ulRef}
+              className={`${styles['tab-content']} ${styles[animationClass]}`}
+              style={{ height: layoutSize+'vh', width: '97.5%',background:'#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+              <div style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</div>
+              <div style={{ height: (layoutSize-5)+'vh' }} className={styles['animation-container']}>
+                <ul style={{ maxHeight: '75%', overflow: 'auto' }} className={styles['news-ul']}>
                   {
-                    return (
-                      <CustomContextMenu tooltip={message} key={index}>
-                        <li>{message.message}</li>
-                      </CustomContextMenu>
+                    switchTab === 'Milestone' &&
+                    <>
+                      <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
+                      <li>Avivo has recieved 16 meetings request this month!</li>
+                      <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
+                    </>
+                  }
+                  {
+                    switchTab === 'Pinned' && pinnedMessages.map((message, index) =>
+                    {
+                      return (
+                        <CustomContextMenu tooltip={message} key={index}>
+                          <li>{message.message}</li>
+                        </CustomContextMenu>
+                      )
+                      // }
+                    },
                     )
-                    // }
-                  },
+                  }
+                  {
+                    switchTab === 'Approval Request' &&
+                    <>
+                      {
+                        approveRequests.length > 0 &&
+                        approveRequests.map((message, index) => (
+                          <li key={message.time}>{message.sendEmail} sent you a request to {message.contactPerson} at {message.fundName} - {formatedTime(message.time)}</li>
+                        ),
+                        )
+                      }
+                    </>
+                  }
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div style={{ margin:'0.2rem',display: 'flex', position: 'relative',padding:'5 rem',borderRadius:'0.2rem', left: '9vw', color: '#DDD',gap:'0.1rem'}}>
+            <Draggable axis="y" onDrag={handleDrag} bounds={dragBounds}>
+              <div style={{padding:'0.1rem',borderRadius:'1.2rem',marginRight:'1.5rem'}} className={styles['dragging_bar']}>
+                <span className={styles['dragging_icon']} style={{paddingRight:'20vw',paddingLeft:'20vw'}}><FontAwesomeIcon icon={faEllipsis} /></span>
+              </div>
+            </Draggable>
+            <div style={{paddingLeft: '5vw'}}>
+              <div  style={{padding:'0.1vw',borderRadius:'1.2rem',marginRight:'1.5rem'}} className={styles['resize_icon']}>
+                <span style={{padding:'0 0.25rem'}} onClick={() => handleLayoutSizeChange(minSize)}><FontAwesomeIcon icon={faArrowsUpToLine} /></span>
+              </div>
+            </div>
+            <div style={{padding:'0.1vw',borderRadius:'1.2rem',marginRight:'1.5rem'}} className={styles['resize_icon']} >
+              <span style={{padding:'0.25rem'}} onClick={() => handleLayoutSizeChange(35)}><FontAwesomeIcon icon={faArrowsRotate} /></span>
+            </div>
+            <div style={{padding:'0.1vw',borderRadius:'1.2rem'}} className={styles['resize_icon']} >
+              <span style={{padding:'0.2rem'}} onClick={() => handleLayoutSizeChange(maxSize)}><FontAwesomeIcon icon={faArrowsDownToLine} /></span>
+            </div>
+          </div>
+          <div style={{ height: (70-layoutSize)+'vh',top: '0',gridRow: '2',backgroundColor: '#aaa1',
+            boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
+            borderRadius: '1rem', marginTop: '0rem', width: '97.5%' }}>
+            <div   className={styles['live-update-layout']}>
+              <div style={{ margin: 'auto 0' }} className={styles['news-title']}>Live update</div>
+              <div  className={styles['live-update-icon']} />
+            </div>
+            {layoutSize === maxSize ? '' :
+              <div style={{height:(55-layoutSize)+'vh'}}>
+                <LiveUpdate user={userInfo}/>
+              </div>}
+          </div>
+        </div>
+
+
+        <div>
+          <div style={{  gridRow: '1', gridColumn: '2' }}>
+            <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+              <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>
+
+              <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>
+                {
+                  followupMessages.length > 0 &&
+                  followupMessages.map((message, index) => (
+                    <CustomContextMenu tooltip={message} key={index}>
+                      <li style={{fontSize:'1.1rem' }}>{message.message}</li>
+                      {/* <li>{message.message}</li> */}
+                    </CustomContextMenu>
+                  ),
+
                   )
                 }
+              </ul>
+
+            </div>
+          </div>
+          <div style={{  gridRow: '2', gridColumn: '2', height: '50%' }}>
+            <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
+              <h2 style={{ marginTop: '2rem' }} className={styles['news-title']}>GPT prompt</h2>
+
+              <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
                 {
-                  switchTab === 'Approval Request' && 
-                  <>
-                    {
-                      approveRequests.length > 0 &&
-                      approveRequests.map((message, index) => (        
-                        <li key={message.time}>{message.sendEmail} sent you a request to {message.contactPerson} at {message.fundName} - {formatedTime(message.time)}</li>               
-                      ),
-                      )
-                    }
-                  </>
+                  tooltipData.length > 0 &&
+                  tooltipData.map((message, index) => (
+                    <CustomContextMenu tooltip={message} key={index}>
+                      <li style={{fontSize:'1.1rem' }}>{message.message}</li>
+                    </CustomContextMenu>
+                  ),
+                  )
                 }
               </ul>
-            </div> 
+            </div>
           </div>
         </div>
-
-
-  
-        <div style={{  gridRow: '1', gridColumn: '2' }}>
-          <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>
-            
-            <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
-              {
-                followupMessages.length > 0 &&
-                followupMessages.map((message, index) => (
-                  <CustomContextMenu tooltip={message} key={index}>
-                    <li>{message.message}</li>
-                    {/* <li>{message.message}</li> */}
-                  </CustomContextMenu>
-                ),
-                
-                )
-              }
-            </ul>
-
-          </div>
-        </div>
-        <div style={{  gridRow: '2', gridColumn: '2', height: '50%' }}>
-          <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-            <h2 style={{ marginTop: '2rem' }} className={styles['news-title']}>GPT prompt</h2>
-            
-            <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
-              {
-                tooltipData.length > 0 &&
-                tooltipData.map((message, index) => (
-                  <CustomContextMenu tooltip={message} key={index}>
-                    <li>{message.message}</li>
-                  </CustomContextMenu>
-                ),
-                )
-              }
-             
-
-            </ul>
-
-          </div>
-        </div>
-
      
-        <div style={{ height: '35vh', gridRow: '2', gridColumn: '1', backgroundColor: '#aaa1', 
-          boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
-          borderRadius: '1rem', marginTop: '2rem', width: '97.5%' }}>
-          <div className={styles['live-update-layout']}>
-            <h2 style={{ margin: 'auto 0' }} className={styles['news-title']}>Live update</h2>
-            <div className={styles['live-update-icon']} />
-          </div>
-          <LiveUpdate user={userInfo}/>
-        </div>
-      </div>
-      
 
-    </div> 
+      </div>
+
+
+    </div>
       
 
   // </div>

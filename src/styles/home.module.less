@@ -333,7 +333,7 @@ section {
     flex-direction: column;
     align-items: start;
     gap: 0.5rem;
-    max-height: 22vh;
+    //max-height: 22vh;
     overflow: auto;
     max-width: 135rem;
     width: -moz-fit-content;
@@ -347,7 +347,7 @@ section {
     padding: 1rem;
     padding-top: 0;
     text-align: left;
-    font-size: 0.9375rem;
+    font-size: 0.93758rem;
     font-family: Inter;
 }
 
@@ -400,10 +400,49 @@ section {
 }
 
 .account_holder {
+    font-size: 0.9em;
     font-weight: 800;
     color: #ddda;
     &:hover {
         // background-color: #D23548;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+
+.dragging_bar {
+    color: #aaa1;
+    &:active {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+.dragging_icon {
+    color: #DDD;
+    &:active {
+        color: transparent;
+        cursor: grab;
+        text-decoration: underline;
+    }
+    &:hover {
+        cursor: grab;
+        text-decoration: underline;
+    }
+}
+
+.resize_icon {
+    background: grey;
+    &:active {
+        background: #3A3A65;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    &:hover {
+        background: #3A3A65;
         cursor: pointer;
         text-decoration: underline;
     }
@@ -564,18 +603,59 @@ section {
       opacity: 0;
     }
   }
-  
-  .tab-content {
-    animation-duration: 0.7s;
-    transform: translateZ(0);  }
-  
-  .tab-enter {
-    animation-name: flipIn;
-  }
-  
-  .tab-exit {
-    animation-name: flipOut;
-  }
+/* Define fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Define fade-out animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes slideIn {
+    from {
+        transform: translateX(-30%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(30%);
+        opacity: 0;
+    }
+}
+/* Apply animations to classes */
+.tab-content {
+    animation-duration: 0.3s;
+    transform: translateZ(0);
+}
+
+.tab-enter {
+    animation-name: slideIn;
+}
+
+.tab-exit {
+    animation-name: slideOut;
+}
 
   .animation-container {
     width: 100%; // maximum width of the rotating element
