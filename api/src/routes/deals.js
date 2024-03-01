@@ -14,6 +14,21 @@ router.get("/deals", async (req, res) => {
     const counts = await collection
       .aggregate([
         {
+          $match: {
+            company_acronym: {
+              $nin: [
+                "CAV",
+                "scioto",
+                "CV",
+                "EMB",
+                "Coastar",
+                "Bioecplise",
+                "Nemalife",
+              ],
+            },
+          },
+        },
+        {
           $group: {
             _id: "$company_acronym",
             totalOutreach: { $sum: 1 },
@@ -64,6 +79,21 @@ router.get("/deal-names", async (req, res) => {
     const companies = await collection
       .aggregate([
         {
+          $match: {
+            company_acronym: {
+              $nin: [
+                "CAV",
+                "scioto",
+                "CV",
+                "EMB",
+                "Coastar",
+                "Bioecplise",
+                "Nemalife",
+              ],
+            },
+          },
+        },
+        {
           $group: {
             _id: "$company_acronym",
           },
@@ -108,6 +138,17 @@ router.get("/deals/last-updated-status-dates", async (req, res) => {
     const pipeline = [
       {
         $match: {
+          company_acronym: {
+            $nin: [
+              "CAV",
+              "scioto",
+              "CV",
+              "EMB",
+              "Coastar",
+              "Bioecplise",
+              "Nemalife",
+            ],
+          },
           last_updated_status_date: {
             $gte: startTimestamp,
             $lte: endTimestamp,
@@ -181,6 +222,17 @@ router.get("/deals/aggregated", async (req, res) => {
     const aggregationPipeline = [
       {
         $match: {
+          company_acronym: {
+            $nin: [
+              "CAV",
+              "scioto",
+              "CV",
+              "EMB",
+              "Coastar",
+              "Bioecplise",
+              "Nemalife",
+            ],
+          },
           last_updated_status_date: {
             $gte: startTimestamp,
             $lte: endTimestamp,
@@ -238,11 +290,22 @@ router.post("/deals/filter", async (req, res) => {
     const database = client.db(dbName);
     const collection = database.collection(collectionName);
 
-    const deals = await collection
-      .find({
-        company_acronym: { $in: companyNames },
-      })
-      .toArray();
+    const deals = await collection.find(
+      {
+        company_acronym: {
+          $in: companyNames,
+          $nin: [
+            "CAV",
+            "Scioto",
+            "CV",
+            "EMB",
+            "Coastar",
+            "Bioecplise",
+            "Nemalife",
+          ], // Exclude specific acronyms
+        },
+      }.toArray()
+    );
 
     res.json(deals); // Send the filtered deals back to the client
   } catch (error) {

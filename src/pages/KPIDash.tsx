@@ -15,9 +15,12 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import React from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { faChartLine,faArrowsTurnToDots} from '@fortawesome/free-solid-svg-icons'
+import {
+  faChartLine,
+  faArrowsTurnToDots,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   Table,
   TableBody,
@@ -100,7 +103,7 @@ import {
   Filler,
 } from "chart.js";
 import MemoizedDealFunnel from "../components/deal-funnel";
-import {solid} from "@fortawesome/fontawesome-svg-core/import.macro";
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 ChartJS.register(
   CategoryScale,
@@ -385,7 +388,29 @@ export default function KPIDash() {
             },
           }
         );
-        setClients(response.data);
+        // Filter out specific company acronyms from the response data
+        const filteredClients = response.data.filter(
+          (client) =>
+            ![
+              "CAV",
+              "cav",
+              "scioto",
+              "Scioto",
+              "cv",
+              "CV",
+              "EMB",
+              "emb",
+              "Coastar",
+              "Bioecplise",
+              "BE",
+              "be",
+              "Nemalife",
+              "Nema Life",
+              "nema life",
+              "Nema life",
+            ].includes(client)
+        );
+        setClients(filteredClients);
       } catch (error) {
         console.error("Error fetching clients:", error);
       }
@@ -1496,10 +1521,20 @@ export default function KPIDash() {
                 onClick={() => setCategory("dashboard")}
                 style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
               >
-                <FontAwesomeIcon icon={faChartLine} size="2x" style={{
-                  marginLeft: '5rem',marginRight:'1rem',color: category === "dashboard" ? "#2254ff" : "#fff",left:'5rem'
-                }} />
-                <KPIText fontSize={"1.25rem"} fontColor={category === "dashboard" ? "#2254ff" : "#fff"} >
+                <FontAwesomeIcon
+                  icon={faChartLine}
+                  size="2x"
+                  style={{
+                    marginLeft: "5rem",
+                    marginRight: "1rem",
+                    color: category === "dashboard" ? "#2254ff" : "#fff",
+                    left: "5rem",
+                  }}
+                />
+                <KPIText
+                  fontSize={"1.25rem"}
+                  fontColor={category === "dashboard" ? "#2254ff" : "#fff"}
+                >
                   Dashboard
                 </KPIText>
               </div>
@@ -1513,10 +1548,20 @@ export default function KPIDash() {
                   justifyContent: "start",
                 }}
               >
-                <FontAwesomeIcon icon={faArrowsTurnToDots} style={{
-                  fontSize:'2rem',marginLeft: '4.9rem',marginRight:'1.1rem',color: category === "deal-funnel" ? "#2254ff" : "#fff",left:'5rem'
-                }} />
-                <KPIText fontSize={"1.25rem"} fontColor={category === "deal-funnel" ? "#2254ff" : "#fff"}>
+                <FontAwesomeIcon
+                  icon={faArrowsTurnToDots}
+                  style={{
+                    fontSize: "2rem",
+                    marginLeft: "4.9rem",
+                    marginRight: "1.1rem",
+                    color: category === "deal-funnel" ? "#2254ff" : "#fff",
+                    left: "5rem",
+                  }}
+                />
+                <KPIText
+                  fontSize={"1.25rem"}
+                  fontColor={category === "deal-funnel" ? "#2254ff" : "#fff"}
+                >
                   Deal Funnel
                 </KPIText>
               </div>
