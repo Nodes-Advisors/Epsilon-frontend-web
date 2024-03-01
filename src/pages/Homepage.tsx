@@ -262,6 +262,8 @@ export default function Home() {
     }
   }
 
+
+
   const CustomContextMenu = ({ children, tooltip}: {children: React.ReactNode, tooltip?: any}) => {
     const [visible, setVisible] = useState(false)
     const [coords, setCoords] = useState({ x: 0, y: 0 })
@@ -529,7 +531,7 @@ export default function Home() {
               <div  className={styles['live-update-icon']} />
             </div>
             {layoutSize === maxSize ? '' :
-              <div style={{height:(55-layoutSize)+'vh'}}>
+              <div className={styles['news-ul']} style={{height:(62-layoutSize)+'vh', overflowX:'hidden',overflowY:'auto'}}>
                 <LiveUpdate user={userInfo}/>
               </div>}
           </div>

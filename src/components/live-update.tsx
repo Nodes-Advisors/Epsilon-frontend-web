@@ -209,7 +209,7 @@ function LiveUpdate({user}: {user: any}) {
 
   useEffect(() => {
     const fetchNodesTeam = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const res = await axios.get(`http://localhost:5001/getNodesProfileImage`, {
           headers: {
@@ -217,48 +217,40 @@ function LiveUpdate({user}: {user: any}) {
             'Authorization': token,
             'email': user?.email,
           },
-        })
+        });
         if (res.status === 200) {
-          setLoading(false)
-          setNodesTeam(res.data)
-          // console.log(res.data)
+          setLoading(false);
+          setNodesTeam(res.data);
         }
       } catch (error) {
-        setLoading(false)
-        console.error(error)
+        setLoading(false);
+        console.error(error);
       }
-    }
-    fetchNodesTeam()
-    
-  }, [])
+    };
+
+    fetchNodesTeam();
+  }, []);
 
   const getImage = (name: string | undefined | null) => {
-    if (name) {
-      // console.log(name)
-      // console.log(nodesTeam)
-      const found = nodesTeam.find(item => item.name.includes(name))
-      // console.log(found)
-      if (found) {
-        // console.log(found.profile_image)
-        return found.profile_image
-      } else {
-        return ''
+    if (name && nodesTeam) {
+      const found = nodesTeam.find(item => item.name && item.name.includes(name));
+      if (found && found.profile_image) {
+        return found.profile_image;
       }
     }
-    return ''
-  }
+    console.log(data);
+    return ''; // Return an empty string if no match is found or profile_image is missing
+  };
 
   const getFullName = (name: string | undefined | null) => {
-    if (name) {
-      const found = nodesTeam.find(item => item.name.includes(name))
-      if (found) {
-        return found.name
-      } else {
-        return ''
+    if (name && nodesTeam) {
+      const found = nodesTeam.find(item => item.name && item.name.includes(name));
+      if (found && found.name) {
+        return found.name;
       }
     }
-    return ''
-  }
+    return ''; // Return an empty string if no match is found or name is missing
+  };
 
   return (
     <div style={{ width: '100%', padding: '1rem' }}>
@@ -346,7 +338,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span 
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                         </>
                           }
                           { item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0
@@ -359,7 +351,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span 
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                           <span>{' after initial pitch'}</span>
                           
                         </>
@@ -378,7 +370,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                           <span>{' deck'}</span>
                           
                         </>
@@ -395,7 +387,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span 
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                           <span>{' after reviewing the deck'}</span>
                         </>
                           } 
@@ -412,7 +404,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                           <span>{' meeting - '}</span>
                           <span 
                             onMouseEnter={handleMouseOverAM}
@@ -433,7 +425,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
                           <span>{' after a meeting'}</span>
                         </>
                           } 
@@ -447,7 +439,7 @@ function LiveUpdate({user}: {user: any}) {
                           <span 
                             onMouseEnter={handleMouseOver}
                             onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name}</span>
+                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
 
                         </>
                           } 
