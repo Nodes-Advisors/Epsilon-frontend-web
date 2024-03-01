@@ -238,7 +238,7 @@ function LiveUpdate({user}: {user: any}) {
         return found.profile_image;
       }
     }
-    console.log(data);
+    //console.log(data);
     return ''; // Return an empty string if no match is found or profile_image is missing
   };
 

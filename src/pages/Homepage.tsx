@@ -74,9 +74,9 @@ export default function Home() {
     // Calculate new widths based on drag distance;
     const parentHeight = window.innerHeight;
     const newHeight = layoutSize + ui.y / parentHeight * 100;
-    // Update widths within constraints (if any)
-    console.log(ui.y);
-    console.log((newHeight-layoutSize)/100);
+    // // Update widths within constraints (if any)
+    // console.log(ui.y);
+    // console.log((newHeight-layoutSize)/100);
     if (newHeight > 5 && newHeight < 60) {
       setDragBounds({top: -100,bottom:100});
       setLayoutSize(newHeight);
@@ -446,19 +446,19 @@ export default function Home() {
         <div style={{ gridColumn: '1', position: 'relative'}}>
           <div style={{ gridRow: '1'}}>
             <div style={{ display: 'flex', position: 'absolute', top: 0,borderRadius:'0.2rem', right: '38px', color: '#DDD',gap:'0.1rem',height:'1.2rem'}}>
-              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Pinned' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'white',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+              <div onClick={() => setSwitchTab('Pinned')} style={{display:'flex',alignItems:'center',background: switchTab === 'Pinned' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'white',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faThumbtack} style={{color: switchTab === 'Pinned' ? '#FFF' : '#DDD'}}/></span>
-                <span onClick={() => setSwitchTab('Pinned')}
+                <span
                       style={{ marginLeft:'0.4rem',color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
               </div>
-              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Milestone' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+              <div onClick={() => setSwitchTab('Milestone')} style={{display:'flex',alignItems:'center',background: switchTab === 'Milestone' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faRoute} style={{color: switchTab === 'Milestone' ? '#FFF' : '#DDD'}}/></span>
-                <span onClick={() => setSwitchTab('Milestone')}
+                <span
                       style={{ marginLeft:'0.4rem', color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
               </div>
-              <div style={{display:'flex',alignItems:'center',background: switchTab === 'Approval Request' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+              <div onClick={() => setSwitchTab('Approval Request')} style={{display:'flex',alignItems:'center',background: switchTab === 'Approval Request' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faSquareCheck} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
-                <span onClick={() => setSwitchTab('Approval Request')}
+                <span
                       style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
               </div>
               </div>
