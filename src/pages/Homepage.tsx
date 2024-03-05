@@ -10,8 +10,8 @@ import CancelImgIcon from '../assets/images/cancel.png'
 import FlipPage from 'react-flip-page'
 import Draggable from 'react-draggable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faThumbtack,faRoute,faSquareCheck, faArrowsUpToLine, faArrowsDownToLine,faArrowsRotate,faEllipsis } from '@fortawesome/free-solid-svg-icons'
-import {throttle} from "lodash";
+import { faThumbtack,faClockRotateLeft,faRoute,faSquareCheck, faArrowsUpToLine, faArrowsDownToLine,faArrowsRotate,faEllipsis } from '@fortawesome/free-solid-svg-icons'
+
 
 export default function Home() {
   
@@ -28,7 +28,7 @@ export default function Home() {
   const { sendMessage, lastMessage, readyState } = useContext(WebSocketContext)
   const [tooltipData, setTooltipData] = useState([])
   const [pinnedMessages, setPinnedMessages] = useState([])
-  const [switchTab, setSwitchTab] = useState<'Pinned' | 'Milestone' | 'Approval Request'>('Pinned')
+  const [switchTab, setSwitchTab] = useState<'Pinned' | 'Milestone' | 'Approval Request'| 'Follow Ups'>('Pinned')
   const [prevTab, setPrevTab] = useState(null)
   const [layoutSize, setLayoutSize] = useState(35)//row1,column1
   const [dragBounds, setDragBounds] = useState({top:-50,bottom:50})//row1,column1
@@ -442,7 +442,7 @@ export default function Home() {
     // <div style={{ width: '100%', minHeight: '90vh' }} >
     <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
-      <div style={{ paddingLeft: '0.5%', width: '97.5%', textAlign: 'left', display: 'grid', gridTemplateColumns: '3fr 1fr', height: '80vh' }}>
+      <div style={{ paddingLeft: '0.5%', width: '97.5%', textAlign: 'left', display: 'grid', height: '80vh' }}>
         <div style={{ gridColumn: '1', position: 'relative'}}>
           <div style={{ gridRow: '1'}}>
             <div style={{ display: 'flex', position: 'absolute', top: 0,borderRadius:'0.2rem', right: '38px', color: '#DDD',gap:'0.1rem',height:'1.2rem'}}>
@@ -460,6 +460,11 @@ export default function Home() {
                 <span><FontAwesomeIcon icon={faSquareCheck} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
                 <span
                       style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
+              </div>
+              <div onClick={() => setSwitchTab('Follow Ups')} style={{display:'flex',alignItems:'center',background: switchTab === 'Follow Ups' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                <span><FontAwesomeIcon icon={faClockRotateLeft} style={{ color: switchTab === 'Follow Ups' ? '#FFF' : '#DDD'}}/></span>
+                <span
+                  style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Follow Ups' ? 700 : 400 }}>Follow Ups</span>
               </div>
               </div>
             <div
@@ -501,14 +506,33 @@ export default function Home() {
                       }
                     </>
                   }
+                  {
+                    switchTab === 'Follow Ups' &&
+                      <>
+                        {
+                          <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>
+                            {
+                              followupMessages.length > 0 &&
+                              followupMessages.map((message, index) => (
+                                  <CustomContextMenu tooltip={message} key={index}>
+                                    <li style={{fontSize:'1.1rem' }}>{message.message}</li>
+                                    {/* <li>{message.message}</li> */}
+                                  </CustomContextMenu>
+                                ),
+                              )
+                            }
+                          </ul>
+                        }
+                      </>
+                  }
                 </ul>
               </div>
             </div>
           </div>
           <div style={{ margin:'0.2rem',display: 'flex', position: 'relative',padding:'5 rem',borderRadius:'0.2rem', left: '9vw', color: '#DDD',gap:'0.1rem'}}>
             <Draggable axis="y" onDrag={handleDrag} bounds={dragBounds}>
-              <div style={{padding:'0.1rem',borderRadius:'1.2rem',marginRight:'1.5rem'}} className={styles['dragging_bar']}>
-                <span className={styles['dragging_icon']} style={{paddingRight:'20vw',paddingLeft:'20vw'}}><FontAwesomeIcon icon={faEllipsis} /></span>
+              <div style={{padding:'0.1rem',borderRadius:'1.2rem',marginRight:'1.5rem',width:'60vw',}} className={styles['dragging_bar']}>
+                <span className={styles['dragging_icon']} style={{paddingRight:'10vw',paddingLeft:'30vw'}}><FontAwesomeIcon icon={faEllipsis} /></span>
               </div>
             </Draggable>
             <div style={{paddingLeft: '5vw'}}>
@@ -536,52 +560,44 @@ export default function Home() {
               </div>}
           </div>
         </div>
+        {/*/!*<div>*!/*/}
+        {/*  <div style={{  gridRow: '1', gridColumn: '2' }}>*/}
+        {/*    <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>*/}
+        {/*      <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>*/}
+        {/*      <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>*/}
+        {/*        {*/}
+        {/*          followupMessages.length > 0 &&*/}
+        {/*          followupMessages.map((message, index) => (*/}
+        {/*              <CustomContextMenu tooltip={message} key={index}>*/}
+        {/*                <li style={{fontSize:'1.1rem' }}>{message.message}</li>*/}
+        {/*                /!* <li>{message.message}</li> *!/*/}
+        {/*              </CustomContextMenu>*/}
+        {/*            ),*/}
+        {/*          )*/}
+        {/*        }*/}
+        {/*      </ul>*/}
 
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*  <div style={{  gridRow: '2', gridColumn: '2', height: '50%' }}>*/}
+        {/*    <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>*/}
+        {/*      <h2 style={{ marginTop: '2rem' }} className={styles['news-title']}>GPT prompt</h2>*/}
 
-        <div>
-          <div style={{  gridRow: '1', gridColumn: '2' }}>
-            <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-              <h2 style={{ marginTop: '2.5rem' }} className={styles['news-title']}>Follow Ups</h2>
-
-              <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>
-                {
-                  followupMessages.length > 0 &&
-                  followupMessages.map((message, index) => (
-                    <CustomContextMenu tooltip={message} key={index}>
-                      <li style={{fontSize:'1.1rem' }}>{message.message}</li>
-                      {/* <li>{message.message}</li> */}
-                    </CustomContextMenu>
-                  ),
-
-                  )
-                }
-              </ul>
-
-            </div>
-          </div>
-          <div style={{  gridRow: '2', gridColumn: '2', height: '50%' }}>
-            <div style={{ height: '35vh', width: '97.5%', backgroundColor: '#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
-              <h2 style={{ marginTop: '2rem' }} className={styles['news-title']}>GPT prompt</h2>
-
-              <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>
-                {
-                  tooltipData.length > 0 &&
-                  tooltipData.map((message, index) => (
-                    <CustomContextMenu tooltip={message} key={index}>
-                      <li style={{fontSize:'1.1rem' }}>{message.message}</li>
-                    </CustomContextMenu>
-                  ),
-                  )
-                }
-              </ul>
-            </div>
-          </div>
-        </div>
-     
-
+        {/*      <ul style={{ maxHeight: '80%', overflow: 'auto' }} className={styles['news-ul']}>*/}
+        {/*        {*/}
+        {/*          tooltipData.length > 0 &&*/}
+        {/*          tooltipData.map((message, index) => (*/}
+        {/*            <CustomContextMenu tooltip={message} key={index}>*/}
+        {/*              <li style={{fontSize:'1.1rem' }}>{message.message}</li>*/}
+        {/*            </CustomContextMenu>*/}
+        {/*          ),*/}
+        {/*          )*/}
+        {/*        }*/}
+        {/*      </ul>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
-
-
     </div>
       
 

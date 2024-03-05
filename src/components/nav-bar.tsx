@@ -104,6 +104,7 @@ export default function NavBar ({children}: {children: React.ReactNode}) {
       })
       setToken(undefined)
       toast.success('Successfully logged out')
+      window.location.reload();
     } catch (error) {
       toast.error(error?.response?.data)
     }

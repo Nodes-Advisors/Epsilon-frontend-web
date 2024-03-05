@@ -9,11 +9,13 @@ import NALogo from "../assets/images/NA-Full-logo-white.svg";
 import meshBg from "../assets/images/cool-background.svg";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope,faUser } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom'
 
-
-const LoginRegister = ({ setOpenAuthPanel }: { setOpenAuthPanel: React.Dispatch<React.SetStateAction<boolean>> }) => {
+const LoginRegister = () => {
   const setToken = useTokenStore((state) => state.setToken);
   const setUser = useUserStore((state) => state.setUser);
+  const navigate = useNavigate();
+
 
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -32,12 +34,15 @@ const LoginRegister = ({ setOpenAuthPanel }: { setOpenAuthPanel: React.Dispatch<
             'Content-Type': 'application/json',
           },
         });
+
       } else if (mode === 'login') {
+        console.log('login')
         response = await axios.post('http://localhost:5001/login', { email, verificationCode }, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
+
       }
       if (response?.status === 200) {
         setToken(response.data.token);
@@ -46,8 +51,8 @@ const LoginRegister = ({ setOpenAuthPanel }: { setOpenAuthPanel: React.Dispatch<
           status: 'online',
         });
         toast.success(mode === 'login' ? 'Logged in successfully!' : 'Signed up successfully!');
-        setOpenAuthPanel(false);
         window.location.reload();
+        navigate('/home');
       }
     } catch (error) {
       toast.error(error?.response?.data);
