@@ -11,6 +11,14 @@ import FlipPage from 'react-flip-page'
 import Draggable from 'react-draggable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faThumbtack,faClockRotateLeft,faRoute,faSquareCheck, faArrowsUpToLine, faArrowsDownToLine,faArrowsRotate,faEllipsis } from '@fortawesome/free-solid-svg-icons'
+import Followup from "../components/followup";
+import GridLayout from "react-grid-layout";
+import { throttle,debounce } from 'lodash';
+
+
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
 
 
 export default function Home() {
@@ -32,6 +40,14 @@ export default function Home() {
   const [prevTab, setPrevTab] = useState(null)
   const [layoutSize, setLayoutSize] = useState(35)//row1,column1
   const [dragBounds, setDragBounds] = useState({top:-50,bottom:50})//row1,column1
+  const [followUps,setFollowUps] = useState([]);
+  const [followUpPage, setFollowUpPage] = useState(1);
+
+  const layout = [
+    { i: 'a', x: 0, y: 0, w: 1, h: 1 },
+    { i: 'b', x: 0, y: 1, w: 1, h: 1 }
+  ];
+
 
   //const [prevTab, setPrevTab] = useState(null)
   const [animationClass, setAnimationClass] = useState('')
@@ -43,6 +59,15 @@ export default function Home() {
     }
     setPrevTab(switchTab)
   }, [switchTab, prevTab])
+
+  const handleResize = debounce((newSize) => {
+    setLayoutSize(newSize);
+  }, 300); // Adjust the debounce delay as needed
+
+  const handleDivResize = (newSize) => {
+    // Call the debounced handleResize function
+    handleResize(newSize);
+  };
 
   useEffect(() => {
     const ul = ulRef.current
@@ -78,58 +103,74 @@ export default function Home() {
     // console.log(ui.y);
     // console.log((newHeight-layoutSize)/100);
     if (newHeight > 5 && newHeight < 60) {
-      setDragBounds({top: -100,bottom:100});
+      setDragBounds({top: -50,bottom:50});
       setLayoutSize(newHeight);
     } else if (newHeight >= 60){
       setLayoutSize(60);
-      setDragBounds({top:-100,bottom:0});
+      setDragBounds({top:-50,bottom:0});
     } else if (newHeight <= 5){
       setLayoutSize(5);
-      setDragBounds({top:0,bottom:+100});
+      setDragBounds({top:0,bottom:+50});
     }
   };
 
+  const handleDragStop = (e, ui) => {
+    // Calculate new heights based on drag distance;
+    const parentHeight = window.innerHeight;
+    const newHeight = layoutSize + ui.y / parentHeight * 100;
 
 
-  const [followupMessages, setFollowupMessages] = useState([
-    {
-      message: 'Tyler Aroner should catch up with Schenkein at GV for ANTION after contacted on 08-10-2021',
-    },
-    {
-      message: 'Tyler Aroner should catch up with Philippakisa at GV for REGEN after contacted on 27-01-2022',
-    },
-    {
-      message: 'Tyler Aroner should catch up with Philippakisa at GV for STA after contacted on 27-01-2022',
-    },
-    {
-      message: 'Tyler Aroner should catch up with Sullivan at GV for STA after contacted on 03-02-2022',
-    },
-    {
-      message: 'Tyler Aroner should catch up with Robbins at GV for STA after contacted on 03-02-2022',
-    },
-  ])
+    console.log('this iss working')
+    // Update heights within constraints (if any)
+    if (newHeight > 5 && newHeight < 60) {
+      // // Set the position of the draggable component to the center of the parent node
+      // const parentElement = e.target.parentNode; // Adjust this selector based on your HTML structure
+      // const draggableElement = e.target; // Adjust this selector based on your HTML structure
+      //
+      // const parentRect = parentElement.getBoundingClientRect();
+      // const draggableRect = draggableElement.getBoundingClientRect();
+      //
+      // // Calculate the vertical position to center the draggable component within the parent node
+      // const newPosition = parentRect.top + (parentRect.height - draggableRect.height) / 2;
+      //
+      // // Set the top position of the draggable component
+      // draggableElement.style.top = newPosition + 'px';
+      setDragBounds({ top: -200, bottom: 200 });
+      setLayoutSize(newHeight);
+    } else if (newHeight >= 60) {
+      setLayoutSize(60);
+      setDragBounds({ top: -200, bottom: 0 });
+    } else if (newHeight <= 5) {
+      setLayoutSize(5);
+      setDragBounds({ top: 0, bottom: +200 });
+    }
+
+
+  };
+
+
 
   useEffect(() => {
     setPrevTab(switchTab)
   }, [switchTab])
 
-  useEffect(() => {
-    axios.get('http://localhost:5001/getAllGPTPrompt',
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-          'email': user?.email,
-        },
-      })
-      .then(res => res.data)
-      .then(data => {
-        setTooltipData(data)
-      })
-      .catch(error => {
-        console.error('Error:', error)
-      })
-  }, [])
+  // useEffect(() => {
+  //   axios.get('http://localhost:5001/getAllGPTPrompt',
+  //     {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': token,
+  //         'email': user?.email,
+  //       },
+  //     })
+  //     .then(res => res.data)
+  //     .then(data => {
+  //       setTooltipData(data)
+  //     })
+  //     .catch(error => {
+  //       console.error('Error:', error)
+  //     })
+  // }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -187,7 +228,36 @@ export default function Home() {
     if (token) fetchUser()
   }, [token])
 
-  const formatedTime = (time: string) => {
+  useEffect(() => {
+    const fetchFollowUps = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/fundrisingpipeline/followup', {
+          params: { page: followUpPage }, // Increment page number
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+            'email': user?.email,
+          },
+        });
+
+        if (response.status === 200) {
+          // Append new results to the existing list
+          setFollowUps([...followUps, ...response.data]);
+          setFollowUpPage(followUpPage + 1); // Update page number
+        } else {
+          console.error('Unexpected status code:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching follow ups:', error);
+        // Handle error
+      }
+    };
+
+    fetchFollowUps();
+  }, [token, user]);
+
+
+    const formatedTime = (time: string) => {
     const date = new Date(time)
     const year = date.getFullYear()
     const month = date.getMonth() + 1
@@ -438,90 +508,93 @@ export default function Home() {
     )
   }
 
-  return (
-    // <div style={{ width: '100%', minHeight: '90vh' }} >
+  return (// <div style={{ width: '100%', minHeight: '90vh' }} >
     <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'start', marginLeft: '10.25rem' }} >
       <h2 className={styles['news-title']}>{`${userInfo.name} Dashboard`}</h2>
       <div style={{ paddingLeft: '0.5%', width: '97.5%', textAlign: 'left', display: 'grid', height: '80vh' }}>
         <div style={{ gridColumn: '1', position: 'relative'}}>
           <div style={{ gridRow: '1'}}>
-            <div style={{ display: 'flex', position: 'absolute', top: 0,borderRadius:'0.2rem', right: '38px', color: '#DDD',gap:'0.1rem',height:'1.2rem'}}>
+            <div style={{ display: 'flex', position: 'absolute', top: 0,borderRadius:'0.2rem', right: '50px', color: '#DDD',gap:'0.1rem',height:'1.2rem'}}>
               <div onClick={() => setSwitchTab('Pinned')} style={{display:'flex',alignItems:'center',background: switchTab === 'Pinned' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'white',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faThumbtack} style={{color: switchTab === 'Pinned' ? '#FFF' : '#DDD'}}/></span>
                 <span
-                      style={{ marginLeft:'0.4rem',color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
+                  style={{ marginLeft:'0.4rem',color: switchTab === 'Pinned' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight: switchTab === 'Pinned' ? 700 : 400 }}>Pinned</span>
               </div>
               <div onClick={() => setSwitchTab('Milestone')} style={{display:'flex',alignItems:'center',background: switchTab === 'Milestone' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faRoute} style={{color: switchTab === 'Milestone' ? '#FFF' : '#DDD'}}/></span>
                 <span
-                      style={{ marginLeft:'0.4rem', color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
+                  style={{ marginLeft:'0.4rem', color: switchTab === 'Milestone' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Milestone' ? 700 : 400 }}>Milestone</span>
               </div>
               <div onClick={() => setSwitchTab('Approval Request')} style={{display:'flex',alignItems:'center',background: switchTab === 'Approval Request' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faSquareCheck} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
                 <span
-                      style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
+                  style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Approval Request' ? 700 : 400 }}>Approval Request</span>
               </div>
               <div onClick={() => setSwitchTab('Follow Ups')} style={{display:'flex',alignItems:'center',background: switchTab === 'Follow Ups' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
                 <span><FontAwesomeIcon icon={faClockRotateLeft} style={{ color: switchTab === 'Follow Ups' ? '#FFF' : '#DDD'}}/></span>
                 <span
                   style={{ marginLeft:'0.4rem', color: switchTab === 'Approval Request' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Follow Ups' ? 700 : 400 }}>Follow Ups</span>
               </div>
-              </div>
+            </div>
             <div
               ref={ulRef}
               className={`${styles['tab-content']} ${styles[animationClass]}`}
               style={{ height: layoutSize+'vh', width: '97.5%',background:'#aaa1', boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)', borderRadius: '1rem' }}>
               <div style={{ marginTop: '2.5rem' }} className={styles['news-title']}>{switchTab}</div>
               <div style={{ height: (layoutSize-5)+'vh' }} className={styles['animation-container']}>
-                <ul style={{ maxHeight: '75%', overflow: 'auto' }} className={styles['news-ul']}>
+                <ul style={{ maxHeight: '98%', overflow: 'auto' }} className={styles['news-ulfp']}>
                   {
                     switchTab === 'Milestone' &&
-                    <>
-                      <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
-                      <li>Avivo has recieved 16 meetings request this month!</li>
-                      <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
-                    </>
+                      <>
+                          <li>Congratulations, <span>Eliott Harfouche</span>. You've hited 3 deck requests this week.</li>
+                          <li>Avivo has recieved 16 meetings request this month!</li>
+                          <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
+                      </>
                   }
                   {
                     switchTab === 'Pinned' && pinnedMessages.map((message, index) =>
-                    {
-                      return (
-                        <CustomContextMenu tooltip={message} key={index}>
-                          <li>{message.message}</li>
-                        </CustomContextMenu>
-                      )
-                      // }
-                    },
+                      {
+                        return (
+                          <CustomContextMenu tooltip={message} key={index}>
+                            <li>{message.message}</li>
+                          </CustomContextMenu>
+                        )
+                        // }
+                      },
                     )
                   }
                   {
                     switchTab === 'Approval Request' &&
-                    <>
-                      {
-                        approveRequests.length > 0 &&
-                        approveRequests.map((message, index) => (
-                          <li key={message.time}>{message.sendEmail} sent you a request to {message.contactPerson} at {message.fundName} - {formatedTime(message.time)}</li>
-                        ),
-                        )
-                      }
-                    </>
+                      <>
+                        {
+                          approveRequests.length > 0 &&
+                          approveRequests.map((message, index) => (
+                              <li key={message.time}>{message.sendEmail} sent you a request to {message.contactPerson} at {message.fundName} - {formatedTime(message.time)}</li>
+                            ),
+                          )
+                        }
+                      </>
                   }
                   {
                     switchTab === 'Follow Ups' &&
                       <>
                         {
-                          <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>
-                            {
-                              followupMessages.length > 0 &&
-                              followupMessages.map((message, index) => (
-                                  <CustomContextMenu tooltip={message} key={index}>
-                                    <li style={{fontSize:'1.1rem' }}>{message.message}</li>
-                                    {/* <li>{message.message}</li> */}
-                                  </CustomContextMenu>
-                                ),
-                              )
-                            }
-                          </ul>
+                          // <ul style={{ maxHeight: '80%', overflow: 'auto'}} className={styles['news-ul']}>
+                          //   {
+                          //     followUps.length > 0 &&
+                          //     followUps.map((item) => (
+                          //         <li style={{fontSize:'1.1rem' }}>{item.account_holder}</li>
+                          //         // <CustomContextMenu tooltip={item.account} key={index}>
+                          //         //   <li style={{fontSize:'1.1rem' }}>{message.message}</li>
+                          //         //   {/* <li>{message.message}</li> */}
+                          //         // </CustomContextMenu>
+                          //       ),
+                          //     )
+                          //   }
+                          // </ul>
+                          <div className={styles['news-ulfp']} style={{overflowX:'hidden',overflowY:'auto'}}>
+                            <Followup user={userInfo}/>
+                          </div>
                         }
                       </>
                   }
@@ -599,8 +672,8 @@ export default function Home() {
         {/*</div>*/}
       </div>
     </div>
-      
 
-  // </div>
+
+    // </div>
   )
 }

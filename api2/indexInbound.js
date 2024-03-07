@@ -725,6 +725,42 @@ app.get('/fundrisingpipeline', async (req, res) => {
   }
 })
 
+app.get('/fundrisingpipeline/followup', async (req, res) => {
+  try {
+    const database = client.db('dev');
+    const collection = database.collection('FundraisingPipeline');
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 10;
+
+    const skipCount = (page - 1) * pageSize;
+
+    const currentTime = new Date();
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const oneWeekAgoMillis = oneWeekAgo.getTime();
+
+    const reminders = await collection.find({
+      last_updated_status_date: { $lt: oneWeekAgoMillis },
+      pass_contacted: { $ne: 1 }, // Filter out if pass_contacted is 1
+      pass_meeting: { $ne: 1 },    // Filter out if pass_meeting is 1
+      pass_deck: { $ne: 1 },       // Filter out if pass_deck is 1
+      pass_dd: { $ne: 1 }          // Filter out if pass_dd is 1
+    })
+        .sort({ last_updated_status_date: 1 })
+        .skip(skipCount)
+        .limit(pageSize)
+        .toArray();
+
+    res.json(reminders);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    res.status(500).send('Error fetching data');
+  }
+});
+
+
+
 app.get('/savedcollections', async (req, res) => {
   try {
     const database = client.db('dev')
