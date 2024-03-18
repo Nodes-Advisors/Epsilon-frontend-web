@@ -4,7 +4,7 @@ import LocationIcon from '../assets/svgs/location.svg?react'
 import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useClientsStore, useFundsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
@@ -16,6 +16,16 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
+import WebSocketContext from '../websocket/WebsocketContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faTags,
+  faBook,
+  faMagnifyingGlassDollar,
+  faDownLeftAndUpRightToCenter,
+  faUpRightAndDownLeftFromCenter
+} from '@fortawesome/free-solid-svg-icons'
+import {handleFullTextFilter} from "../lib/utils";
 
 export default function ClientProfile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
@@ -40,6 +50,8 @@ export default function ClientProfile(): JSX.Element {
   const newCollectionRef = useRef<HTMLInputElement>(null)
   const [nodesTeam, setNodesTeam] = useState<any[]>([])
 
+  const [switchTab,setSwitchTab]= useState<'Historical Log' | 'Active Funds' >('Historical Log')
+  const [rowStates, setRowStates] = useState({});
   function formatDate(timestamp) {
     const date = new Date(timestamp)
   
@@ -61,6 +73,14 @@ export default function ClientProfile(): JSX.Element {
   if (!id) {
     throw new Error('fund id not found')
   }
+
+  const toggleRow = (index) => {
+    setRowStates(prevState => {
+      const newState = { ...prevState };
+      newState[index] = !newState[index]; // Toggle the state or set to true if not present
+      return newState;
+    });
+  };
   
   useEffect(() => {
     const record = clients.filter((record) => record._id === id)[0]
@@ -139,8 +159,8 @@ export default function ClientProfile(): JSX.Element {
   
   const getImage = (name: string | undefined | null) => {
     if (name) {
-      console.log(name)
-      console.log(nodesTeam)
+      // console.log(name)
+      // console.log(nodesTeam)
       const found = nodesTeam.find(item => item.name && item.name.includes(name))
       // console.log(found)
       if (found) {
@@ -153,6 +173,17 @@ export default function ClientProfile(): JSX.Element {
     return ''
   }
 
+  const getFirstSentence = (info) => {
+    // Split the info into words
+    const words = info.split(' ');
+    // Take the first 10 words
+    const firstTenWords = words.slice(0, 30);
+    // Join the first 10 words back into a string
+    const firstTenWordsString = firstTenWords.join(' ');
+    return firstTenWordsString;
+  };
+
+
   return (
     <div 
       style={{ overflow: 'hidden', position: 'relative', gap: '3vh', display: 'flex', flexDirection: 'column', justifyContent: 'start', alignItems: 'center', height: '90vh' }}>
@@ -162,9 +193,8 @@ export default function ClientProfile(): JSX.Element {
         <img
           
           className={styles['back-icon']} src={BackIcon} alt="" />
-        <h3 className={styles['back-text']}>Return to Client Card Page</h3>
       </div>
-      <div>
+      <div style={{position:"absolute",left:'10rem',top:'8rem'}}>
         <div style={{ display: 'flex'}}>
           <div className={styles['left-panel']}>
             {
@@ -173,8 +203,8 @@ export default function ClientProfile(): JSX.Element {
                 <Skeleton className={styles['venture-logo']}  />
                 : 
                 <div style={{ position: 'relative' }}>
-                  <AsyncImage src={record.Logo ? record.Logo : ''} alt='' 
-                    style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
+                  <AsyncImage src={record.logo ? record.logo : ''} alt=''
+                    style={{  width: ' 15rem', height: '15rem', objectFit: 'contain', backgroundColor: '#999',
                       border: '1px solid transparent', borderRadius: '0.5px',
                     }}
 
@@ -209,7 +239,7 @@ export default function ClientProfile(): JSX.Element {
                           <ul
                             className={styles['relationship-list']}
                             style={{ listStyleType: 'none', color: '#9b93af', fontSize: '1.25rem',
-                              height: '30vh', overflowY: 'auto', overflowX: 'hidden',
+                              height: '20vh', overflowY: 'auto', overflowX: 'hidden',
                               paddingRight: '4rem', margin: '0', display: 'flex', flexDirection: 'column', gap: '4rem' }}
                           >
                             {
@@ -255,7 +285,7 @@ export default function ClientProfile(): JSX.Element {
             <div className={styles['name-layout']}>
               <div className={styles.name}>
                 <span className={styles['partial-name']}>
-                  {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['acronym'] as string : 'no name'}
+                  {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['Funds'] as string : 'no name'}
                 </span>
               </div>
               {/* {
@@ -382,7 +412,9 @@ export default function ClientProfile(): JSX.Element {
                         record['short_info'] 
                           ? 
                           <span className={styles['book-wrapper']}>
-                            <img src={BookIcon} className={styles['book-client-card-icon']} alt="" />
+                            <div className={styles['book-text-2']} style={{left:"0",width:"40rem"}}>
+                              {getFirstSentence(record['short_info'] )}
+                            </div>
                             <span className={styles['book-client-card-tooltip']}>{record['short_info']}</span>
                           </span>
                           : 
@@ -393,10 +425,20 @@ export default function ClientProfile(): JSX.Element {
               </p>
             </div>
             <div className={styles['model-layout']}>
-              <h2 className={styles.description}>Historical Log</h2>
-  
-              <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto' }}>
-                <table style={{ textAlign: 'left' }}>
+              <div style={{display:'flex', height:'2rem'}}>
+                <div onClick={() => setSwitchTab('Historical Log')} style={{display:'flex',alignItems:'center',background: switchTab === 'Historical Log' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                  <span><FontAwesomeIcon icon={faBook} className={styles.tagdescription} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
+                  <span className={styles.tagdescription}
+                        style={{ marginLeft:'0.4rem', color: switchTab === 'Historical Log' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Historical Log' ? 700 : 400 }}>Historical Log</span>
+                </div>
+                <div onClick={() => setSwitchTab('Active Funds')} style={{display:'flex',alignItems:'center',background: switchTab === 'Active Funds' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                  <span><FontAwesomeIcon icon={faMagnifyingGlassDollar} className={styles.tagdescription} style={{ color: switchTab === 'Active Funds' ? '#FFF' : '#DDD'}}/></span>
+                  <span className={styles.tagdescription}
+                        style={{ marginLeft:'0.4rem', color: switchTab === 'Active Funds' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Active Funds' ? 700 : 400 }}>Active Funds</span>
+                </div>
+              </div>
+              <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto',width:'100%' }}>
+                <table style={{ textAlign: 'left', tableLayout: 'fixed', overflowX: "hidden", width: '100%' }}>
                   <thead>
                     {
                       isLoading 
@@ -407,7 +449,6 @@ export default function ClientProfile(): JSX.Element {
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
-                          <th><Skeleton width={'3rem'} /></th>
                         </tr>
                         :
                       
@@ -419,59 +460,76 @@ export default function ClientProfile(): JSX.Element {
                             <th>VC</th>
                             <th>VC Contact</th>
                             <th>Status</th>
-                            <th>Comments</th>
                           </tr>
                           :
                           <h3>No log record</h3>
                     }
                   </thead>
                   <tbody>
-                    {
-                      isLoading 
-                        ?
-                        Array(5).fill(0).map((_, i) => (
-                          <tr key={i}>
-                            <td><Skeleton width={'10rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'3rem'} /></td>
+                  {
+                    isLoading
+                      ?
+                      Array(5).fill(0).map((_, i) => (
+                        <tr key={i}>
+                          <td><Skeleton width={'10rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                          <td><Skeleton width={'5rem'} /></td>
+                        </tr>
+                      ))
+                      :
+                      hislogs.map((log, i) => (
+                        <React.Fragment key={i}>
+                          <tr>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{formatDate(log.Date)}</td>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Client ? log.Client : 'No client record'}</td>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Contact ? log.Contact : 'No contact record'}</td>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
                           </tr>
-                        ))
-                        :
-                        hislogs.map((log, i) => (
-                          <tr key={i}>
-                            <td>{formatDate(log.Date)}</td>
-                            {/* <td>{log.Client ? log.Client : 'No client record'}</td> */}
-                            {/* <td>{log.current_stage ? log.current_stage : 'No stage record'}</td> */}
-                            
-                            {/* <td>{log.round_size ? log.round_size : 'No round size record'}</td> */}
-                            {/* <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td> */}
-                            <td>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
-                            <td>{log.VC ? log.VC : 'No VC record'}</td>
-                            <td>{log.Contact ? log.Contact : 'No contact record'}</td>
-                            <td>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
-                            <td>{log.Coments 
-                              ? 
-                              <div className={styles['book-wrapper']}>
-                                <img className={styles['book-icon']} src={BookIcon} />
-                                <span className={styles['book-tooltip']}>{log.Coments}</span>
-                              
-                              </div>
-                              : 
-                              'No'
-                            }</td>
-                          </tr>
-                        ))
-                    }
+                          { !rowStates[i] && log.Coments && (
+                            <tr >
+                              <td className={styles['logrow']} colSpan="5" >
+                                <div style={{ position: 'relative' }}>
+                                  <div className={styles['logContent']}>
+                                    <span >{log.Coments}</span>
+                                  </div>
+                                  <FontAwesomeIcon
+                                    style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                    onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                    icon={faUpRightAndDownLeftFromCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          { rowStates[i] && log.Coments && (
+                            <tr >
+                              <td className={styles['logrow']} colSpan="5" >
+                                <div style={{ position: 'relative' }}>
+                                  <div className={styles['logFullContent']}>
+                                    <span >{log.Coments}</span>
+                                  </div>
+                                  <FontAwesomeIcon
+                                    style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                    onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                    icon={faDownLeftAndUpRightToCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))
+                  }
                   </tbody>
                 </table>
               </div>
 
             </div>
           </div>
-          <div className={styles['right-panel']}>
+          <div style={{width:'20%'}} className={styles['right-panel']}>
         
             <div className={styles['investor-title-layout']}>
               <DotCircleIcon className={styles['dot-circle-investor-icon']} />
@@ -504,7 +562,7 @@ export default function ClientProfile(): JSX.Element {
                     let imgUrl = undefined
                     let redirectedId = undefined
                     if (relatedFund.length > 0) {
-                      imgUrl = relatedFund[0]['Logo']
+                      imgUrl = relatedFund[0]['logo']
                       redirectedId = relatedFund[0]['_id']
                     }
                     return (
@@ -526,7 +584,23 @@ export default function ClientProfile(): JSX.Element {
                   )
                   : 'no common passes'
             }
-          
+
+            <div className={styles['investor-title-layout']}>
+              <FontAwesomeIcon style={{fontSize:'1.4rem'}} icon={faTags} />
+              <span className={styles['investor-title-text']}>Sectors</span>
+            </div>
+            {record && record['Sector'] && (
+              <div style={{ marginTop:'-1rem',marginBottom: '10px',width:'95%' }}> {/* Add margin bottom */}
+                {record['Sector'].split(',').map((sector, index) => (
+                  <div key={index} style={{ display: 'inline-block', marginRight: '2px', marginBottom: '2px', padding: '1px 5px', borderRadius: '5px', backgroundColor: '#754DCA', fontSize: '16px' }}>
+                    {sector.trim()} {/* trim() removes any leading or trailing spaces */}
+                  </div>
+                ))}
+                {record['Sector'].split(',').length > 3 && <div style={{ display: 'inline-block', marginRight: '5px' }}>...</div>} {/* Display ellipsis if there are more than three tags */}
+              </div>
+            )}
+
+
 
           </div>
 

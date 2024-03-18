@@ -4,7 +4,7 @@ import LocationIcon from '../assets/svgs/location.svg?react'
 import DotCircleIcon from '../assets/svgs/dot-circle.svg?react'
 import YCLogo from '../assets/images/yc_logo.png'
 import VectorLogo from '../assets/svgs/vector.svg?react'
-import { useState, useEffect, useRef, useContext } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { AsyncImage } from 'loadable-image'
 import Skeleton from 'react-loading-skeleton'
 import { useFundsStore, useSavedFundsStore, useTokenStore, useUserStore } from '../store/store'
@@ -17,6 +17,16 @@ import axios from 'axios'
 import BackIcon from '../assets/images/back.png'
 import { useNavigate } from 'react-router-dom'
 import WebSocketContext from '../websocket/WebsocketContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {
+  faTags,
+  faBook,
+  faMagnifyingGlassDollar,
+  faDownLeftAndUpRightToCenter,
+  faUpRightAndDownLeftFromCenter
+} from '@fortawesome/free-solid-svg-icons'
+import {handleFullTextFilter} from "../lib/utils";
+
 
 export default function Profile(): JSX.Element {
   // const { user, isLoading } = useAuth0()
@@ -46,7 +56,9 @@ export default function Profile(): JSX.Element {
   const [nodesTeam, setNodesTeam] = useState<any[]>([])
   const token = useTokenStore(state => state.token)
   const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
-  
+  const [switchTab,setSwitchTab]= useState<'Historical Log' | 'Active Funds' >('Historical Log')
+  const [rowStates, setRowStates] = useState({});
+
   function formatDate(timestamp) {
     const date = new Date(timestamp)
   
@@ -60,6 +72,14 @@ export default function Profile(): JSX.Element {
   
     return `${day}/${month}/${year}`
   }
+
+  const toggleRow = (index) => {
+    setRowStates(prevState => {
+      const newState = { ...prevState };
+      newState[index] = !newState[index]; // Toggle the state or set to true if not present
+      return newState;
+    });
+  };
   
   const funds = useFundsStore(state => state.funds)
   const id = window.location.pathname.split('/')[2]
@@ -255,7 +275,7 @@ export default function Profile(): JSX.Element {
         if (res.status === 200) {
           setLoading(false)
           setNodesTeam(res.data)
-          console.log(res.data)
+          // console.log(res.data)
         }
       } catch (error) {
         setLoading(false)
@@ -265,6 +285,42 @@ export default function Profile(): JSX.Element {
     if (token) fetchNodesTeam()
     
   }, [token])
+
+  // Function to handle sector click
+  const handleSectorClick = (sector: string) => {
+    // Retrieve existing filter from localStorage
+    const redirectionUrl = `/fund-cards`;
+    const existingFilter = localStorage.getItem('filter');
+    let updatedFilter;
+
+    if (existingFilter) {
+      // Parse existing filter from localStorage
+      updatedFilter = JSON.parse(existingFilter);
+      // Update 'Sector' filter
+      updatedFilter['Sector'] = [sector];
+    } else {
+      // If no existing filter, initialize with empty values for other filters
+      updatedFilter = {
+        '': [],
+        'Account Manager': [],
+        'Deals': [],
+        'Investors': [],
+        'Location': [],
+        'Status': [],
+        'Type': [],
+        'Contact': [],
+        'Suitability Score': [],
+        'Co-Investors': [],
+        'Sector': [sector], // Update 'Sector' filter
+        'Clear Filters': [],
+        'Responsiveness Rate': [],
+      };
+    }
+    // Store updated filter in localStorage
+    localStorage.setItem('filter', JSON.stringify(updatedFilter));
+    navigate(redirectionUrl);
+  };
+
 
   const getImage = (name: string | undefined | null) => {
     if (name) {
@@ -291,9 +347,8 @@ export default function Profile(): JSX.Element {
         <img
           
           className={styles['back-icon']} src={BackIcon} alt="" />
-        <h3 className={styles['back-text']}>Return to Fund Card Page</h3>
       </div>
-      <div>
+      <div style={{position:"absolute",left:'10rem',top:'8rem'}}>
         <div style={{ display: 'flex'}}>
           <div className={styles['left-panel']}>
             {
@@ -302,8 +357,8 @@ export default function Profile(): JSX.Element {
                 <Skeleton className={styles['venture-logo']}  />
                 : 
                 <div style={{ position: 'relative' }}>
-                  <AsyncImage src={record.Logo ? record.Logo : ''} alt='' 
-                    style={{  width: ' 20.57144rem', height: '20.47456rem', objectFit: 'contain', backgroundColor: '#999', 
+                  <AsyncImage src={record.Logo ? record.Logo : ''} alt=''
+                    style={{  width: ' 15rem', height: '15rem', objectFit: 'contain', backgroundColor: '#999',
                       border: '1px solid transparent', borderRadius: '0.5px',
                     }}
 
@@ -348,9 +403,6 @@ export default function Profile(): JSX.Element {
                     </>  
                     :
                     <>
-                    
-                      
-                    
                       {
                         hislogs.length > 0
                           ?
@@ -517,10 +569,20 @@ export default function Profile(): JSX.Element {
               </p>
             </div>
             <div className={styles['model-layout']}>
-              <h2 className={styles.description}>Historical Log</h2>
-  
-              <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto' }}>
-                <table style={{ textAlign: 'left' }}>
+              <div style={{display:'flex', height:'2rem'}}>
+                <div onClick={() => setSwitchTab('Historical Log')} style={{display:'flex',alignItems:'center',background: switchTab === 'Historical Log' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                  <span><FontAwesomeIcon icon={faBook} className={styles.tagdescription} style={{ color: switchTab === 'Approval Request' ? '#FFF' : '#DDD'}}/></span>
+                  <span className={styles.tagdescription}
+                        style={{ marginLeft:'0.4rem', color: switchTab === 'Historical Log' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Historical Log' ? 700 : 400 }}>Historical Log</span>
+                </div>
+                <div onClick={() => setSwitchTab('Active Funds')} style={{display:'flex',alignItems:'center',background: switchTab === 'Active Funds' ? '#3A3A65' : '#1E2351',padding:'1.2rem',border:'grey',borderTopLeftRadius:'0.6rem',borderTopRightRadius:'0.6rem'}}>
+                  <span><FontAwesomeIcon icon={faMagnifyingGlassDollar} className={styles.tagdescription} style={{ color: switchTab === 'Active Funds' ? '#FFF' : '#DDD'}}/></span>
+                  <span className={styles.tagdescription}
+                        style={{ marginLeft:'0.4rem', color: switchTab === 'Active Funds' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Active Funds' ? 700 : 400 }}>Active Deals</span>
+                </div>
+              </div>
+              <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto',width:'100%' }}>
+                <table style={{ textAlign: 'left', tableLayout: 'fixed', overflowX: "hidden", width: '100%' }}>
                   <thead>
                     {
                       isLoading 
@@ -531,7 +593,6 @@ export default function Profile(): JSX.Element {
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
                           <th><Skeleton width={'5rem'} /></th>
-                          <th><Skeleton width={'3rem'} /></th>
                         </tr>
                         :
                       
@@ -543,7 +604,6 @@ export default function Profile(): JSX.Element {
                             <th>Account Manager</th>
                             <th>VC Contact</th>
                             <th>Status</th>
-                            <th>Comments</th>
                           </tr>
                           :
                           <h3>No log record</h3>
@@ -559,34 +619,53 @@ export default function Profile(): JSX.Element {
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
                             <td><Skeleton width={'5rem'} /></td>
-                      
                             <td><Skeleton width={'5rem'} /></td>
-                            <td><Skeleton width={'3rem'} /></td>
                           </tr>
                         ))
                         :
                         hislogs.map((log, i) => (
-                          <tr key={i}>
-                            <td>{formatDate(log.Date)}</td>
-                            <td>{log.Client ? log.Client : 'No client record'}</td>
-                            {/* <td>{log.current_stage ? log.current_stage : 'No stage record'}</td> */}
-                            
-                            {/* <td>{log.round_size ? log.round_size : 'No round size record'}</td> */}
-                            {/* <td>{log.TotalRaised ? log.TotalRaised : 'No total raised record'}</td> */}
-                            <td>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
-                            <td>{log.Contact ? log.Contact : 'No contact record'}</td>
-                            <td>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
-                            <td>{log.Coments 
-                              ? 
-                              <div className={styles['book-wrapper']}>
-                                <img className={styles['book-icon']} src={BookIcon} />
-                                <span className={styles['book-tooltip']}>{log.Coments}</span>
-                              
-                              </div>
-                              : 
-                              'No'
-                            }</td>
-                          </tr>
+                          <React.Fragment key={i}>
+                            <tr>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{formatDate(log.Date)}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Client ? log.Client : 'No client record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Contact ? log.Contact : 'No contact record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
+                            </tr>
+                            { !rowStates[i] && log.Coments && (
+                              <tr >
+                                <td className={styles['logrow']} colSpan="5" >
+                                  <div style={{ position: 'relative' }}>
+                                    <div className={styles['logContent']}>
+                                    <span >{log.Coments}</span>
+                                    </div>
+                                    <FontAwesomeIcon
+                                      className={styles['fonticon-button']}
+                                      style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                      onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                      icon={faUpRightAndDownLeftFromCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                            { rowStates[i] && log.Coments && (
+                              <tr >
+                                <td className={styles['logrow']} colSpan="5" >
+                                  <div style={{ position: 'relative' }}>
+                                    <div className={styles['logFullContent']}>
+                                      <span >{log.Coments}</span>
+                                    </div>
+                                    <FontAwesomeIcon
+                                      style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                      onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                      icon={faDownLeftAndUpRightToCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         ))
                     }
                   </tbody>
@@ -595,7 +674,7 @@ export default function Profile(): JSX.Element {
 
             </div>
           </div>
-          <div className={styles['right-panel']}>
+          <div style={{width:'20%'}} className={styles['right-panel']}>
         
             <div className={styles['investor-title-layout']}>
               <DotCircleIcon className={styles['dot-circle-investor-icon']} />
@@ -624,18 +703,18 @@ export default function Profile(): JSX.Element {
                 record['Co-Investors'] && (record['Co-Investors'] as string).length > 0
                   ? (
                 record['Co-Investors'] as string).split(',').map((investor: string) => {
-                    const relatedFund = funds.filter((fund) => fund['Funds'] === investor)
-                    let imgUrl = undefined
+                    investor = investor.trim();
+                    const investorRegex = new RegExp(investor, 'i');
+                    const relatedFund = funds.filter((fund) => investorRegex.test(fund['Funds']));
+                    console.log(investor)
                     let redirectedId = undefined
                     if (relatedFund.length > 0) {
-                      imgUrl = relatedFund[0]['Logo']
                       redirectedId = relatedFund[0]['_id']
                     }
                     return (
                       <div key={investor} className={styles['investor-layout']}>
 
-                        <img src={imgUrl ? imgUrl : YCLogo} alt='' className={styles['investor-logo']} />
-                        <div 
+                        <div
           
                           className={styles['investor-text']}>
                           <span 
@@ -658,7 +737,24 @@ export default function Profile(): JSX.Element {
                   )
                   : 'no co-investors'
             }
-          
+            <div className={styles['investor-title-layout']}>
+              <FontAwesomeIcon style={{fontSize:'1.4rem'}} icon={faTags} />
+              <span className={styles['investor-title-text']}>Sectors</span>
+            </div>
+            {record && record['Sector'] && (
+              <div style={{ marginTop:'-1rem',marginBottom: '10px',width:'95%' }}> {/* Add margin bottom */}
+                {record['Sector'].split(',').map((sector, index) => (
+                  <div className={styles['sector-button-redirect']} key={index} onClick={() => handleSectorClick(sector.trim())}>
+                    {sector.trim()} {/* trim() removes any leading or trailing spaces */}
+                  </div>
+                ))}
+                {record['Sector'].split(',').length > 3 && <div style={{ display: 'inline-block', marginRight: '5px' }}>...</div>} {/* Display ellipsis if there are more than three tags */}
+              </div>
+            )}
+
+
+
+
 
           </div>
 

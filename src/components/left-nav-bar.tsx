@@ -46,12 +46,12 @@ export default function LeftNavBar({style, show}: {style?: React.CSSProperties, 
 
       <Divider style={{ marginTop: '0.7rem', marginBottom: '0.7rem' }} height='0.1625rem' width='5.25rem' color='rgba(255, 255, 255, 0.6)'/>
       <nav>
-        <NavWidget src={HomeIcon} Svg={KPIDashIcon} width='3.75rem' height='3.75rem' to='/' text='Home' />
-        <NavWidget src={ClientImg} Svg={KPIDashIcon} width='4rem' height='4rem' to='/client-cards' text= 'Clients'/>
-        <NavWidget src={KPIDashImg} Svg={KPIDashIcon} width='4rem' height='4rem' to='/kpi-dash' text= 'KPI Dash'/>
-        <NavWidget src={FundCardImg} Svg={FundCardIcon} width='4rem' height='4rem' to='/fund-cards' text='Fund Cards' />
-        <NavWidget src={IntelligenceImg} Svg={IntelligenceIcon} width='5rem' height='5rem' to='/intelligence' text='Intelligence' />
-        <NavWidget src={DatabaseImg} Svg={IntelligenceIcon} width='4.5rem' height='4.5rem' to='/database' text='Database Interaction' />
+        <NavWidget src={HomeIcon} Svg={KPIDashIcon} width='3.25rem' height='3.725rem' to='/' text='Home' />
+        <NavWidget src={ClientImg} Svg={KPIDashIcon} width='3.5rem' height='3.5rem' to='/client-cards' text= 'Clients'/>
+        <NavWidget src={KPIDashImg} Svg={KPIDashIcon} width='3.5rem' height='3.5rem' to='/kpi-dash' text= 'KPI Dash'/>
+        <NavWidget src={FundCardImg} Svg={FundCardIcon} width='3.5rem' height='3.5rem' to='/fund-cards' text='Fund Cards' />
+        <NavWidget src={IntelligenceImg} Svg={IntelligenceIcon} width='4.5rem' height='4.5rem' to='/intelligence' text='Intelligence' />
+        <NavWidget src={DatabaseImg} Svg={IntelligenceIcon} width='4rem' height='4rem' to='/database' text='Database Interaction' />
       </nav>
       {/* <GroupButtonIcon id={styles['group-button']} /> */}
     </aside>

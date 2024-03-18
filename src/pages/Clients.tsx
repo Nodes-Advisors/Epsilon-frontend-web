@@ -535,23 +535,15 @@ export default function Clients() {
 
                           </div>
                           <div style={{ position: 'relative' }}>
-                            <FontAwesomeIcon
-                              icon={faNetworkWired}
-                              onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'; }}
+                            <AsyncImage
+                              onMouseEnter={(e) => { (e.target as HTMLElement).style.cursor = 'pointer'  }}
                               onClick={() => {
-                                localStorage.setItem('client-filter', JSON.stringify(filteredList));
-                                localStorage.setItem('client-id', record._id as string);
-                                navigate(`/client-card/${record._id}`);
+                                localStorage.setItem('client-filter', JSON.stringify(filteredList))
+                                localStorage.setItem('client-id', record._id as string)
+                                navigate(`/client-card/${record._id}`)
                               }}
-                              style={{
-                                borderRadius: '0.25rem',
-                                border: `0.25rem solid transparent`,
-                                width: '3rem',
-                                height: '3rem',
-                                objectFit: 'contain',
-                                background: 'rgba(255, 255, 255, 0)'
-                              }}
-                            />{/* <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} /> */}
+                              src={record['logo'] ? (record['logo']) : venture_logo} style={{ borderRadius: '0.25rem', border: `0.25rem solid transparent`, width: '5rem', height: '5rem', objectFit: 'contain', background: 'rgba(255, 255, 255, 0.5)' }} />
+                            {/* <FundStatus colorList={generateColorList(record['Contact'] ? (record['Contact'].split(',')).length : 0, record.Contact, record.Status)} /> */}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem', lineHeight: 1, alignItems: 'start' }}>
                             <span onClick={() => { 

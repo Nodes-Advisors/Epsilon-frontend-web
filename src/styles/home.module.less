@@ -388,6 +388,69 @@ section {
     }
 }
 
+.news-ulfollow {
+    // padding: 2rem;
+    overflow: auto;
+    border-radius: 0.5rem;
+    // background-color: #aaa1;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.5rem;
+    //max-height: 22vh;
+    max-width: 135rem;
+    width: -moz-fit-content;
+    width: fit-content;
+    width: 95%;
+    border: none;
+    // box-shadow: 0px 0px 1px 0px rgba(255, 255, 255, 0.90);
+    list-style-type: none;
+    margin: 0;
+    // margin-left: 30%;
+    padding: 1rem;
+    padding-top: 0;
+    text-align: left;
+    font-size: 0.93758rem;
+    font-family: Inter;
+}
+
+.news-ulfollow::-webkit-scrollbar { /* For WebKit browsers */
+    width: 4px;
+}
+
+.news-ulfollow::-webkit-scrollbar-track { /* For WebKit browsers */
+    background: #ccc;
+}
+
+.news-ulfollow::-webkit-scrollbar-thumb { /* For WebKit browsers */
+    background: #888;
+    height: 50px;
+}
+
+.news-ulfollow::-webkit-scrollbar-thumb:hover { /* For WebKit browsers */
+    background: #555;
+}
+
+.news-ulfollow li {
+    border-radius: 0.5rem;
+    position: relative;
+    z-index: 10;
+    text-wrap: wrap;
+    padding: 0.25rem;
+    padding: 0.25rem;
+    text-wrap: wrap;
+    font-size: 1.3rem;
+    // &:first-child {
+    //     margin-top: 0;
+    //// }
+    //&:hover {
+    //    background-color: #7774;
+    //}
+    //&:active {
+    //    outline: #7778 solid 0.1rem;
+    //}
+}
+
 .news-ulfp {
     // padding: 2rem;
     overflow: auto;
@@ -442,13 +505,13 @@ section {
     font-size: 1.3rem;
     // &:first-child {
     //     margin-top: 0;
-    // }
-    &:hover {
-        background-color: #7774;
-    }
-    &:active {
-        outline: #7778 solid 0.1rem;
-    }
+    //// }
+    //&:hover {
+    //    background-color: #7774;
+    //}
+    //&:active {
+    //    outline: #7778 solid 0.1rem;
+    //}
 }
 
 .company-manager {
@@ -466,6 +529,17 @@ section {
     font-size: 0.9em;
     font-weight: 800;
     color: #ddda;
+    &:hover {
+        // background-color: #D23548;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+
+.lp-hover {
+    font-size: 0.9em;
+    font-weight: 800;
+    color: rgba(73, 73, 73, 0.67);
     &:hover {
         // background-color: #D23548;
         cursor: pointer;
@@ -706,19 +780,31 @@ section {
         opacity: 0;
     }
 }
-/* Apply animations to classes */
-.tab-content {
-    animation-duration: 0.3s;
-    transform: translateZ(0);
+/* Define the keyframes for the slower and more subtle shaking animation */
+@keyframes shakeAnimation {
+    0% { transform: translateX(-1px); }
+    25% { transform: translateX(1px); }
+    50% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+    100% { transform: translateX(-1px); }
 }
 
+/* Apply the shakeAnimation when the tab enters */
 .tab-enter {
-    animation-name: slideIn;
+    animation-name: shakeAnimation;
+    animation-duration: 0.4s; /* Adjust the duration for the entering animation */
+    animation-timing-function: ease; /* Adjust timing function as needed */
+    animation-fill-mode: forwards; /* Ensure final keyframe is maintained */
 }
 
+/* Apply the shakeAnimation when the tab exits */
 .tab-exit {
-    animation-name: slideOut;
+    animation-name: shakeAnimation;
+    animation-duration: 0.4s; /* Adjust the duration for the exiting animation */
+    animation-timing-function: ease; /* Adjust timing function as needed */
+    animation-fill-mode: forwards; /* Ensure final keyframe is maintained */
 }
+
 
   .animation-container {
     width: 100%; // maximum width of the rotating element

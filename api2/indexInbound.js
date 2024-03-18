@@ -1,5 +1,5 @@
 import express from 'express'
-import { MongoClient } from 'mongodb'
+import { MongoClient, ObjectId } from 'mongodb'
 import cors from 'cors'
 import nodemailer from 'nodemailer'
 import jwt from 'jsonwebtoken'
@@ -732,22 +732,37 @@ app.get('/fundrisingpipeline/followup', async (req, res) => {
 
     const page = parseInt(req.query.page) || 1;
     const pageSize = 10;
-
     const skipCount = (page - 1) * pageSize;
 
-    const currentTime = new Date();
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const oneWeekAgoMillis = oneWeekAgo.getTime();
+    // Extract the account holder parameter from the query
+    const accountHolder = req.query.account_holder ? req.query.account_holder.toLowerCase() : null;
 
-    const reminders = await collection.find({
-      last_updated_status_date: { $lt: oneWeekAgoMillis },
-      pass_contacted: { $ne: 1 }, // Filter out if pass_contacted is 1
-      pass_meeting: { $ne: 1 },    // Filter out if pass_meeting is 1
-      pass_deck: { $ne: 1 },       // Filter out if pass_deck is 1
-      pass_dd: { $ne: 1 }          // Filter out if pass_dd is 1
-    })
-        .sort({ last_updated_status_date: 1 })
+    // Construct the filter object based on the query parameters
+    const filter = {
+      pass_contacted: { $ne: 1 },
+      pass_meeting: { $ne: 1 },
+      pass_deck: { $ne: 1 },
+      pass_dd: { $ne: 1 }
+    };
+
+    // If account_holder parameter is provided, add it to the filter
+    if (accountHolder) {
+      filter.account_holder = { $regex: accountHolder, $options: 'i' }; // i option for case-insensitive
+    }
+
+    // Check if last_updated_status_date is in milliseconds
+    const lastUpdatedStatusDateInput = req.query.last_updated_status_date;
+    if (lastUpdatedStatusDateInput && !isNaN(lastUpdatedStatusDateInput)) {
+      filter.last_updated_status_date = { $lt: parseInt(lastUpdatedStatusDateInput) };
+    } else {
+      // If not in milliseconds, assume it's a date format
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      filter.last_updated_status_date = { $lt: oneWeekAgo };
+    }
+
+    const reminders = await collection.find(filter)
+        .sort({ last_updated_status_date: -1 })
         .skip(skipCount)
         .limit(pageSize)
         .toArray();
@@ -758,6 +773,110 @@ app.get('/fundrisingpipeline/followup', async (req, res) => {
     res.status(500).send('Error fetching data');
   }
 });
+
+
+
+app.post('/fundrisingpipeline/updatestatus', async (req, res) => {
+  try {
+    const { _id, nextStatus, comment } = req.body;
+
+    if (!_id || !nextStatus) {
+      return res.status(400).json({ error: 'Missing parameters: nextStatus are required.' });
+    }
+
+    const database = client.db('dev');
+    const collection = database.collection('FundraisingPipeline');
+    const collectionLog = database.collection('HistoricalLogs');
+
+    const pipelineObj = await collection.findOne({ _id: new ObjectId(_id) });
+
+    if (!pipelineObj) {
+      return res.status(404).json({ error: 'Pipeline not found with the provided _id.' });
+    }
+
+    const currentTime = new Date();
+
+    // Handle different nextStatus scenarios
+    switch (nextStatus.toLowerCase()) {
+      case 'follow_up':
+        await collection.updateOne(
+            { _id: new ObjectId(_id) },
+            { $set: { last_updated_status_date: currentTime } }
+        );
+        break;
+
+      case 'deck_request':
+        await collection.updateOne(
+            { _id: new ObjectId(_id) },
+            {
+              $set: {
+                deck_request: 1,
+                last_updated_status_date: currentTime
+              }
+            }
+        );
+
+        // Create a log object
+        const logObj = {
+          Date: new Date().getTime(),
+          Nodes: pipelineObj.account_holder,
+          VC: pipelineObj.LP_pitched,
+          Contact: pipelineObj.LP_contact_pitched,
+          Client: pipelineObj.company_name,
+          fundraising_pipeline_status: pipelineObj.current_status,
+          Update: `${pipelineObj.account_holder} contacted ${pipelineObj.LP_contact_pitched} at ${pipelineObj.LP_pitched} for ${pipelineObj.company_name}`,
+          Coments: comment || null // Use the provided comment or set it to null if not provided
+        };
+
+        await collectionLog.insertOne(logObj);
+        break;
+
+        // Add more cases for other statuses as needed
+
+      default:
+        return res.status(400).json({ error: 'Invalid nextStatus provided.' });
+    }
+
+    res.json({ success: true, message: 'Pipeline status updated successfully.' });
+  } catch (error) {
+    console.error('Error updating pipeline status:', error);
+    res.status(500).json({ error: 'Error updating pipeline status.' });
+  }
+});
+
+
+app.put('/fundrisingpipeline/refreshfollowup', async (req, res) => {
+  try {
+    const { _id } = req.body;
+
+    if (!_id) {
+      return res.status(400).json({ error: 'Missing parameters: id is required.' });
+    }
+
+    const database = client.db('dev');
+    const collection = database.collection('FundraisingPipeline');
+
+    const pipelineObj = await collection.findOne({ _id: new ObjectId(_id) });
+
+    if (!pipelineObj) {
+      return res.status(404).json({ error: 'Pipeline obj not found with the provided _id.' });
+    }
+    console.log('its a');
+
+    const currentTime = new Date();
+    await collection.updateOne(
+        { _id: new ObjectId(_id) }, // Use ObjectId to construct the query
+        { $set: { last_updated_status_date: currentTime } }
+    );
+    console.log('its b');
+
+    res.json({ success: true, message: 'Pipeline status updated successfully.' });
+  } catch (error) {
+    console.error('Error updating pipeline status:', error);
+    res.status(500).json({ error: 'Error updating pipeline status.' });
+  }
+});
+
 
 
 

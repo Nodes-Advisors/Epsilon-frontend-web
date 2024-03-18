@@ -13,6 +13,7 @@ function LiveUpdate({user}: {user: any}) {
   const [data, setData] = useState([])
   const [showPopup, setShowPopup] = useState(false)
   const [showPopupAM, setShowPopupAM] = useState(false)
+  const [showPopupFund, setShowPopupFund] = useState(false)
   const [popupPosition, setShowPopupPosition] = useState({x: 0, y: 0})
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null)
@@ -119,6 +120,29 @@ function LiveUpdate({user}: {user: any}) {
     const timeout = setTimeout(() => {
       setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 90})
       setShowPopupAM(true)
+      setHoveredName(name)
+    }, 500)
+    setHoverTimeout(timeout)
+  }
+
+  const handleMouseOverFund = (e: React.MouseEvent<HTMLSpanElement>) => {
+    setShowPopup(false)
+    if (hideTimeout) {
+      clearTimeout(hideTimeout)
+      setHideTimeout(null)
+    }
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+      setHoverTimeout(null)
+    }
+    // console.log(e.currentTarget.innerText)
+    const name = e.currentTarget.innerText
+    const rect = e.currentTarget.getBoundingClientRect()
+    const width = e.currentTarget.offsetWidth
+    const height = e.currentTarget.offsetHeight
+    const timeout = setTimeout(() => {
+      setShowPopupPosition({x: rect.left + width / 2 - 120, y: rect.top + height / 2 - 90})
+      setShowPopupFund(true)
       setHoveredName(name)
     }, 500)
     setHoverTimeout(timeout)
@@ -333,19 +357,31 @@ function LiveUpdate({user}: {user: any}) {
                           <span>{' contacted '}</span>
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' at '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span>
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff', }}>{item.LP_pitched}</span>
                           <span>{' for '}</span>
-                          <span 
-                            onMouseEnter={handleMouseOver}
-                            onMouseLeave={handleMouseOut}
-                            className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
+                            {item.company_name === "Unknown" ? (
+                              <div className={styles['unknown-company']}>...</div>
+                            ) : (
+                              <span
+                                onMouseEnter={handleMouseOver}
+                                onMouseLeave={handleMouseOut}
+                                className={styles['company-manager']}>{item.company_name !== "null" ? item.company_name : item.company_acronym}</span>
+                            )}
                         </>
                           }
                           { item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0
                         && <>
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' passed on '}</span>
                           {/* this should be deal name  */}
                           <span 
@@ -364,7 +400,11 @@ function LiveUpdate({user}: {user: any}) {
                           {/* [person at a fund] from [Fund Name] requested the [company] deck  */}
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' requested the '}</span>
                          
                           <span
@@ -381,7 +421,11 @@ function LiveUpdate({user}: {user: any}) {
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after reviewing the deck */}
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' passed on '}</span>
                      
                           <span 
@@ -398,7 +442,11 @@ function LiveUpdate({user}: {user: any}) {
                           {/* [person at a fund] from [Fund Name] requested a [company name] meeting  - (user) */}
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' requested a '}</span>
              
                           <span
@@ -419,7 +467,11 @@ function LiveUpdate({user}: {user: any}) {
                           {/* [person at a fund] from [Fund Name] passed on [Company Name] after a meeting  */}
                           <span style={{ color: '#fff' }}>{item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'}</span> 
                           <span>{' from '}</span>
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' passed on '}</span>
              
                           <span
@@ -434,7 +486,11 @@ function LiveUpdate({user}: {user: any}) {
                         && item.dd === 1 && item.pass_dd === 0 &&
                         <>
                           {/* [Fund Name] entered in dd phase on [Company Name] */}
-                          <span style={{ color: '#fff' }}>{item.LP_pitched}</span> 
+                          <span
+                              onMouseEnter={handleMouseOverFund}
+                              onMouseLeave={handleMouseOut}
+                              className={styles['lp-hover']}
+                              style={{ color: '#fff' }}>{item.LP_pitched}</span>
                           <span>{' entered in dd phase on '}</span>
                           <span 
                             onMouseEnter={handleMouseOver}
@@ -455,48 +511,91 @@ function LiveUpdate({user}: {user: any}) {
             <li style={{ alignSelf: 'center' }}>
               <button onClick={handleNextPage}>Load more...</button>
             </li>
-            {showPopupAM && 
-            <div 
-              onMouseLeave={() => {
-                if (hoverTimeout) {
-                  clearTimeout(hoverTimeout)
-                  setHoverTimeout(null)
-                }
-              
-                const timeout = setTimeout(() => {
-                  setShowPopupAM(false)
-                }, 200)
-                setHideTimeout(timeout)
-              }}
-              style={{ 
-                backdropFilter: 'blur(25px)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                transition: 'all 0.5s ease',
-                zIndex: 10, 
-                position: 'absolute', 
-                gap: '1rem',
-                top: popupPosition.y, left: popupPosition.x, 
-                width: '25rem', height: '15rem', 
-                background: '#fff1', borderRadius: '0.5rem' }}>
-              <div style={{ color: '#fff', marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
-              </div>
-              <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
-              <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
-                <span style={{   fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
-                  .reduce((sum, item) => sum + item?.contacted, 0)}</span>
-                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
-                  .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
-                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
-                  .reduce((sum, item) => sum + item?.meeting_request, 0)}</span>
-                <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>
-                <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
-                  .reduce((sum, item) => sum + item?.dd, 0)}</span>
-              </div>
-            </div>
+            {showPopupAM &&
+                <div
+                    onMouseLeave={() => {
+                      if (hoverTimeout) {
+                        clearTimeout(hoverTimeout)
+                        setHoverTimeout(null)
+                      }
+
+                      const timeout = setTimeout(() => {
+                        setShowPopupAM(false)
+                      }, 200)
+                      setHideTimeout(timeout)
+                    }}
+                    style={{
+                      backdropFilter: 'blur(25px)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      transition: 'all 0.5s ease',
+                      zIndex: 10,
+                      position: 'absolute',
+                      gap: '1rem',
+                      top: popupPosition.y, left: popupPosition.x,
+                      width: '25rem', height: '15rem',
+                      background: '#fff1', borderRadius: '0.5rem' }}>
+                    <div style={{ color: '#fff', marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
+                    </div>
+                    <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
+                    <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
+                        <span style={{   fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.contacted, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.meeting_request, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.dd, 0)}</span>
+                    </div>
+                </div>
+            }
+            {showPopupFund &&
+                <div
+                    onMouseLeave={() => {
+                      if (hoverTimeout) {
+                        clearTimeout(hoverTimeout)
+                        setHoverTimeout(null)
+                      }
+
+                      const timeout = setTimeout(() => {
+                        setShowPopupAM(false)
+                      }, 200)
+                      setHideTimeout(timeout)
+                    }}
+                    style={{
+                      backdropFilter: 'blur(25px)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      transition: 'all 0.5s ease',
+                      zIndex: 10,
+                      position: 'absolute',
+                      gap: '1rem',
+                      top: popupPosition.y, left: popupPosition.x,
+                      width: '25rem', height: '15rem',
+                      background: '#fff1', borderRadius: '0.5rem' }}>
+                    <div style={{ color: '#fff', marginLeft: '5%', width: '90%', display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredName}</span>
+                    </div>
+                    <div style={{ width: '90%', height: '0.5px', backgroundColor: '#eee' }}></div>
+                    <div style={{ justifyItems: 'start', alignItems: 'center', width: '90%', marginLeft: '5%', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem'}}>
+                        <span style={{   fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Contacted</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.contacted, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Deck Requests</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.deck_request, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>Meeting Requests</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.meeting_request, 0)}</span>
+                        <span style={{  fontSize: '1.1rem', fontWeight: 500, whiteSpace: 'wrap' }}>DD</span>
+                        <span style={{ color: '#754DCA', fontSize: '1.5rem', fontWeight: 500, whiteSpace: 'wrap' }}>{hoveredData.filter(item => item?.company_name === hoveredName)
+                          .reduce((sum, item) => sum + item?.dd, 0)}</span>
+                    </div>
+                </div>
             }
 
             {showPopup && (

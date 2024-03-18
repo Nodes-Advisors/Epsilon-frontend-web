@@ -19,13 +19,15 @@ import { throttle } from 'lodash'
 import ReactPaginate from 'react-paginate'
 import WebSocketContext from '../websocket/WebsocketContext'
 import { handleFullTextFilter } from '../lib/utils'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faDownLeftAndUpRightToCenter,faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons'
 
-export default function FundCards() {
+export default function FundCards(props) {
   
   const clients = useClientsStore(state => state.clients)
   const setClients = useClientsStore(state => state.setClients)
   const [fundStatus, setFundStatus] = useState<object[]>([])
-  const filterNames: FILTER_NAME[] = ['Account Manager', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Responsiveness Rate', 'Clear Filters']
+  const filterNames: FILTER_NAME[] = ['Account Manager','Sector', 'Status', 'Deals', 'Investors', 'Location', 'Type', 'Contact', 'Suitability Score', 'Co-Investors', 'Responsiveness Rate', 'Clear Filters']
   const [isLoading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
   const [filteredData, setFilteredData] = useState<any[]>([])
@@ -50,6 +52,7 @@ export default function FundCards() {
   const [hoveredCollection, setHoveredCollection] = useState<string>('')
   const [inputValue, setInputValue] = useState('')
   const [totalFundCount, setTotalFundCount] = useState<number>(0)
+  const [rowStates, setRowStates] = useState({});
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -61,6 +64,7 @@ export default function FundCards() {
     'Contact': string[],
     'Suitability Score': string[],
     'Co-Investors': string[],
+    'Sector': string[],
     'Clear Filters': string[],
     'Responsiveness Rate': string[],
   }>(localStorage.getItem('filter') ? JSON.parse(localStorage.getItem('filter') as string) : {
@@ -74,6 +78,7 @@ export default function FundCards() {
     'Contact': [],
     'Suitability Score': [],
     'Co-Investors': [],
+    'Sector': [],
     'Clear Filters': [],
     'Responsiveness Rate': [],
   })
@@ -81,6 +86,15 @@ export default function FundCards() {
   const { sendMessage, lastMessage, connectionStatus } = useContext(WebSocketContext)
 
   // according to filteredList, filter data
+
+  const toggleRow = (index) => {
+    setRowStates(prevState => {
+      const newState = { ...prevState };
+      newState[index] = !newState[index]; // Toggle the state or set to true if not present
+      return newState;
+    });
+  };
+
 
   useEffect(() => {
     const fetchSavedCollections = async () => {
@@ -175,6 +189,11 @@ export default function FundCards() {
                 return filteredList[filterName].some(filter => 
                   filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                 )
+              case 'Sector':
+
+                return filteredList[filterName].some(filter =>
+                  filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+                )
               case 'Responsiveness Rate':
                 return [ '>90', '>80', '60-80', '<60']
               default:
@@ -249,7 +268,11 @@ export default function FundCards() {
         case 'Suitability Score':
           return [ '>90', '>80', '60-80', '<60']
         case 'Co-Investors':
-          return filteredList[filterName].some(filter => 
+          return filteredList[filterName].some(filter =>
+            filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
+          )
+        case 'Sector':
+          return filteredList[filterName].some(filter =>
             filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
           )
         case 'Responsiveness Rate':
@@ -356,6 +379,8 @@ export default function FundCards() {
       return ['>90', '>80', '60-80', '<60']
     case 'Co-Investors':
       return removeDuplicatesAndNull(data.map((record) => record['Co-Investors'] as string))
+    case 'Sector':
+      return removeDuplicatesAndNull(data.map((record) => record['Sector'] as string))
     case 'Responsiveness Rate':
       return ['>90', '>80', '60-80', '<60']
     default:
@@ -375,6 +400,7 @@ export default function FundCards() {
         setFilteredList({
           '': [],
           'Account Manager': [],
+          'Sector': [],
           'Deals': [],
           'Investors': [],
           'Location': [],
@@ -549,6 +575,8 @@ export default function FundCards() {
     }
   }
 
+  console.log(filteredList)
+
   const isInClientList = (statusString: string) => {
 
     for (const client of clients) {
@@ -601,6 +629,10 @@ export default function FundCards() {
 
   const handleAddFilter = (e) => {
     
+  }
+
+  function trimLastSpaceIfEnd(str) {
+      return str.replace(/^\s+|\s+$/g, '');
   }
 
   return (
@@ -748,15 +780,14 @@ export default function FundCards() {
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalFundCount ? `${totalFundCount} Funds` : `${filteredData.length} Funds (out of ${totalFundCount} Funds)`}</span>
-              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr', width: '100%', textAlign: 'left'  }}>
-                <span>Funds</span>
+              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr 1.5fr 2fr 2fr 1fr 1fr', width: '100%', textAlign: 'left'  }}>
+                <span style={{ textAlign: 'center' }}>Funds</span>
                 <span>Status</span>
                 <span>Past Deals</span>
                 <span>Account Manager</span>
-                <span>Sector</span>
+                <span style={{ textAlign: 'center' }}>Sector</span> {/* Center alignment for 'Sector' */}
                 <span>Type</span>
                 <span>Connections</span>
-                
                 <span>Co-Investors</span>
                 <span>Suitability Score</span>
                 <span>Responsiveness Rate</span>
@@ -768,7 +799,7 @@ export default function FundCards() {
                   ?
                   currentItems.map((record, index) => (
                     <>
-                      <div key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 1.5fr 1.5fr 2fr 2fr 1.5fr 1.5fr' }}> 
+                      <div key={record._id} className={styles['divWithHover']} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '3fr 1fr 1.5fr 1.5fr 2.5fr 1.5fr 2fr 2fr 1fr 1fr' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
                             <button
@@ -844,10 +875,37 @@ export default function FundCards() {
                           data-label= 'Account Manager'
                           onClick={e => handleFullTextFilter(e, setFilteredList)}
                           className={styles['fund-list-item']}>{convertedOutput(record['Account Manager'] as string | string[]) as string || 'n/a'}</span>
-                        <span 
-                          data-label= 'Sector'
-                          
-                          className={styles['fund-list-item']}>{convertedOutput(record['Sector'] as string | string[]) as string || 'n/a'}</span>
+                        <div style={{display:'flex'}}>
+                        {rowStates[index] ? (
+                          <div>
+                            {/* Show full content if row state is true */}
+                            {record['Sector'].split(',').map((sector, index) => (
+                              <div onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Sector' key={index} className={styles['secbutton-style']}>
+                                {sector.trim().replace(/\s/g, "")}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ marginBottom: '1px',display: 'inline-block',alignItems:'center' }}>
+                            {record['Sector'].split(',').map((sector, index) => {
+                              const trimmedSector = trimLastSpaceIfEnd(sector.trim());
+                              return (
+                                <div onClick={e => handleFullTextFilter(e, setFilteredList)} data-label='Sector' key={index} className={styles['secbutton-style']}>
+                                  {trimmedSector}
+                                </div>
+                              );
+                            }).slice(0, 3)}
+                            {record['Sector'].split(',').length > 3 && <div style={{  marginRight: '5px' }}>...</div>}
+                          </div>
+                        )}
+                          {rowStates[index] ? (
+                            <FontAwesomeIcon className={styles['fonticon-button']} style={{position:'absolute',left:'55vw'}} onClick={() => toggleRow(index)} icon={faDownLeftAndUpRightToCenter} />
+                          ) : (
+                            <FontAwesomeIcon className={styles['fonticon-button']} style={{position:'absolute',left:'55vw'}} onClick={() => toggleRow(index)} icon={faUpRightAndDownLeftFromCenter} />
+                          )}
+                        </div>
+
+
                         <span 
                           data-label= 'Type'
                           onClick={e => handleFullTextFilter(e, setFilteredList)}
