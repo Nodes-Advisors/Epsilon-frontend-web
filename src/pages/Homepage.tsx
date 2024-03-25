@@ -42,6 +42,22 @@ export default function Home() {
   const [dragBounds, setDragBounds] = useState({top:-50,bottom:50})//row1,column1
   const [followUps,setFollowUps] = useState([]);
   const [followUpPage, setFollowUpPage] = useState(1);
+  const [pinnedItems, setPinnedItems] = useState<{
+    '': string[],
+    'Milestones': Map<string, string>,
+    'Approval Requests': Map<string, string>,
+    'Follow-ups': Map<string, string>,
+    'Live Updates': Map<string, string>,
+  }>(localStorage.getItem('pinnedItems') ? JSON.parse(localStorage.getItem('pinnedItems') as string) : {
+    '': [],
+    'Milestones': new Map<string, string>(),
+    'Approval Requests': new Map<string, string>(),
+    'Follow-ups': new Map<string, string>(),
+    'Live Updates': new Map<string, string>(),
+  });
+
+
+
 
   const layout = [
     { i: 'a', x: 0, y: 0, w: 1, h: 1 },
@@ -68,6 +84,37 @@ export default function Home() {
     // Call the debounced handleResize function
     handleResize(newSize);
   };
+
+  useEffect(() => {
+    // Fetch items from local storage when tab changes to "PinnedItems"
+    if (switchTab === 'Pinned') {
+      const storedPinnedItems = localStorage.getItem('pinnedItems');
+      if (storedPinnedItems) {
+        const parsedPinnedItems = JSON.parse(storedPinnedItems);
+
+        // Convert each section to Map format
+        const milestonesMap = new Map(Object.entries(parsedPinnedItems['Milestones']));
+        const approvalRequestsMap = new Map(Object.entries(parsedPinnedItems['Approval Requests']));
+        const followUpsMap = new Map(Object.entries(parsedPinnedItems['Follow-ups']));
+        const liveUpdatesMap = new Map(Object.entries(parsedPinnedItems['Live Updates']));
+
+        console.log('Parsed Milestones:', milestonesMap);
+        console.log('Parsed Approval Requests:', approvalRequestsMap);
+        console.log('Parsed Follow-ups:', followUpsMap);
+        console.log('Parsed Live Updates:', liveUpdatesMap);
+
+        // Update the state with the converted maps
+        setPinnedItems({
+          '': parsedPinnedItems[''],
+          'Milestones': milestonesMap,
+          'Approval Requests': approvalRequestsMap,
+          'Follow-ups': followUpsMap,
+          'Live Updates': liveUpdatesMap,
+        });
+      }
+    }
+  }, [switchTab]);
+
 
   useEffect(() => {
     const ul = ulRef.current
@@ -333,8 +380,35 @@ export default function Home() {
   }
 
 
+  const handleLiveUpdate = () => {
+    const storedPinnedItems = localStorage.getItem('pinnedItems');
+    if (storedPinnedItems) {
+      const parsedPinnedItems = JSON.parse(storedPinnedItems);
 
-  const CustomContextMenu = ({ children, tooltip}: {children: React.ReactNode, tooltip?: any}) => {
+      // Convert each section to Map format
+      const milestonesMap = new Map(Object.entries(parsedPinnedItems['Milestones']));
+      const approvalRequestsMap = new Map(Object.entries(parsedPinnedItems['Approval Requests']));
+      const followUpsMap = new Map(Object.entries(parsedPinnedItems['Follow-ups']));
+      const liveUpdatesMap = new Map(Object.entries(parsedPinnedItems['Live Updates']));
+
+      console.log('Parsed Milestones:', milestonesMap);
+      console.log('Parsed Approval Requests:', approvalRequestsMap);
+      console.log('Parsed Follow-ups:', followUpsMap);
+      console.log('Parsed Live Updates:', liveUpdatesMap);
+
+      // Update the state with the converted maps
+      setPinnedItems({
+        '': parsedPinnedItems[''],
+        'Milestones': milestonesMap,
+        'Approval Requests': approvalRequestsMap,
+        'Follow-ups': followUpsMap,
+        'Live Updates': liveUpdatesMap,
+      });
+    }
+  }
+
+
+  const CustomContextMenu = ({ children, tooltip, itemId}: {children: React.ReactNode, tooltip?: any, itemId: string}) => {
     const [visible, setVisible] = useState(false)
     const [coords, setCoords] = useState({ x: 0, y: 0 })
     const [tooltipVisible, setTooltipVisible] = useState(false)
@@ -381,7 +455,52 @@ export default function Home() {
       
       closeFollowUp()
     }
-  
+
+    const removePinnedItem = (itemId: string) => {
+      // Retrieve pinnedItems from localStorage
+      const storedPinnedItems = localStorage.getItem('pinnedItems');
+
+      if (storedPinnedItems) {
+        // Parse the stored pinnedItems
+        const updatedItems = JSON.parse(storedPinnedItems);
+
+        console.log('Stored pinned items:', updatedItems);
+
+        // Convert each section to a Map
+        updatedItems['Milestones'] = new Map(Object.entries(updatedItems['Milestones']));
+        updatedItems['Approval Requests'] = new Map(Object.entries(updatedItems['Approval Requests']));
+        updatedItems['Follow-ups'] = new Map(Object.entries(updatedItems['Follow-ups']));
+        updatedItems['Live Updates'] = new Map(Object.entries(updatedItems['Live Updates']));
+
+        console.log('After conversion to Map:', updatedItems);
+
+        // Remove the item from the appropriate section in updatedItems
+        if (updatedItems['Milestones'].has(itemId)) {
+          updatedItems['Milestones'].delete(itemId);
+        } else if (updatedItems['Approval Requests'].has(itemId)) {
+          updatedItems['Approval Requests'].delete(itemId);
+        } else if (updatedItems['Follow-ups'].has(itemId)) {
+          updatedItems['Follow-ups'].delete(itemId);
+        } else if (updatedItems['Live Updates'].has(itemId)) {
+          updatedItems['Live Updates'].delete(itemId);
+        }
+
+        // Update localStorage with the modified pinnedItems
+        localStorage.setItem('pinnedItems', JSON.stringify({
+          '': updatedItems[''],
+          'Milestones': Object.fromEntries(updatedItems['Milestones']),
+          'Approval Requests': Object.fromEntries(updatedItems['Approval Requests']),
+          'Follow-ups': Object.fromEntries(updatedItems['Follow-ups']),
+          'Live Updates': Object.fromEntries(updatedItems['Live Updates']),
+        }));
+
+        // Update the state to reflect the changes
+        setPinnedItems(updatedItems);
+      }
+    };
+
+
+
     return (
       
       <div 
@@ -401,8 +520,8 @@ export default function Home() {
           <div
             style={{
               position: 'absolute',
-              top: `${coords.y}px`,
-              left: `${coords.x}px`,
+              top: `${coords.y-140}px`,
+              left: `${coords.x-140}px`,
               backgroundColor: 'white',
               boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
               borderRadius: '0.5rem',
@@ -410,12 +529,7 @@ export default function Home() {
             }}
           >
             <ul style={{ color: '#333', listStyleType: 'none', margin: 0, padding: 0 }}>
-              <li style={{ padding: '0.5rem 1rem', margin: 0 }} onClick={e => togglePin(e, tooltip)}>
-                {isPinned(tooltip) ? 'Unpin this' : 'Pin this'}
-              </li>
-              {!tooltip.type && <li 
-                onClick={followUp}
-                style={{ padding: '0.5rem 1rem', margin: 0 }}>Follow up</li>}
+              <li onClick={() => removePinnedItem(itemId)} style={{ padding: '0.5rem 1rem', margin: 0 }}>Unpin this</li>
               {/* <li style={{ padding: '1rem', margin: 0 }}>Option 3</li> */}
             </ul>
           </div>
@@ -551,18 +665,50 @@ export default function Home() {
                           <li>Eliott Harfouche has 3 requests pending, please check your requests</li>
                       </>
                   }
-                  {
-                    switchTab === 'Pinned' && pinnedMessages.map((message, index) =>
-                      {
-                        return (
-                          <CustomContextMenu tooltip={message} key={index}>
-                            <li>{message.message}</li>
-                          </CustomContextMenu>
-                        )
-                        // }
-                      },
-                    )
-                  }
+                  {switchTab === 'Pinned' && (
+                    <div id="pinnedItems">
+                      <ul>
+                        {/* Milestones */}
+                        {Array.from(pinnedItems['Milestones']).map(([key, message], index) => {
+                          console.log('Milestone message:', message);
+                          return (
+                            <CustomContextMenu tooltip={message} itemId={key} key={index}>
+                              <li>{message}</li>
+                            </CustomContextMenu>
+                          );
+                        })}
+
+                        {/* Approval Requests */}
+                        {Array.from(pinnedItems['Approval Requests']).map(([key, message], index) => {
+                          console.log('Approval Request message:', message);
+                          return (
+                            <CustomContextMenu tooltip={message} itemId={key} key={index}>
+                              <li>{message}</li>
+                            </CustomContextMenu>
+                          );
+                        })}
+
+                        {/* Follow-ups */}
+                        {Array.from(pinnedItems['Follow-ups']).map(([key, message], index) => {
+                          console.log('Follow-up message:', message);
+                          return (
+                            <CustomContextMenu tooltip={message} itemId={key} key={index}>
+                              <li>{message}</li>
+                            </CustomContextMenu>
+                          );
+                        })}
+                        {/* Live Updates */}
+                        {Array.from(pinnedItems['Live Updates']).map(([key, message], index) => {
+                          console.log('Live Update message:', message);
+                          return (
+                            <CustomContextMenu tooltip={message} itemId={key} key={index}>
+                              <li>{message}</li>
+                            </CustomContextMenu>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
                   {
                     switchTab === 'Approval Request' &&
                       <>
@@ -629,7 +775,7 @@ export default function Home() {
             </div>
             {layoutSize === maxSize ? '' :
               <div className={styles['news-ul']} style={{height:(62-layoutSize)+'vh', overflowX:'hidden',overflowY:'auto'}}>
-                <LiveUpdate user={userInfo}/>
+                <LiveUpdate onUpdate={handleLiveUpdate} user={userInfo}/>
               </div>}
           </div>
         </div>

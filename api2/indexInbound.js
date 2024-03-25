@@ -343,6 +343,25 @@ app.get('/gethislog/:fundName', async (req, res) => {
   }
 })
 
+app.get('/getallhislogs', async (req, res) => {
+  try {
+    const database = client.db('dev');
+    const collection = database.collection('HistoricalLogs');
+    const logs = await collection.find({}).toArray();
+
+    if (logs.length > 0) {
+      logs.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+      res.json(logs);
+    } else {
+      res.status(404).send('Logs not found');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
+
+
 app.get('/getclienthislog/:clientAcronym', async (req, res) => {
   try {
     const database = client.db('dev')
@@ -876,6 +895,44 @@ app.put('/fundrisingpipeline/refreshfollowup', async (req, res) => {
     res.status(500).json({ error: 'Error updating pipeline status.' });
   }
 });
+
+app.get('/clients/data', async (req, res) => {
+  try {
+    const database = client.db('dev');
+    const collection = database.collection('FundraisingPipeline');
+
+    const aggregatedKPIsByCompany = await collection.aggregate([
+      {
+        $group: {
+          _id: "$LP_pitched", // Group by company_name
+          totalOutreach: { $sum: "$contacted" }, // Sum totalOutreach
+          deckRequested: { $sum: "$deck_request" },
+          meetingRequested: { $sum: "$meeting_request" },
+          ddRequested: { $sum: "$dd" },
+          passes: { $sum: "$pass_contacted" }
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          company_name: "$_id", // Include the company_name field
+          totalOutreach: 1, // Include the totalOutreach field
+          deckRequested: 1, // Include the deckRequested field
+          meetingRequested: 1, // Include the meetingRequested field
+          ddRequested: 1, // Include the ddRequested field
+          passes: 1,
+        },
+      },
+    ]).toArray();
+
+    res.json(aggregatedKPIsByCompany);
+  } catch (error) {
+    console.error('Error aggregating KPIs by company:', error);
+    res.status(500).json({ error: 'Error aggregating KPIs by company.' });
+  }
+});
+
+
 
 
 

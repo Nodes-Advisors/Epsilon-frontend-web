@@ -42,4 +42,5 @@ router.get("/total-outreach", async (req, res) => {
   }
 });
 
+
 export default router;

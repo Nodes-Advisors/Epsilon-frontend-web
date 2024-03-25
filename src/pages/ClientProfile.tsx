@@ -37,6 +37,7 @@ export default function ClientProfile(): JSX.Element {
   const [approvers, setApprovers] = useState<string | null>(null)
   const [details, setDetails] = useState<string | null>(null)
   const [hislogs, setHisLogs] = useState<any[]>([])
+  const [activePipeline, setActivePipeline] = useState<any[]>([])
   const [priority, setPriority] = useState<string>('')
   const [deal, setDeal] = useState<string>('')
   const [contactPerson, setContactPerson] = useState<string>('')
@@ -65,6 +66,56 @@ export default function ClientProfile(): JSX.Element {
   
     return `${day}/${month}/${year}`
   }
+
+  useEffect(() => {
+    const fetchCompanyData = async() => {
+      const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
+      if (res.status === 200) {
+        setLoading(false)
+        //setPipeline(res.data)
+        localStorage.setItem('pipelineData', JSON.stringify(res.data));
+      }
+    }
+
+    const filterPipelineByConditions = (record) => {
+      const storedPipelineData = JSON.parse(localStorage.getItem('pipelineData')) || [];
+
+      const filteredPipeline = storedPipelineData.filter(item => {
+        const acronymMatch = record && record.acronym ? item.company_acronym?.toLowerCase() === record.acronym.toLowerCase() : false;
+        const statusConditions = [
+          item.pass_contacted === 0,
+          item.pass_deck === 0,
+          item.pass_meeting === 0,
+          item.current_status !== "pass",
+          item.pass_dd === 0,
+          item.deck_request === 1 || item.meeting_request === 1 || item.dd === 1
+        ];
+
+        return acronymMatch && statusConditions.some(condition => condition);
+      }).sort((a, b) => {
+        return new Date(b.last_updated_status_date).getTime() - new Date(a.last_updated_status_date).getTime();
+      });
+
+      setActivePipeline(filteredPipeline); // Set the filtered pipeline objects in the state
+    };
+
+    fetchCompanyData();
+    const record = clients.filter((record) => record._id === id)[0];
+    filterPipelineByConditions(record);
+  }, [])
+
+  const emailToNameMap = new Map([
+    ['aroner@nodesadvisors.com', 'Tyler Aroner'],
+    ['ghavami@nodesadvisors.com', 'Iman Ghavami'],
+    ['harfouche@nodesadvisors.com', 'Eliott Harfouche']
+  ]);
+
   const token = useTokenStore(state => state.token)
   // const user = useUserStore(state => state.user)
   const clients = useClientsStore(state => state.clients)
@@ -285,7 +336,7 @@ export default function ClientProfile(): JSX.Element {
             <div className={styles['name-layout']}>
               <div className={styles.name}>
                 <span className={styles['partial-name']}>
-                  {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['Funds'] as string : 'no name'}
+                  {isLoading ? <Skeleton width={'20rem'} height={'3.5rem'} /> : record ? record['acronym'] as string : 'no name'}
                 </span>
               </div>
               {/* {
@@ -437,6 +488,7 @@ export default function ClientProfile(): JSX.Element {
                         style={{ marginLeft:'0.4rem', color: switchTab === 'Active Funds' ? '#FFF' : '#DDD', cursor: 'pointer', fontWeight:  switchTab === 'Active Funds' ? 700 : 400 }}>Active Funds</span>
                 </div>
               </div>
+              {switchTab === 'Historical Log' && (
               <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto',width:'100%' }}>
                 <table style={{ textAlign: 'left', tableLayout: 'fixed', overflowX: "hidden", width: '100%' }}>
                   <thead>
@@ -480,11 +532,12 @@ export default function ClientProfile(): JSX.Element {
                       ))
                       :
                       hislogs.map((log, i) => (
+
                         <React.Fragment key={i}>
                           <tr>
                             <td className={log.Coments ? styles['logContentWithComment'] : ''}>{formatDate(log.Date)}</td>
-                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Client ? log.Client : 'No client record'}</td>
                             <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Nodes ? log.Nodes : 'No account manager record'}</td>
+                            <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.VC ? log.VC : 'No VC record'}</td>
                             <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.Contact ? log.Contact : 'No contact record'}</td>
                             <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.fundraising_pipeline_status ? log.fundraising_pipeline_status : 'No status record'}</td>
                           </tr>
@@ -525,7 +578,99 @@ export default function ClientProfile(): JSX.Element {
                   }
                   </tbody>
                 </table>
-              </div>
+              </div> )}
+              {switchTab === 'Active Funds' && (
+                <div className={styles['historical-log-scrollbar-layout']} style={{ maxHeight: '30vh', overflow: 'auto',width:'100%' }}>
+                  <table style={{ textAlign: 'left', tableLayout: 'fixed', overflowX: "hidden", width: '100%' }}>
+                    <thead>
+                    {
+                      isLoading
+                        ?
+                        <tr>
+                          <th><Skeleton width={'10rem'} /></th>
+                          <th><Skeleton width={'5rem'} /></th>
+                          <th><Skeleton width={'5rem'} /></th>
+                          <th><Skeleton width={'5rem'} /></th>
+                          <th><Skeleton width={'5rem'} /></th>
+                        </tr>
+                        :
+
+                        activePipeline.length > 0
+                          ?
+                          <tr>
+                            <th>Date</th>
+                            <th>Account Manager</th>
+                            <th>VC</th>
+                            <th>VC Contact</th>
+                            <th>Status</th>
+                          </tr>
+                          :
+                          <h3>No active funds</h3>
+                    }
+                    </thead>
+                    <tbody>
+                    {
+                      isLoading
+                        ?
+                        Array(5).fill(0).map((_, i) => (
+                          <tr key={i}>
+                            <td><Skeleton width={'10rem'} /></td>
+                            <td><Skeleton width={'5rem'} /></td>
+                            <td><Skeleton width={'5rem'} /></td>
+                            <td><Skeleton width={'5rem'} /></td>
+                            <td><Skeleton width={'5rem'} /></td>
+                          </tr>
+                        ))
+                        :
+                        activePipeline.map((log, i) => (
+
+                          <React.Fragment key={i}>
+                            <tr>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{formatDate(log.last_updated_status_date)}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.account_holder ? log.account_holder : 'No account manager record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.LP_pitched ? log.LP_pitched : 'No VC record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.LP_contact_pitched ? log.LP_contact_pitched : 'No contact record'}</td>
+                              <td className={log.Coments ? styles['logContentWithComment'] : ''}>{log.current_status ? log.current_status : 'No status record'}</td>
+                            </tr>
+                            { !rowStates[i] && log.reason_of_passing && (
+                              <tr >
+                                <td className={styles['logrow']} colSpan="5" >
+                                  <div style={{ position: 'relative' }}>
+                                    <div className={styles['logContent']}>
+                                      <span >{log.reason_of_passing}</span>
+                                    </div>
+                                    <FontAwesomeIcon
+                                      style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                      onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                      icon={faUpRightAndDownLeftFromCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                            { rowStates[i] && log.reason_of_passing && (
+                              <tr >
+                                <td className={styles['logrow']} colSpan="5" >
+                                  <div style={{ position: 'relative' }}>
+                                    <div className={styles['logFullContent']}>
+                                      <span >{log.reason_of_passing}</span>
+                                    </div>
+                                    <FontAwesomeIcon
+                                      style={{ position: 'absolute', right: '0rem', top: '50%', transform: 'translateY(-50%)', marginRight: '1rem' }}
+                                      onClick={() => toggleRow(i)} // Use index variable i for toggleRow
+                                      icon={faDownLeftAndUpRightToCenter} // faUpRightAndDownLeftFromCenter Use index variable i for accessing rowStates
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))
+                    }
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
             </div>
           </div>

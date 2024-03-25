@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import styles from '../styles/home.module.less'
 import Skeleton from 'react-loading-skeleton'
 import GPTdata from './GPTdata'
@@ -6,8 +6,15 @@ import axios from 'axios'
 import { AsyncImage } from 'loadable-image'
 import { useNavigate } from 'react-router-dom'
 import { useTokenStore } from '../store/store'
+import CancelImgIcon from "../assets/images/cancel.png";
+import _default from "chart.js/dist/core/core.interaction";
 
-function LiveUpdate({user}: {user: any}) {
+interface LiveUpdateProps {
+  user: any;
+  onUpdate: () => void; // onUpdate 函数的类型声明
+}
+
+const LiveUpdate: React.FC<LiveUpdateProps> = ({ user, onUpdate }) => {
   const [isLoading, setLoading] = useState(true)
   const [focused, setFocused] = useState<'all' | 'you'>('all')
   const [data, setData] = useState([])
@@ -72,10 +79,13 @@ function LiveUpdate({user}: {user: any}) {
   }, [page])
 
 
+
   const handleNextPage = () => {
     
     setPage(page + 1)
   }
+
+
 
 
   const handleMouseOver = (e: React.MouseEvent<HTMLSpanElement>) => {
@@ -164,6 +174,8 @@ function LiveUpdate({user}: {user: any}) {
     // setShowPopup(false)
   }
 
+
+
   const formatDate = (utcTimestamp: number): string => {
     const date = new Date(utcTimestamp)
     const now = new Date()
@@ -206,6 +218,212 @@ function LiveUpdate({user}: {user: any}) {
       )
       return includesCheck
     }
+  }
+
+  const CustomContextMenu = ({ children, tooltip,item}: {children: React.ReactNode, tooltip?: any,item: any}) => {
+    const [visible, setVisible] = useState(false)
+    const [coords, setCoords] = useState({ x: 0, y: 0 })
+    const [tooltipVisible, setTooltipVisible] = useState(false)
+    const [highlighted, setHighlighted] = useState(false)
+    const [followUpVisible, setFollowUpVisible] = useState(false)
+
+    const followUp = () => {
+      setFollowUpVisible(true)
+    }
+
+    const closeFollowUp = () => {
+      setFollowUpVisible(false)
+    }
+
+
+    const showMenu = (e) => {
+      e.preventDefault()
+      setVisible(true)
+      console.log('in')
+      const offsetX = -150; // Adjust as needed
+      const offsetY = -170; // Adjust as needed
+      setCoords((prevCoords) => ({ x: e.clientX +offsetX , y: e.clientY +offsetY }));
+      console.log(coords)
+      setHighlighted(true)
+    }
+
+    const closeMenu = () => {
+      setVisible(false)
+      setHighlighted(false)
+    }
+
+    const showTooltip = () => {
+      setTooltipVisible(true)
+    }
+
+    const hideTooltip = () => {
+      setTooltipVisible(false)
+    }
+
+    useEffect(() => {
+      document.addEventListener('click', closeMenu)
+      return () => {
+        document.removeEventListener('click', closeMenu)
+      }
+    }, [])
+
+    const submit = async(e) => {
+      e.preventDefault()
+
+      closeFollowUp()
+    }
+
+    const updateLiveUpdates = (item: any) => {
+      console.log("Starting updateFollowUps function...");
+
+      // Retrieve pinnedItems from localStorage
+      const storedPinnedItems = localStorage.getItem('pinnedItems');
+      console.log("Retrieved storedPinnedItems from localStorage:", storedPinnedItems);
+
+      let updatedItems: {
+        'Milestones': Map<string, string>[],
+        'Approval Requests': Map<string, string>[],
+        'Follow-ups': Map<string, string>[],
+        'Live Updates': Map<string, string>[],
+      } = {
+        'Milestones': new Map<string, string>(),
+        'Approval Requests': new Map<string, string>(),
+        'Follow-ups': new Map<string, string>(),
+        'Live Updates': new Map<string, string>(),
+      };
+
+
+      if (!storedPinnedItems) {
+        console.log("No pinnedItems found in localStorage. Initializing new structure...");
+        updatedItems = {
+          '': [],
+          'Milestones': new Map<string, string>(),
+          'Approval Requests': new Map<string, string>(),
+          'Follow-ups': new Map<string, string>(),
+          'Live Updates': new Map<string, string>(),
+        };
+      } else {
+        console.log("Parsing storedPinnedItems from localStorage...");
+        updatedItems = JSON.parse(storedPinnedItems);
+      }
+
+      // Ensure 'Follow-ups' section exists and initialize if not
+      if (!updatedItems['Live Updates']) {
+        console.log("No 'Follow-ups' section found. Initializing new Map...");
+        updatedItems['Live Updates'] = new Map<string, string>();
+      } else if (!(updatedItems['Live Updates'] instanceof Map)) { // Check if it's not already a Map
+        console.log("Existing 'Follow-ups' section is not a Map. Converting to Map...");
+        updatedItems['Live Updates'] = new Map<string, string>(Object.entries(updatedItems['Live Updates']));
+      }
+
+
+      // Construct follow-up message
+      let message = '';
+
+      if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 0) {
+        message = `${item.account_holder} contacted ${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} at ${item.LP_pitched} for ${item.company_name !== "null" ? item.company_name : item.company_acronym}`;
+      } else if (item.contacted === 1 && item.pass_contacted === 1 && item.deck_request === 0) {
+        message = `${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} from ${item.LP_pitched} passed on ${item.company_name !== "null" ? item.company_name : item.company_acronym} after initial pitch`;
+      } else if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1 && item.pass_deck === 0 && item.meeting_request === 0 && item.pass_meeting === 0 && item.dd === 0 && item.pass_dd === 0) {
+        message = `${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} from ${item.LP_pitched} requested the ${item.company_name !== "null" ? item.company_name : item.company_acronym} deck`;
+      } else if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1 && item.pass_deck === 1) {
+        message = `${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} from ${item.LP_pitched} passed on ${item.company_name !== "null" ? item.company_name : item.company_acronym} after reviewing the deck`;
+      } else if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1 && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 0 && item.dd === 0 && item.pass_dd === 0) {
+        message = `${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} from ${item.LP_pitched} requested a meeting for ${item.company_name !== "null" ? item.company_name : item.company_acronym} - ${item.account_holder}`;
+      } else if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1 && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 1 && item.dd === 0 && item.pass_dd === 0) {
+        message = `${item.LP_contact_pitched ? item.LP_contact_pitched : 'Someone'} from ${item.LP_pitched} passed on ${item.company_name !== "null" ? item.company_name : item.company_acronym} after a meeting`;
+      } else if (item.contacted === 1 && item.pass_contacted === 0 && item.deck_request === 1 && item.pass_deck === 0 && item.meeting_request === 1 && item.pass_meeting === 0 && item.dd === 1 && item.pass_dd === 0) {
+        message = `${item.LP_pitched} entered in dd phase on ${item.company_name !== "null" ? item.company_name : item.company_acronym}`;
+      }
+
+      console.log("Constructed live update message:", message);console.log("Constructed follow-up message:", message);
+
+      // Add follow-up message to 'Follow-ups' section
+      const liveMap = updatedItems['Live Updates'];
+      console.log("Type of updatedItems['Live Updates']:", typeof updatedItems['Live Updates']);
+
+      liveMap.set('live'+item._id, message);
+      console.log("Added follow-up message to 'Follow-ups' section.");
+
+      // Update localStorage with the modified pinnedItems
+      localStorage.setItem('pinnedItems', JSON.stringify({
+        '': updatedItems[''], // Ensure to use updatedItems here instead of pinnedItems
+        'Milestones': Object.fromEntries(Array.from(updatedItems['Milestones'])),
+        'Approval Requests': Object.fromEntries(Array.from(updatedItems['Approval Requests'])),
+        'Follow-ups': Object.fromEntries(Array.from(updatedItems['Follow-ups'])),
+        'Live Updates': Object.fromEntries(Array.from(updatedItems['Live Updates'])),
+      }));
+
+      console.log("Updated pinnedItems saved to localStorage:", updatedItems);
+
+      // Check again if data is stored in localStorage
+      const updatedStoredPinnedItems = localStorage.getItem('pinnedItems');
+      console.log("Double-checking storedPinnedItems from localStorage:", updatedStoredPinnedItems);
+      onUpdate();
+    };
+
+    return (
+
+      <div
+        style={{ backgroundColor: highlighted ? '#7774' : 'transparent' }} // Add this line
+        onContextMenu={showMenu} onClick={closeMenu} onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
+        {children}
+
+        {
+          tooltip.type && !highlighted && tooltip &&
+            <Tooltip show={tooltipVisible}>
+                <div><span style={{ fontWeight: 700 }}>Sender:</span> {tooltip.sender_name}</div>
+                <div><span style={{ fontWeight: 700 }}>Email:</span> {tooltip.sender_email}</div>
+                <div><span style={{ fontWeight: 700 }}>Content:</span> {tooltip.content}</div>
+            </Tooltip>
+        }
+        {visible && (
+          <div
+            style={{
+              position: 'absolute',
+              top: `${coords.y}px`,
+              left: `${coords.x}px`,
+              backgroundColor: 'white',
+              boxShadow: '0px 0px 2px 0px rgba(255, 255, 255, 0.90)',
+              borderRadius: '0.5rem',
+              zIndex: 1000,
+            }}
+          >
+            <ul style={{ color: '#333', listStyleType: 'none', margin: 0, padding: 0 }}>
+              {/*<li style={{ padding: '0.5rem 1rem', margin: 0 }} onClick={e => togglePin(e, tooltip)}>*/}
+              {/*  {isPinned(tooltip) ? 'Unpin this' : 'Pin this'}*/}
+              {/*</li>*/}
+              <li
+                onClick={() => updateLiveUpdates(item)}
+                style={{ padding: '0.5rem 1rem', margin: 0 }}>Pin this</li>
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const Tooltip = ({ show, children }) => {
+    if (!show) {
+      return null
+    }
+    return (
+      <div style={{
+        position: 'absolute',
+        backdropFilter: 'blur(10px)',
+        backgroundColor: '#fff9',
+        color: '#333',
+        padding: '1rem',
+        borderRadius: '0.5rem',
+        boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)',
+        zIndex: 1000,
+        width: '25rem',
+        right: '40rem',
+        bottom: '20rem',
+      }}>
+        {children}
+      </div>
+    )
   }
 
   const getDateDiff = (inputDate: Date): string => {
@@ -328,10 +546,10 @@ function LiveUpdate({user}: {user: any}) {
             
 
             {
-              data.filter(item => getFilter(item)).map((item: any) => {
+              data.filter(item => getFilter(item)).map((item: any,index) => {
                 return (
                   <>
-                  
+                  <CustomContextMenu tooltip={item} key={index} item={item}>
                     <li key={item.id} style={{ display: 'flex', alignItems: 'center' }}>
 
                       <AsyncImage
@@ -502,7 +720,7 @@ function LiveUpdate({user}: {user: any}) {
                         </div>
                       </div>
                     </li>
-                  
+                  </CustomContextMenu>
                   </>
                 
                 )
@@ -764,7 +982,8 @@ function LiveUpdate({user}: {user: any}) {
               </div>
             )}
           </ul>
-        ) 
+        )
+
       }
     </div>
   )

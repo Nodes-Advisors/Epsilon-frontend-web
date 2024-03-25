@@ -53,6 +53,8 @@ export default function FundCards(props) {
   const [inputValue, setInputValue] = useState('')
   const [totalFundCount, setTotalFundCount] = useState<number>(0)
   const [rowStates, setRowStates] = useState({});
+  const [kpiData,setKpiData] = useState([])
+  const [responsiveRate,setResponsiveRate] = useState([])
   const [filteredList, setFilteredList] = useState<{
     '': string[],
     'Account Manager': string[],
@@ -483,6 +485,44 @@ export default function FundCards(props) {
     fetchPendingList()
   }, [])
 
+  useEffect(() => {
+    const fetchAggregatedKPIs = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5001/clients/data",
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token,
+              'email': user?.email,
+            },
+          }
+        );
+        if (response.status === 200) {
+          setKpiData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching aggregated KPIs:", error);
+      }
+    };
+
+    fetchAggregatedKPIs();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const calculateResponsiveRate = (kpiData) => {
+    const responsiveRates = kpiData.map(item => {
+      const { passes, deckRequested, totalOutreach } = item;
+      const responsiveRate = (passes + deckRequested) / totalOutreach;
+      return { ...item, responsiveRate };
+    });
+  };
+
+  //console.log(pipeline)
+
+
+  console.log(kpiData);
+  console.log(responsiveRate);
+
   const sendRequest = async (e) => {
     e.preventDefault()
 
@@ -545,6 +585,22 @@ export default function FundCards(props) {
   const handleInputChange = (e) => {
     setInputValue(e.target.value)
   }
+
+  const calculateResponsiveRateForFunds = (name) => {
+    const fundsRecords = kpiData.filter(record => record.company_name === name);
+    console.log("Filtered records for", name, ":", fundsRecords);
+
+    if (fundsRecords.length === 0) {
+      console.log("No records found for", name);
+      return null; // Return null if there are no records for the specified name
+    }
+
+    const { passes, deckRequested, totalOutreach } = fundsRecords[0];
+    const responsiveRate = (passes + deckRequested) / totalOutreach;
+    console.log("Responsive rate for", name, ":", responsiveRate);
+    return responsiveRate;
+  };
+
 
   const throttledHandleInputChange = throttle(handleInputChange, 500)
 
@@ -944,10 +1000,14 @@ export default function FundCards(props) {
                           onClick={handleAddFilter}
                           className={styles['fund-list-item']}>{convertedOutput(record['Suitability Score'] as string[] | string) as string || 'n/a'}
                         </span>
-                        <span 
-                          data-label= 'Responsiveness Rate'
+                        <span
+                          data-label="Responsiveness Rate"
                           onClick={handleAddFilter}
-                          className={styles['fund-list-item']}>{convertedOutput(record['Responsiveness Rate'] as string[] | string) as string || 'n/a'}
+                          className={styles['fund-list-item']}
+                        >
+                          {calculateResponsiveRateForFunds(record.Funds) === null ?
+                            'N/A' :
+                            (calculateResponsiveRateForFunds(record.Funds) * 100).toFixed(2) + '%'}
                         </span>
                       </div>
                       <div style={{ width: '100%', backgroundColor: '#fff1', height: '0.05rem' }}></div>

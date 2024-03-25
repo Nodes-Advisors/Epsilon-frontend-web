@@ -32,6 +32,7 @@ export default function Clients() {
   const user = useUserStore(state => state.user)
   const [totalClientCount, setTotalClientCount] = useState<number>(0)
   const [showFilteredList, setShowFilteredList] = useState<boolean>(false)
+  const [pipeline, setPipeline] = useState([])
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState('')
   const token = useTokenStore(state => state.token)
@@ -67,16 +68,19 @@ export default function Clients() {
           },
         })
         .then((res) => {
-        
-          setClients(res.data)  
-          setFilteredData(res.data)
+          const updatedClients = res.data.map(client => {
+            const filteredPipeline = filterPipelineByConditions(client);
+            return { ...client, 'Active Funds': filteredPipeline };
+          });
+          setClients(updatedClients);
+          setFilteredData(updatedClients)
        
-          setTotalClientCount(res.data.length)
+          setTotalClientCount(updatedClients.length)
         
           if (localStorage.getItem('client-filter')) {
             const filteredList = JSON.parse(localStorage.getItem('client-filter') as string)
             if (Object.values(filteredList).every(filter => filter.length === 0)) {
-              setFilteredData(res.data)
+              setFilteredData(clients)
               return
             }
             setFilteredData(clients.filter((record) => {
@@ -126,6 +130,7 @@ export default function Clients() {
                     filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                   )
                 case 'Active Funds':
+                  //console.log(filterName)
                   return filteredList[filterName].some((filter) => 
                     filter === record[filterName] || (record[filterName] && record[filterName].includes(filter)),
                   )
@@ -228,6 +233,27 @@ export default function Clients() {
     }))
   }, [filteredList])
 
+  useEffect(() => {
+    const fetchCompanyData = async() => {
+      const res = await axios.get(`http://localhost:5001/fundrisingpipeline`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+          'email': user?.email,
+        },
+      })
+      if (res.status === 200) {
+        setLoading(false)
+        //setPipeline(res.data)
+        localStorage.setItem('pipelineData', JSON.stringify(res.data));
+      }
+    }
+    fetchCompanyData()
+  }, [])
+
+
+
+
 
   const [itemOffset, setItemOffset] = useState(0)
   const itemsPerPage = 10
@@ -239,6 +265,41 @@ export default function Clients() {
     const newOffset = (event.selected * itemsPerPage) % filteredData.length
     setItemOffset(newOffset)
   }
+
+  const filterPipelineByConditions = (record) => {
+    const storedPipelineData = JSON.parse(localStorage.getItem('pipelineData')) || [];
+
+    let LP_pitchedString = '';
+
+    const filteredPipeline = storedPipelineData.filter(item => {
+      const acronymMatch = record && record.acronym ? item.company_acronym?.toLowerCase() === record.acronym.toLowerCase() : false;
+      const statusConditions = [
+        item.pass_contacted === 0,
+        item.pass_deck === 0,
+        item.current_status !== "pass",
+        item.pass_meeting === 0,
+        item.pass_dd === 0,
+        item.deck_request === 1 || item.meeting_request === 1 || item.dd === 1
+      ];
+
+      return acronymMatch && statusConditions.some(condition => condition);
+    }).sort((a, b) => {
+      return new Date(b.last_updated_status_date).getTime() - new Date(a.last_updated_status_date).getTime();
+    });
+
+    filteredPipeline.forEach((item, index) => {
+      if (index > 0) {
+        LP_pitchedString += ', '; // Add comma if not the first LP_pitched value
+      }
+      LP_pitchedString += item.LP_pitched;
+    });
+
+    //console.log('LP_pitchedString:', LP_pitchedString);
+
+    return LP_pitchedString;
+  };
+
+
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value)
@@ -296,6 +357,7 @@ export default function Clients() {
 
   const handleClickToFilter = (e: React.MouseEvent<HTMLSpanElement>) => {
     handleFullTextFilter(e, setFilteredList)
+    //console.log('filter is' +filterName)
     setItemOffset(0)
   }
 
@@ -371,7 +433,7 @@ export default function Clients() {
   }, [])
 
   return (
-    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Fira Code', monospace, 'Kalnia', serif" }}>
+    <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems:'start', gap: '2rem', fontFamily: "'Calibri', sans-serif" }}>
       <div style={{ marginLeft: '4rem', marginTop: '2rem' }}>
         <div 
           style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
@@ -509,7 +571,7 @@ export default function Clients() {
 
             <div key={'fund-cards'} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <span style={{ textAlign: 'left', fontSize: '1.5rem' }}>{filteredData.length === totalClientCount ? `${totalClientCount} Clients` : `${filteredData.length} Clients (out of ${totalClientCount} Clients)`}</span>
-              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '2fr repeat(10, 1fr)', width: '100%', textAlign: 'left'  }}>
+              <div style={{ fontSize: '1.15rem', display: 'grid', gap: '2rem', gridTemplateColumns: '2fr repeat(7, 1fr) 2fr 1fr 1fr', width: '100%', textAlign: 'left'  }}>
                 <span>Clients</span>
                 <span>Status</span>
                 <span>Transaction Type</span>
@@ -518,7 +580,7 @@ export default function Clients() {
                 <span>Deal Type</span>
                 <span>Deal Size</span>
                 <span>Committed Investors</span>
-                <span>Active Funds</span>
+                <span style={{ textAlign: 'center' }}>Active Funds</span>
                 <span>Success Rate</span>
                 <span>Predictor Score </span>
               </div>
@@ -529,7 +591,7 @@ export default function Clients() {
                   ?
                   currentItems.map((record, index) => (
                     <>
-                      <div className={styles['book-wrapper']} key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '2fr repeat(10, 1fr)' }}> 
+                      <div className={styles['cdivWithHover']} key={record._id} style={{ display: 'grid', lineHeight: 1, gap: '2rem', gridTemplateColumns: '2fr repeat(7, 1fr) 2fr 1fr 1fr' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem'  }}>
 
@@ -603,7 +665,18 @@ export default function Clients() {
                         </span>
                        
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Committed Investors'] as string[] | string) as string || 'n/a'}</span>
-                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Active Funds'] as string[] | string) as string || 'n/a'}</span>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'center' }}>
+                          {record['Active Funds'] && typeof record['Active Funds'] === 'string' && record['Active Funds'].split(',').slice(0, 3).map((LP_pitched, index) => (
+                            <span onClick={handleClickToFilter} data-label='Active Funds' className={styles['secbutton-style']}  key={index}>
+                              {LP_pitched.trim()}
+                            </span>
+                          ))}
+                            {record['Active Funds'] && typeof record['Active Funds'] === 'string' && record['Active Funds'].split(',').length > 3 && <div style={{ marginRight: '5px' }}>...</div>}
+                        </span>
+
+
+
+
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Success Rate'] as string[] | string) as string || 'n/a'}</span>
                         <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', textAlign: 'left' }}>{convertedOutput(record['Predictor Score'] as string[] | string) as string || 'n/a'}</span>
                        
